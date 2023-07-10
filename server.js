@@ -13,6 +13,9 @@ app.use(express.static("public"));
 
 const routerApi = require("./routers/index_Router");
 
+//esto para que el post reconozca el req.body
+app.use(express.json());
+
 //usamos los routers
 routerApi(app);
 

@@ -12,6 +12,6 @@ const ventasSchema = new Schema({
   hora: Date,
 });
 
-const Ventas = mongoose.model("ventas", ventasSchema);
+const Ventas = mongoose.model('ventas', ventasSchema);
 
 module.exports = Ventas;
