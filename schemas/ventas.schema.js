@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require('joi');
 
 //const id = Joi.string();
 const Sucursal = Joi.string();
@@ -19,4 +19,4 @@ const createVentaSchema = Joi.object({
   utilidad: utilidad.required(),
 });
 
-module.exports = { createVentaSchema };
+module.exports = createVentaSchema;

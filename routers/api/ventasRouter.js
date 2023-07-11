@@ -1,6 +1,6 @@
 const express = require("express");
-const schemaHandler = require("../../middlewares/schema.handler");
-const { createProductSchema } = require("../../schemas/ventas.schema");
+const validationSchema = require("../../middlewares/validation.handler");
+const createVentaSchema = require("../../schemas/ventas.schema");
 const Venta = require("../../modelMongo/ventas");
 
 const router = express.Router();
@@ -16,13 +16,14 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", validationSchema(createVentaSchema, 'body')
+,async (req, res, next) => {
   try {
-    const datos = req.body;
-    const arrayProductDB = Venta.create(datos);
-    res.json(datos);
-  } catch (error) {
-    console.log(err);
+    const body = req.body;
+    const newSell = Venta.create(body);
+    res.json(body);
+  } catch (e) {
+    next(e)
   }
 });
 

@@ -2,8 +2,8 @@ const express = require("express");
 
 //importamos los endpoints:
 const homeRouter = require("./homeRouter");
-const apiVentas = require("./api/ventas");
-const apiProducts = require("./api/products");
+const apiVentas = require("./api/ventasRouter");
+const apiProducts = require("./api/productsRouter");
 const publicPath = __dirname.replace("routers", "public");
 
 function routerApi(app) {
