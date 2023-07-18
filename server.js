@@ -1,5 +1,6 @@
 const express = require("express");
 const config = require("./config/config");
+const cors = require('cors');
 
 const app = express();
 
@@ -16,6 +17,8 @@ const routerApi = require("./routers/index_Router");
 //esto para que el post reconozca el req.body
 app.use(express.json());
 
+
+app.use(cors());
 //usamos los routers
 routerApi(app);
 

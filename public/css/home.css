@@ -1,0 +1,17 @@
+input[type="text"]{
+    border: none;
+    border-bottom: 1px solid #645979;
+    outline: none;
+    border-radius: 5px 5px 0 0;
+    background-color: #ffffff;
+    font-size: 16px;
+}
+
+#suggestionsList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  #suggestionsList li {
+    cursor: pointer;
+  }
