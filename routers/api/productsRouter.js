@@ -14,6 +14,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/findOne", async (req, res) => {
+  try {
+    const product = await Products.findOne(req.query)
+    res.json(product)
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.post(
   "/",
   validationSchema(createProductSchema, "body"),
