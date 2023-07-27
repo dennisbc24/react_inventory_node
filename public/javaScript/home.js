@@ -45,14 +45,36 @@ function showSuggestions(inputValue) {
           document.getElementById("stock").textContent = resJson.stock;
           document.getElementById("creacion").textContent = resJson.creacion;
           //debugger;
-          const pt = document.getElementById("pt").textContent
+          /* const pt = document.getElementById("pt").textContent
           const cant = document.getElementById("cant").textContent
           const pu = pt / cant
           const utilidad = (pu - costo) * cant
           document.getElementById("pu").textContent = pu ;
-          document.getElementById("utilidad").textContent = utilidad ;
+          document.getElementById("utilidad").textContent = utilidad ; */
         });
     };
     suggestionsList.appendChild(li);
   });
+}
+
+
+function multiplyValues() {
+  // Obtenemos los valores de los inputs
+  const input1 = parseFloat(document.getElementById('input1').value);
+  const input2 = parseFloat(document.getElementById('input2').value);
+  
+  
+  // Verificamos que ambos valores sean números válidos
+  if (!isNaN(input1) && !isNaN(input2)) {
+    // Realizamos la division
+    const pUnitario = input2 / input1;
+    const util = (pUnitario-costo.textContent) * input1
+    console.log(util);
+    document.getElementById('util').textContent = util;
+    // Mostramos el resultado en el elemento con id "resultado"
+    document.getElementById('resultado').textContent = pUnitario;
+  } else {
+    // Si alguno de los valores no es válido, mostramos un mensaje de error
+    document.getElementById('resultado').textContent = 'Error: Ingresa números válidos';
+  }
 }
