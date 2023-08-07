@@ -8,34 +8,32 @@
   </head>
   <body>
     <h1>Inventario de Maxi Cusco</h1>
-    <input type="text" id="searchInput" oninput="showSuggestions(this.value)" />
+    <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
-    <h3>Sucursal</h3>
-    <p>B17</p>
 
-    <h3>Cantidad</h3>
-    <!-- <p id="cant">2</p> -->
-    <input type="number" id="input1" oninput="multiplyValues()" />
-    
-    <h3>Precio Unitario</h3>
-    <!-- <p id="pu"></p> -->
-    <p>Resultado: <span id="resultado"></span></p>
-
-    <h3>Total</h3>
-    <!-- <p id="pt">70</p> -->
-    <input type="number" id="input2" oninput="multiplyValues()" />
-    <h3>Utilidad</h3>
-    <p id="utilidad"></p>
-    <p>utl: <span id="util"></span></p>
-    <h3>Articulo</h3>
-    <p id="name"></p>
-    <h3>Costo</h3>
-    <p id="costo"></p>
-    <h3>Stock</h3>
-    <p id="stock"></p>
-    <h3>Ingreso</h3>
-    <p id="creacion"></p>
-
+    <h1>registrar venta</h1>
+    <form action="" id="formulario">
+      <h3>Sucursal</h3>
+      <p id="sucursal">B17</p>
+      <h3>Cantidad</h3>
+      <input type="number" name="cantidad" id="input1" oninput="multiplyValues()" />
+      <h3>Precio Unitario</h3>
+      <p>Resultado: <span id="resultado"></span></p>
+       <h3>Total</h3>
+      <input type="number" name="total" id="input2" oninput="multiplyValues()" />
+      <h3>Utilidad</h3>
+      <p id="utilidad"></p>
+      <p>utl: <span id="util"></span></p>
+      <h3>Articulo</h3>
+      <p id="name"></p>
+      <h3>Costo</h3>
+      <p id="costo"></p>
+      <h3>Stock</h3>
+      <p id="stock"></p>
+      <h3>Ingreso</h3>
+      <p id="creacion"></p>
+      <button type="submit">enviar formulario</button>
+    </form>
     
     
     

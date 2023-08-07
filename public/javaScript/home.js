@@ -1,4 +1,8 @@
 const nombres = [];
+const articulos = [];
+const todo = [];
+
+const urlUpload = 'http://localhost:8180/api/v1/ventas'
 
 const url = "http://localhost:8180/api/v1/products";
 const urlFindOne = "http://localhost:8180/api/v1/products/findOne?name=";
@@ -6,6 +10,7 @@ fetch(url)
   .then((res) => res.json())
   .then((respuestaJson) => {
     respuestaJson.forEach((product) => {
+      articulos.push(product);
       nombres.push(product.name);
     });
   });
@@ -36,45 +41,66 @@ function showSuggestions(inputValue) {
 
       suggestionsList.innerHTML = "";
 
-      fetch(`${urlFindOne}${nombre}`)
-        .then((res) => res.json())
-        .then((resJson) => {
-          const costo = resJson.costo;
-          document.getElementById("costo").textContent = costo;
-          document.getElementById("name").textContent = resJson.name;
-          document.getElementById("stock").textContent = resJson.stock;
-          document.getElementById("creacion").textContent = resJson.creacion;
-          //debugger;
-          /* const pt = document.getElementById("pt").textContent
-          const cant = document.getElementById("cant").textContent
-          const pu = pt / cant
-          const utilidad = (pu - costo) * cant
-          document.getElementById("pu").textContent = pu ;
-          document.getElementById("utilidad").textContent = utilidad ; */
-        });
+      articulos.forEach((elem) => {
+        if (elem.name == nombre) {
+          document.getElementById("costo").textContent = elem.costo;
+          document.getElementById("name").textContent = elem.name;
+          document.getElementById("stock").textContent = elem.stock;
+          document.getElementById("creacion").textContent = elem.creacion;
+        }
+      });
     };
     suggestionsList.appendChild(li);
   });
 }
 
-
 function multiplyValues() {
   // Obtenemos los valores de los inputs
-  const input1 = parseFloat(document.getElementById('input1').value);
-  const input2 = parseFloat(document.getElementById('input2').value);
-  
-  
+  const input1 = parseFloat(document.getElementById("input1").value);
+  const input2 = parseFloat(document.getElementById("input2").value);
+
   // Verificamos que ambos valores sean números válidos
   if (!isNaN(input1) && !isNaN(input2)) {
     // Realizamos la division
     const pUnitario = input2 / input1;
-    const util = (pUnitario-costo.textContent) * input1
+    const util = (pUnitario - costo.textContent) * input1;
     console.log(util);
-    document.getElementById('util').textContent = util;
+    document.getElementById("util").textContent = util;
     // Mostramos el resultado en el elemento con id "resultado"
-    document.getElementById('resultado').textContent = pUnitario;
+    document.getElementById("resultado").textContent = pUnitario;
   } else {
     // Si alguno de los valores no es válido, mostramos un mensaje de error
-    document.getElementById('resultado').textContent = 'Error: Ingresa números válidos';
+    document.getElementById("resultado").textContent =
+      "Error: Ingresa números válidos";
   }
 }
+
+const enviarVenta = (formDataParam) => {
+
+  fetch(urlUpload,{
+      method:'POST',
+      body:formDataParam
+  })
+
+};
+
+const form = document.getElementById("formulario");
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+const venta = new FormData(form)
+const sucur = document.getElementById('sucursal')
+const resul = document.getElementById('resultado')
+
+const ventaNueva = {
+  Sucursal: sucur.textContent,
+  pt: resul.textContent
+
+}
+
+venta.append('ventaNueva', ventaNueva)
+  console.log("todo bien");
+  console.log(venta);
+  
+  
+});

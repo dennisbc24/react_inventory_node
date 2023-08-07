@@ -16,12 +16,14 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", validationSchema(createVentaSchema, 'body')
-,async (req, res, next) => {
+router.post("/", 
+//validationSchema(createVentaSchema, 'body'),
+async (req, res, next) => {
   try {
     const body = req.body;
-    const newSell = Venta.create(body);
+    //const newSell = Venta.create(body);
     res.json(body);
+    console.log(body);
   } catch (e) {
     next(e)
   }
