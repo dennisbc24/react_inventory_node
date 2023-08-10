@@ -1,3 +1,5 @@
+import { formatInTimeZone } from 'date-fns-tz'
+
 const nombres = [];
 const articulos = [];
 const todo = [];
@@ -91,16 +93,42 @@ form.addEventListener("submit", (event) => {
 const venta = new FormData(form)
 const sucur = document.getElementById('sucursal')
 const resul = document.getElementById('resultado')
+const item = document.getElementById('name')
+const utilidad = document.getElementById('util')
 
-const ventaNueva = {
+/* const ventaNueva = {
   Sucursal: sucur.textContent,
   pt: resul.textContent
 
-}
+} */
 
-venta.append('ventaNueva', ventaNueva)
+const sucursal = sucur.textContent
+const resultado = resul.textContent
+const articulo = item.textContent
+const util = utilidad.textContent
+const fecha = new Date;
+
+const targetTimeZone = 'America/New_York';
+const zonedDate = formatInTimeZone(fecha, targetTimeZone);
+
+
+const fechaActual = zonedDate.toISOString()
+
+venta.append('Sucursal', sucursal)
+venta.append('pu', resultado)
+venta.append('Articulo', articulo)
+venta.append('utilidad', util)
+venta.append('fecha', fechaActual)
   console.log("todo bien");
   console.log(venta);
+
+  // crea un nuevo objeto `Date`
+var today = new Date();
+ 
+// obtener la fecha y la hora
+var now = today.toLocaleString();
+console.log(now)
+  
   
   
 });
