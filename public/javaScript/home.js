@@ -1,5 +1,3 @@
-import { formatInTimeZone } from 'date-fns-tz'
-
 const nombres = [];
 const articulos = [];
 const todo = [];
@@ -81,54 +79,53 @@ const enviarVenta = (formDataParam) => {
 
   fetch(urlUpload,{
       method:'POST',
-      body:formDataParam
+      body: JSON.stringify(formDataParam),
+      headers:{'Content-Type': 'application/json'}
   })
-
+  .then(function(response) {
+    console.log(formDataParam);
+    return response.text();
+  })
+  .then(function(data) {
+    
+    console.log(data); // Manejar la respuesta del servidor si es necesario
+  })
+  .catch(function(error) {
+    console.error('Error:', error);
+  });
 };
 
-const form = document.getElementById("formulario");
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
+const btnPost = document.getElementById('finalizar')
 
-const venta = new FormData(form)
+
+
+btnPost.addEventListener("click", async (event) => {
+  event.preventDefault();
+//const form = document.getElementById("formulario");
+const venta = new FormData
+
+//const venta = new FormData(form)
 const sucur = document.getElementById('sucursal')
 const resul = document.getElementById('resultado')
 const item = document.getElementById('name')
 const utilidad = document.getElementById('util')
 
-/* const ventaNueva = {
+const productoNuevo = {
   Sucursal: sucur.textContent,
-  pt: resul.textContent
+  pu: parseInt(resul.textContent),
+  Articulo: item.textContent,
+  utilidad: parseInt(utilidad.textContent),
 
-} */
-
-const sucursal = sucur.textContent
-const resultado = resul.textContent
-const articulo = item.textContent
-const util = utilidad.textContent
-const fecha = new Date;
-
-const targetTimeZone = 'America/New_York';
-const zonedDate = formatInTimeZone(fecha, targetTimeZone);
+  
+}
 
 
-const fechaActual = zonedDate.toISOString()
 
-venta.append('Sucursal', sucursal)
-venta.append('pu', resultado)
-venta.append('Articulo', articulo)
-venta.append('utilidad', util)
-venta.append('fecha', fechaActual)
+venta.append('productoNuevo', productoNuevo)
+
   console.log("todo bien");
-  console.log(venta);
+  
 
-  // crea un nuevo objeto `Date`
-var today = new Date();
- 
-// obtener la fecha y la hora
-var now = today.toLocaleString();
-console.log(now)
-  
-  
-  
+   await enviarVenta(venta);
+  console.log("funcion ejecutada");
 });

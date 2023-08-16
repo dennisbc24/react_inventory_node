@@ -20,10 +20,14 @@ router.post("/",
 //validationSchema(createVentaSchema, 'body'),
 async (req, res, next) => {
   try {
-    const body = req.body;
+    
     //const newSell = Venta.create(body);
-    res.json(body);
-    console.log(body);
+    //res.json(req);
+    formData = req.body;
+    console.log(req);
+    console.log("Datos recibidos:", formData);
+    res.json(formData)
+    
   } catch (e) {
     next(e)
   }
