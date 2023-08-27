@@ -2,7 +2,8 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
-const urlBase = 'http://localhost:8180'
+const urlBase = 'https://inventario.elwayardo.com'
+//const baseLocal = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/ventas`
 
@@ -80,8 +81,9 @@ function multiplyValues() {
 const enviarVenta = (formDataParam) => {
 
   fetch(urlUpload, {
+    
       method:'POST',
-      headers: {'Content-Type': 'application/json'},
+      
       body: formDataParam
   })
   .then(function(response) {
@@ -123,10 +125,10 @@ const productoNuevo = {
 
 
 
-venta.append('productoNuevo', JSON.stringify(productoNuevo))
+venta.append('productoNuevo', productoNuevo)
 
   console.log("todo bien");
-  console.log("antes de la funcion enviarVenta: " + JSON.stringify(venta));
+  console.log("antes de la funcion enviarVenta: " + venta);
 
    await enviarVenta(venta);
   console.log("funcion ejecutada");
