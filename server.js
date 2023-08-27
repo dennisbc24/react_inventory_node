@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({extended: true})); //Esto es para formData
 
-const port = 8180;
+const port = 3000;
 app.listen(port, () => {
   console.log("empezando el server puerto " + port);
 });
