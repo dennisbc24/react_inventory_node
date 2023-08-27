@@ -2,10 +2,12 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
-const urlUpload = 'http://localhost:8180/api/v1/ventas'
+const urlBase = 'http://localhost:8180'
 
-const url = "http://localhost:8180/api/v1/products";
-const urlFindOne = "http://localhost:8180/api/v1/products/findOne?name=";
+const urlUpload = `${urlBase}/api/v1/ventas`
+
+const url = `${urlBase}/api/v1/products`;
+const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 fetch(url)
   .then((res) => res.json())
   .then((respuestaJson) => {
@@ -77,10 +79,10 @@ function multiplyValues() {
 
 const enviarVenta = (formDataParam) => {
 
-  fetch(urlUpload,{
+  fetch(urlUpload, {
       method:'POST',
-      body: JSON.stringify(formDataParam),
-      headers:{'Content-Type': 'application/json'}
+      headers: {'Content-Type': 'application/json'},
+      body: formDataParam
   })
   .then(function(response) {
     console.log(formDataParam);
@@ -99,12 +101,12 @@ const btnPost = document.getElementById('finalizar')
 
 
 
-btnPost.addEventListener("click", async (event) => {
-  event.preventDefault();
-//const form = document.getElementById("formulario");
-const venta = new FormData
+btnPost.addEventListener("click", async e => {
+  e.preventDefault();
+const form = document.getElementById("formulario");
+//const venta = new FormData
 
-//const venta = new FormData(form)
+const venta = new FormData(form)
 const sucur = document.getElementById('sucursal')
 const resul = document.getElementById('resultado')
 const item = document.getElementById('name')
@@ -121,10 +123,10 @@ const productoNuevo = {
 
 
 
-venta.append('productoNuevo', productoNuevo)
+venta.append('productoNuevo', JSON.stringify(productoNuevo))
 
   console.log("todo bien");
-  
+  console.log("antes de la funcion enviarVenta: " + JSON.stringify(venta));
 
    await enviarVenta(venta);
   console.log("funcion ejecutada");

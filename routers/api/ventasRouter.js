@@ -24,8 +24,7 @@ async (req, res, next) => {
     //const newSell = Venta.create(body);
     //res.json(req);
     formData = req.body;
-    console.log(req);
-    console.log("Datos recibidos:", formData);
+    console.log("Datos recibidos:", JSON.stringify(formData));
     res.json(formData)
     
   } catch (e) {
