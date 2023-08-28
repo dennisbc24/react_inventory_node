@@ -3,9 +3,9 @@ const articulos = [];
 const todo = [];
 
 const urlBase = 'https://inventario.elwayardo.com'
-//const baseLocal = 'http://localhost:3000'
+const baseLocal = 'http://localhost:3000'
 
-const urlUpload = `${urlBase}/api/v1/ventas`
+const urlUpload = `${baseLocal}/api/v1/ventas`
 
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;

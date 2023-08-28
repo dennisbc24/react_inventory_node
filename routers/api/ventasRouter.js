@@ -9,12 +9,45 @@ const Ventas = require("../../modelMongo/ventas");
 
 router.get("/", async (req, res) => {
   try {
-    const arrayProductDB = await Ventas.find().limit(7);
+    const arrayProductDB = await Ventas.aggregate([
+      {
+        $match: {
+          Fecha: {
+            $gte: new Date(año, mes - 1, 1),
+            $lt: new Date(año, mes, 1)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPt: { $sum: '$pt' }
+        }
+      }
+    ])
     res.json(arrayProductDB);
   } catch (err) {
     console.log(err);
   }
+})
+
+
+
+.exec((err, result) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log('Total pt for the month:', result[0].totalPt);
 });
+
+
+
+
+
+
+
+
 
 router.post("/", 
 //validationSchema(createVentaSchema, 'body'),
