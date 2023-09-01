@@ -3,23 +3,22 @@ const config = require("./config/config");
 const cors = require('cors');
 
 const app = express();
-//esto para que el post reconozca el req.body
-app.use(express.json());
-app.use(cors());
+
+
 app.use(express.urlencoded({extended: true})); //Esto es para formData
 
 const port = 3000;
-app.listen(port, () => {
-  console.log("empezando el server puerto " + port);
-});
+
+
 
 //donde va a encontrar los archivos estaticos
 app.use(express.static("public"));
 
 const routerApi = require("./routers/index_Router");
 
-
-
+//esto para que el post reconozca el req.body
+app.use(express.json());
+app.use(cors());
 
 //usamos los routers
 routerApi(app);
@@ -44,3 +43,9 @@ mongoose
   })
   .then(() => console.log("base de datos conectada"))
   .catch((e) => console.error(e));
+
+
+
+  app.listen(port, () => {
+    console.log("empezando el server puerto " + port);
+  });

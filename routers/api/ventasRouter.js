@@ -16,6 +16,36 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/filter", async (req, res) => {
+  try {
+    
+    const filtro = await Ventas.aggregate([
+  {
+    '$match': {
+      'Fecha': {
+        '$gte': new Date('2023-06-08'), 
+        '$lt': new Date('2023-06-09')
+      }
+    }
+  }, {
+    '$group': {
+      '_id': '$Sucursal', 
+      'suma': {
+        '$sum': '$pt'
+      },
+       
+      'ganancia': {
+        '$sum': '$utilidad'
+      }
+    }
+  }
+])
+    res.json(filtro);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.post("/", 
 //validationSchema(createVentaSchema, 'body'),
 async (req, res, next) => {
@@ -23,9 +53,9 @@ async (req, res, next) => {
     
     //const newSell = Venta.create(body);
     //res.json(req);
-    formData = req.body;
-    console.log("Datos recibidos:", JSON.stringify(formData));
-    res.json(formData)
+    
+    console.log("Datos recibidos:", req.body);
+    res.json(req.body)
     
   } catch (e) {
     next(e)

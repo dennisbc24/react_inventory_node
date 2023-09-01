@@ -2,6 +2,7 @@ const express = require("express");
 
 //importamos los endpoints:
 const homeRouter = require("./homeRouter");
+const resumenRouter = require("./resumenRouter");
 const apiVentas = require("./api/ventasRouter");
 const apiProducts = require("./api/productsRouter");
 const publicPath = __dirname.replace("routers", "public");
@@ -14,9 +15,10 @@ function routerApi(app) {
   app.use(express.static(publicPath));
   console.log(`${publicPath}/templates`);
   app.use("/", homeRouter);
-  app.use("/api/v1", router);
-  router.use("/ventas", apiVentas);
-  router.use("/products", apiProducts);
+  app.use("/resumen", resumenRouter);
+  app.use('/api/v1', router)
+    router.use("/ventas", apiVentas);
+    router.use("/products", apiProducts);
 }
 
 module.exports = routerApi;

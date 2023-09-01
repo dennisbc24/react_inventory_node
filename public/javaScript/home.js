@@ -2,8 +2,8 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
-const urlBase = 'https://inventario.elwayardo.com'
-//const baseLocal = 'http://localhost:3000'
+//const urlBase = 'https://inventario.elwayardo.com'
+const urlBase = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/ventas`
 
