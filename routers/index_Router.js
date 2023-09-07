@@ -16,15 +16,9 @@ function routerApi(app) {
   console.log(`${publicPath}/templates`);
   app.use("/", homeRouter);
   app.use("/resumen", resumenRouter);
-<<<<<<< HEAD
-  app.use('/api/v1', router)
-    router.use("/ventas", apiVentas);
-    router.use("/products", apiProducts);
-=======
   app.use("/api/v1", router);
   router.use("/ventas", apiVentas);
   router.use("/products", apiProducts);
->>>>>>> b25fddca00cee7338adcb205c4f8f104d7dae3e6
 }
 
 module.exports = routerApi;

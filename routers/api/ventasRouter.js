@@ -33,15 +33,14 @@ router.get("/", async (req, res) => {
 
 
 
-.exec((err, result) => {
+/* .exec((err, result) => {
   if (err) {
     console.error(err);
     return;
   }
   console.log('Total pt for the month:', result[0].totalPt);
 });
-
-<<<<<<< HEAD
+ */
 router.get("/filter", async (req, res) => {
   try {
     
@@ -71,15 +70,6 @@ router.get("/filter", async (req, res) => {
     console.log(err);
   }
 });
-=======
-
-
-
-
-
-
-
->>>>>>> b25fddca00cee7338adcb205c4f8f104d7dae3e6
 
 router.post("/", 
 //validationSchema(createVentaSchema, 'body'),
