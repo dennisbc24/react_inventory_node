@@ -43,13 +43,15 @@ router.get("/", async (req, res) => {
  */
 router.get("/filter", async (req, res) => {
   try {
+    const desde = req.query.desde
+    const hasta = req.query.hasta
     
     const filtro = await Ventas.aggregate([
   {
     '$match': {
       'Fecha': {
-        '$gte': new Date('2023-06-08'), 
-        '$lt': new Date('2023-06-09')
+        '$gte': new Date(desde), 
+        '$lt': new Date(hasta)
       }
     }
   }, {
@@ -65,6 +67,7 @@ router.get("/filter", async (req, res) => {
     }
   }
 ])
+
     res.json(filtro);
   } catch (err) {
     console.log(err);
