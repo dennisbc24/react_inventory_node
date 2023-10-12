@@ -54,9 +54,9 @@ const obtenerQuery = async () => {
   
   const client = new Client({
     user: 'postgres',
-    host: 'database-2.ccwnygmfrk89.sa-east-1.rds.amazonaws.com',
-    database: 'postgres',
-    password: 'lamejorpartedemi7',
+    host: '',
+    database: '',
+    password: '',
     port: 5432,
     ssl:{
       rejectUnauthorized: false,
