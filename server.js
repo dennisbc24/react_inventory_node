@@ -24,25 +24,55 @@ app.use(cors());
 routerApi(app);
 
 //mongoDB
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 
-const user = config.config.dbUser;
-const password = config.config.dbPassword;
-const dbname = config.config.dbName;
+// const user = config.config.dbUser;
+// const password = config.config.dbPassword;
+// const dbname = config.config.dbName;
 
-const urlBD = `mongodb+srv://${user}:${password}@cursoplatzi.yir1r.mongodb.net/${dbname}?retryWrites=true&w=majority`;
+// const urlBD = `mongodb+srv://${user}:${password}@cursoplatzi.yir1r.mongodb.net/${dbname}?retryWrites=true&w=majority`;
 
-//estás indicando a Mongoose que utilice la implementación de promesas global de JavaScript en lugar de su propia implementación. Esto significa que Mongoose utilizará las promesas nativas proporcionadas por la versión de Node.js en la que se esté ejecutando tu aplicación
-mongoose.Promise = global.Promise;
+// //estás indicando a Mongoose que utilice la implementación de promesas global de JavaScript en lugar de su propia implementación. Esto significa que Mongoose utilizará las promesas nativas proporcionadas por la versión de Node.js en la que se esté ejecutando tu aplicación
+// mongoose.Promise = global.Promise;
 
-mongoose
-  .connect(urlBD, {
-    //usar prametros actuales
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+// mongoose
+//   .connect(urlBD, {
+//     //usar prametros actuales
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => console.log("base de datos conectada"))
+//   .catch((e) => console.error(e));
+
+const { Client } = require('pg');
+
+
+
+const obtenerQuery = async () => {
+
+
+  
+  const client = new Client({
+    user: 'postgres',
+    host: '',
+    database: '',
+    password: '',
+    port: 5432,
+    ssl:{
+      rejectUnauthorized: false,
+    },
+
   })
-  .then(() => console.log("base de datos conectada"))
-  .catch((e) => console.error(e));
+  await client.connect()
+   
+  const res = await client.query('SELECT * FROM users ORDER BY id ASC')
+  const result = res.rows;
+  await client.end()
+  return result;
+}
+ obtenerQuery().then((result)=>{
+  console.log(result);
+ })
 
 
 
