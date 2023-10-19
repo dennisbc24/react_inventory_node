@@ -6,9 +6,15 @@ const Venta = require("../../modelMongo/ventas");
 const router = express.Router();
 
 
-const { getSales } = require('../../controllers/index.controllers')
+const { getSales, createSales, getById, deleteById, updateById } = require('../../controllers/index.controllers')
 
 router.get("/", getSales)
+
+router.get("/:id", getById)
+
+router.post("/", createSales)
+router.delete("/:id", deleteById)
+router.put("/:id", updateById)
 
 
 router.get("/filter", async (req, res) => {
@@ -44,20 +50,5 @@ router.get("/filter", async (req, res) => {
   }
 });
 
-router.post("/", 
-//validationSchema(createVentaSchema, 'body'),
-async (req, res, next) => {
-  try {
-    
-    //const newSell = Venta.create(body);
-    //res.json(req);
-    
-    console.log("Datos recibidos:", req.body);
-    res.json(req.body)
-    
-  } catch (e) {
-    next(e)
-  }
-});
 
 module.exports = router;
