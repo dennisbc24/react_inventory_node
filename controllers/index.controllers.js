@@ -1,5 +1,7 @@
 const { Pool } = require("pg");
 const config = require("../config/config");
+const { response } = require("express");
+//const { description } = require("../schemas/ventas.schema");
 
 const pool = new Pool({
   user: config.config.dbUser,
@@ -18,4 +20,4 @@ const getSales = async (req, res) => {
  res.send('sales')
 };
 
-module.exports = { getSales };
+module.exports = { getSales, createSales ,getById, deleteById, updateById};
