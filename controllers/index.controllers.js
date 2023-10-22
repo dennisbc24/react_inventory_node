@@ -13,7 +13,7 @@ const pool = new Pool({
 });
 
 const getSales = async (req, res) => {
- const response =  await pool.query("SELECT * FROM users ORDER BY id ASC");
+ const response =  await pool.query("SELECT * FROM sales ORDER BY id_sale ASC LIMIT 10");
  console.log(response.rows);
  res.send('sales')
 };
