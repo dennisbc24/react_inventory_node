@@ -14,10 +14,12 @@ const pool = new Pool({
   },
 });
 
-const getSales = async (req, res) => {
- const response =  await pool.query("SELECT * FROM sales ORDER BY id_sale ASC LIMIT 10");
- console.log(response.rows);
- res.send('sales')
+const getProducts = async (req, res) => {
+  const response = await pool.query(
+    "SELECT * FROM products ORDER BY id_product ASC"
+  );
+ 
+  res.json(response.rows);
 };
 
-module.exports = { getSales, createSales ,getById, deleteById, updateById};
+module.exports = { getProducts };
