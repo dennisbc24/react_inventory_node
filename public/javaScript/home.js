@@ -127,7 +127,7 @@ const productoNuevo = {
 
 venta.append('productoNuevo', productoNuevo)
 
-const sale = JSON.stringify(venta)
+const sale = venta
   console.log("todo bien");
   console.log("antes de la funcion enviarVenta: " + sale);
 

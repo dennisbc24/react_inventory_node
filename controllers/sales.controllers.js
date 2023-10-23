@@ -1,3 +1,7 @@
+
+
+
+
 const { Pool } = require("pg");
 
 const moment = require('moment-timezone');
@@ -9,6 +13,7 @@ const moment = require('moment-timezone');
 
 const config = require("../config/config");
 const { response } = require("express");
+const { parseJSON } = require("date-fns");
 
 //const { description } = require("../schemas/ventas.schema");
 
@@ -30,7 +35,7 @@ const getSales = async (req, res) => {
   res.json(response.rows);
 };
 
-const postSales = async (req, res) => {
+const postSales = async (req, res, next) => {
   //const { branch, amount, product, p_total, p_unit, revenue } = req.body;
  
   /* const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
@@ -39,11 +44,29 @@ const postSales = async (req, res) => {
   const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, fechaActual.toDate(), amount, product, p_total, p_unit, revenue, horaActual]);
   console.log(response); */
 
-const recibo = req.body
+/* const recibo = req.body
 
   const respuesta = JSON.parse(recibo)
-  console.log(respuesta);
+  console.log(respuesta); */
+
+
+
+  try {
+    
+    //const newSell = Venta.create(body);
+    //res.json(req);
+    const nose = req.body;
+        
+    console.log("Datos recibidos:", nose);
+    res.json(req.body)
+    
+  } catch (e) {
+    next(e)
+  }
   //res.send("sale created");
 };
+
+
+
 
 module.exports = { getSales, postSales };
