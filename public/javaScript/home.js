@@ -7,7 +7,7 @@ const baseLocal = 'http://localhost:3000'
 
 const urlUpload = `${baseLocal}/api/v1/ventas`
 
-const url = `${baseLocal}/api/v1/products`;
+const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 fetch(url)
   .then((res) => res.json())
@@ -122,14 +122,14 @@ const productoNuevo = {
 
   
 }
+const sale = productoNuevo
+console.log(sale);
+
+//venta.append('productoNuevo', productoNuevo)
 
 
-
-venta.append('productoNuevo', productoNuevo)
-
-const sale = venta
   console.log("todo bien");
-  console.log("antes de la funcion enviarVenta: " + sale);
+  //console.log("antes de la funcion enviarVenta: " + sale);
 
    await enviarVenta(sale);
   console.log("funcion ejecutada");

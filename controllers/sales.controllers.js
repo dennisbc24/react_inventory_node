@@ -46,8 +46,23 @@ const postSales = async (req, res, next) => {
 
   res.send("sale created"); */
 
-  const bod = req.body
-  res.send(bod)
+  console.log(req.body);
+
+  const datos = JSON.parse(req.body)
+  
+
+  
+  
+  //res.json(arrayProductDB);
+
+  //res.json({message: 'archivo subido'})
+
+
+
+
+
+  
+  res.send(datos)
 
 
 };
