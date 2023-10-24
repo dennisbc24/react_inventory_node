@@ -2,17 +2,12 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
-<<<<<<< HEAD
-//const urlBase = 'https://inventario.elwayardo.com'
-const urlBase = 'http://localhost:3000'
-=======
 const urlBase = 'https://inventario.elwayardo.com'
 const baseLocal = 'http://localhost:3000'
->>>>>>> b25fddca00cee7338adcb205c4f8f104d7dae3e6
 
 const urlUpload = `${baseLocal}/api/v1/ventas`
 
-const url = `${urlBase}/api/v1/products`;
+const url = `${baseLocal}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 fetch(url)
   .then((res) => res.json())
@@ -51,10 +46,10 @@ function showSuggestions(inputValue) {
 
       articulos.forEach((elem) => {
         if (elem.name == nombre) {
-          document.getElementById("costo").textContent = elem.costo;
+          document.getElementById("costo").textContent = elem.cost;
           document.getElementById("name").textContent = elem.name;
           document.getElementById("stock").textContent = elem.stock;
-          document.getElementById("creacion").textContent = elem.creacion;
+          document.getElementById("creacion").textContent = elem.created;
         }
       });
     };
@@ -132,9 +127,10 @@ const productoNuevo = {
 
 venta.append('productoNuevo', productoNuevo)
 
+const sale = venta
   console.log("todo bien");
-  console.log("antes de la funcion enviarVenta: " + venta);
+  console.log("antes de la funcion enviarVenta: " + sale);
 
-   await enviarVenta(venta);
+   await enviarVenta(sale);
   console.log("funcion ejecutada");
 });
