@@ -36,37 +36,21 @@ const getSales = async (req, res) => {
 };
 
 const postSales = async (req, res, next) => {
-  //const { branch, amount, product, p_total, p_unit, revenue } = req.body;
+ /*  const { branch, amount, product, p_total, p_unit, revenue } = req.body;
  
-  /* const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+  const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   const horaActual = fechaActual.format('HH:mm:ss'); // Formatea la hora
   console.log(req.body);
   const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, fechaActual.toDate(), amount, product, p_total, p_unit, revenue, horaActual]);
-  console.log(response); */
+  console.log(response);
 
-/* const recibo = req.body
+  res.send("sale created"); */
 
-  const respuesta = JSON.parse(recibo)
-  console.log(respuesta); */
+  const bod = req.body
+  res.send(bod)
 
 
-
-  try {
-    
-    //const newSell = Venta.create(body);
-    //res.json(req);
-    const nose = req.body;
-        
-    console.log("Datos recibidos:", nose);
-    res.json(req.body)
-    
-  } catch (e) {
-    next(e)
-  }
-  //res.send("sale created");
 };
-
-
 
 
 module.exports = { getSales, postSales };
