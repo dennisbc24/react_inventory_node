@@ -122,7 +122,7 @@ const productoNuevo = {
 
   
 }
-const sale = productoNuevo
+const sale = JSON.stringify(productoNuevo)
 console.log(sale);
 
 //venta.append('productoNuevo', productoNuevo)

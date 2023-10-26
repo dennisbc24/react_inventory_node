@@ -46,26 +46,21 @@ const postSales = async (req, res, next) => {
 
   res.send("sale created"); */
 
-  console.log(req.body);
+  const datos = Object.entries(req.body).map(entry => {
+    const [key, value] = entry
+    console.log({key,value});
+  })
 
-  const datos = JSON.parse(req.body)
-  
 
   
+  //console.log(datos.branch);
+  console.log(datos);
+  
+  res.send(datos)
   
   //res.json(arrayProductDB);
 
   //res.json({message: 'archivo subido'})
-
-
-
-
-
-  
-  res.send(datos)
-
-
 };
-
 
 module.exports = { getSales, postSales };
