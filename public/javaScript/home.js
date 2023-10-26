@@ -81,7 +81,9 @@ function multiplyValues() {
 const enviarVenta = (formDataParam) => {
 
   fetch(urlUpload, {
-    
+    headers: {
+      "Content-Type": "application/json", //esto fue para que el body no llegue vacio
+    },
       method:'POST',
       
       body: formDataParam
@@ -109,20 +111,25 @@ const form = document.getElementById("formulario");
 //const venta = new FormData
 
 const venta = new FormData(form)
+
 const sucur = document.getElementById('sucursal')
+const amount = document.getElementById('input1')
+const p_total = document.getElementById('input2')
 const resul = document.getElementById('resultado')
 const item = document.getElementById('name')
 const utilidad = document.getElementById('util')
 
-const productoNuevo = {
-  Sucursal: sucur.textContent,
-  pu: parseInt(resul.textContent),
-  Articulo: item.textContent,
-  utilidad: parseInt(utilidad.textContent),
+const ventaNueva = {
+  branch: sucur.textContent,
+  amount: amount.value,
+  product: item.textContent,
+  p_total: p_total.value,
+  p_unit: parseInt(resul.textContent),
+  revenue: parseInt(utilidad.textContent),
 
   
 }
-const sale = JSON.stringify(productoNuevo)
+const sale = JSON.stringify(ventaNueva)
 console.log(sale);
 
 //venta.append('productoNuevo', productoNuevo)
