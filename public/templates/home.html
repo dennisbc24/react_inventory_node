@@ -7,23 +7,22 @@
     <title>inventarioX</title>
   </head>
   <body>
-    <h1>Inventario de Maxi Cusco</h1>
+    <h1>Venta</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
 
-    <h1>registrar venta</h1>
+    <h2>Registrar Venta</h2>
     <form id="formulario" enctype="multipart/form-data">
       <h3>Sucursal</h3>
       <p id="sucursal">B17</p>
       <h3>Cantidad</h3>
-      <input type="number" name="Cantidad" id="input1" oninput="multiplyValues()" />
+      <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
       <h3>Precio Unitario</h3>
-      <p>Resultado: <span id="resultado"></span></p>
+      <p> <span id="resultado"></span></p>
        <h3>Total</h3>
-      <input type="number" name="pt" id="input2" oninput="multiplyValues()" />
+      <input type="number" name="pt" id="input2" class="inputSecond" oninput="multiplyValues()" />
       <h3>Utilidad</h3>
-      <p id="utilidad"></p>
-      <p>utl: <span id="util"></span></p>
+      <p> <span id="util"></span></p>
       <h3>Articulo</h3>
       <p id="name"></p>
       <h3>Costo</h3>

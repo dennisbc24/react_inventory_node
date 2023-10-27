@@ -36,7 +36,7 @@ const getSales = async (req, res) => {
 };
 
 const postSales = async (req, res, next) => {
- /*  const { branch, amount, product, p_total, p_unit, revenue } = req.body;
+  const { branch, amount, product, p_total, p_unit, revenue } = req.body;
  
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   const horaActual = fechaActual.format('HH:mm:ss'); // Formatea la hora
@@ -44,33 +44,14 @@ const postSales = async (req, res, next) => {
   const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, fechaActual.toDate(), amount, product, p_total, p_unit, revenue, horaActual]);
   console.log(response);
 
-  res.send("sale created"); */
+  res.send("sale created");
 
-
- 
-  //const values = Object.values(datos)
-  //const entries = Object.entries(datos)
-  const mappeResults = Object.entries(req.body
-    ).map(key =>{
-    console.log(key)
-  })
-
-  //console.log(values);
-  //console.log(entries);
-  console.log(mappeResults);
-
+   
+  console.log(req.body);
   
-  //res.json(arrayProductDB);
-
-  //res.json({message: 'archivo subido'}
-
-
-
+  res.send(req.body)
   
-  //res.send(datos)
-
-
+  
 };
-
 
 module.exports = { getSales, postSales };
