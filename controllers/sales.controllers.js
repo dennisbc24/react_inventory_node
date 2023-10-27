@@ -30,7 +30,7 @@ const pool = new Pool({
 
 const getSales = async (req, res) => {
   const response = await pool.query(
-    "SELECT * FROM sales ORDER BY id_sale ASC LIMIT 10"
+    "SELECT * FROM sales ORDER BY date DESC, hour DESC LIMIT 5"
   );
   res.json(response.rows);
 };

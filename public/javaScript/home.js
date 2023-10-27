@@ -7,6 +7,7 @@ const baseLocal = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/ventas`
 
+
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 fetch(url)
@@ -115,13 +116,65 @@ const sale = JSON.stringify(ventaNueva)
 
 await enviarVenta(sale); */
 
+btnPost.classList.replace('botton_save', 'botton_pressed');
 
 console.log('boton presionado');
+window.location.reload()
 
 });
 
 
 
+
+function traer(){
+	
+  const urlTest = 'http://localhost:3000/api/v1/ventas'
+  const cajaGrande = document.getElementById('ultimed_sales');
+  //cajaGrande.innerHTML = "";
+	window
+	.fetch(urlTest)
+		.then((respuesta)=> respuesta.json())
+		.then((responseJson)=>{
+			const todosLosElementos = [];
+			responseJson.forEach((elemento) => {
+				
+					const div1  = document.createElement('div')
+
+
+					const amount = document.createElement('p');
+						const amountApi = elemento.amount;
+            amount.textContent = amountApi;
+            
+            div1.className = 'ultimed_sales_article'
+            
+
+        
+            const product = document.createElement('p');
+						const productApi = elemento.product;
+            product.textContent = productApi;
+            
+            
+
+            
+            const total = document.createElement('p');
+						const totalApit = elemento.p_total;
+            total.textContent = totalApit;
+            
+            
+            div1.append(amount, product, total)
+      
+					todosLosElementos.push(div1);
+
+					
+
+					cajaGrande.append(...todosLosElementos);
+					
+          //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
+			});
+	})
+}
+
+traer();
 
 
 
