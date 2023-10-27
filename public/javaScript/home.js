@@ -103,16 +103,10 @@ const enviarVenta = (formDataParam) => {
 
 const btnPost = document.getElementById('finalizar')
 
-
-
 btnPost.addEventListener("click", async e => {
   e.preventDefault();
-const form = document.getElementById("formulario");
-//const venta = new FormData
 
-const venta = new FormData(form)
-
-const sucur = document.getElementById('sucursal')
+/* const sucur = document.getElementById('sucursal')
 const amount = document.getElementById('input1')
 const p_total = document.getElementById('input2')
 const resul = document.getElementById('resultado')
@@ -126,18 +120,12 @@ const ventaNueva = {
   p_total: p_total.value,
   p_unit: parseInt(resul.textContent),
   revenue: parseInt(utilidad.textContent),
-
-  
 }
 const sale = JSON.stringify(ventaNueva)
-console.log(sale);
 
-//venta.append('productoNuevo', productoNuevo)
+await enviarVenta(sale); */
 
 
-  console.log("todo bien");
-  //console.log("antes de la funcion enviarVenta: " + sale);
+console.log('boton presionado');
 
-   await enviarVenta(sale);
-  console.log("funcion ejecutada");
 });
