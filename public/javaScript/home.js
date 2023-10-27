@@ -86,17 +86,7 @@ const enviarVenta = (formDataParam) => {
       
       body: formDataParam
   })
-  .then(function(response) {
-    console.log(formDataParam);
-    return response.text();
-  })
-  .then(function(data) {
-    
-    console.log(data); // Manejar la respuesta del servidor si es necesario
-  })
-  .catch(function(error) {
-    console.error('Error:', error);
-  });
+  
 };
 
 const btnPost = document.getElementById('finalizar')
@@ -134,3 +124,10 @@ console.log(sale);
    await enviarVenta(sale);
   console.log("funcion ejecutada");
 });
+
+
+
+
+
+
+
