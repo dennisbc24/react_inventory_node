@@ -7,6 +7,7 @@ const baseLocal = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/ventas`
 
+
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 fetch(url)
@@ -88,29 +89,13 @@ const enviarVenta = (formDataParam) => {
       
       body: formDataParam
   })
-  .then(function(response) {
-    console.log(formDataParam);
-    return response.text();
-  })
-  .then(function(data) {
-    
-    console.log(data); // Manejar la respuesta del servidor si es necesario
-  })
-  .catch(function(error) {
-    console.error('Error:', error);
-  });
+  
 };
 
 const btnPost = document.getElementById('finalizar')
 
-
-
 btnPost.addEventListener("click", async e => {
   e.preventDefault();
-const form = document.getElementById("formulario");
-//const venta = new FormData
-
-const venta = new FormData(form)
 
 const sucur = document.getElementById('sucursal')
 const amount = document.getElementById('input1')
@@ -126,18 +111,71 @@ const ventaNueva = {
   p_total: p_total.value,
   p_unit: parseInt(resul.textContent),
   revenue: parseInt(utilidad.textContent),
-
-  
 }
 const sale = JSON.stringify(ventaNueva)
-console.log(sale);
 
-//venta.append('productoNuevo', productoNuevo)
+await enviarVenta(sale);
 
+btnPost.classList.replace('botton_save', 'botton_pressed');
 
-  console.log("todo bien");
-  //console.log("antes de la funcion enviarVenta: " + sale);
+console.log('boton presionado');
+window.location.reload()
 
-   await enviarVenta(sale);
-  console.log("funcion ejecutada");
 });
+
+
+
+
+function traer(){
+	
+ // const urlTest = 'http://localhost:3000/api/v1/ventas'
+  const cajaGrande = document.getElementById('ultimed_sales');
+  //cajaGrande.innerHTML = "";
+	window
+	.fetch(urlUpload)
+		.then((respuesta)=> respuesta.json())
+		.then((responseJson)=>{
+			const todosLosElementos = [];
+			responseJson.forEach((elemento) => {
+				
+					const div1  = document.createElement('div')
+
+
+					const amount = document.createElement('p');
+						const amountApi = elemento.amount;
+            amount.textContent = amountApi;
+            
+            div1.className = 'ultimed_sales_article'
+            
+
+        
+            const product = document.createElement('p');
+						const productApi = elemento.product;
+            product.textContent = productApi;
+            
+            
+
+            
+            const total = document.createElement('p');
+						const totalApit = elemento.p_total;
+            total.textContent = totalApit;
+            
+            
+            div1.append(amount, product, total)
+      
+					todosLosElementos.push(div1);
+
+					
+
+					cajaGrande.append(...todosLosElementos);
+					
+          //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
+			});
+	})
+}
+
+traer();
+
+
+
+

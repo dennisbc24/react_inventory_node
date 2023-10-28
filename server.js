@@ -3,6 +3,10 @@ const express = require("express");
 const cors = require('cors');
 
 const app = express();
+//esto para que el post reconozca el req.body 
+//tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
+app.use(express.json());
+app.use(cors());
 
 app.use(express.json());   //esto para que el post reconozca el req.body //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
 app.use(cors());
@@ -14,6 +18,11 @@ const port = 3000;
 app.use(express.static("public"));
 
 const routerApi = require("./routers/index_Router");
+
+//esto para que el post reconozca el req.body 
+//tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
+app.use(express.json());
+app.use(cors());
 
 //usamos los routers
 routerApi(app);

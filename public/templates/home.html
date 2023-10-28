@@ -7,35 +7,36 @@
     <title>inventarioX</title>
   </head>
   <body>
-    <h1>Inventario de Maxi Cusco</h1>
+    <h1>Registrar Venta</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
 
-    <h1>registrar venta</h1>
     <form id="formulario" enctype="multipart/form-data">
-      <h3>Sucursal</h3>
+      <h3 class="lines">Establecimiento:</h3>
       <p id="sucursal">B17</p>
-      <h3>Cantidad</h3>
-      <input type="number" name="Cantidad" id="input1" oninput="multiplyValues()" />
-      <h3>Precio Unitario</h3>
-      <p>Resultado: <span id="resultado"></span></p>
-       <h3>Total</h3>
-      <input type="number" name="pt" id="input2" oninput="multiplyValues()" />
-      <h3>Utilidad</h3>
-      <p id="utilidad"></p>
-      <p>utl: <span id="util"></span></p>
-      <h3>Articulo</h3>
+      <h3 class="lines">Cantidad:</h3>
+      <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
+      <h3 class="lines">Precio Unitario:</h3>
+      <p> <span id="resultado"></span></p>
+       <h3 class="lines">Total:</h3>
+      <input type="number" name="pt" id="input2" class="inputSecond" oninput="multiplyValues()" />
+      <h3 class="lines">Ganancia:</h3>
+      <p> <span id="util"></span></p>
+      <h3 class="lines">Nombre:</h3>
       <p id="name"></p>
-      <h3>Costo</h3>
+      <h3 class="lines">Costo:</h3>
       <p id="costo"></p>
-      <h3>Stock</h3>
+      <h3 class="lines">Stock:</h3>
       <p id="stock"></p>
-      <h3>Ingreso</h3>
+      <h3 class="lines">Creado:</h3>
       <p id="creacion"></p>
-      <button id="finalizar">enviar</button>
+      <button id="finalizar" class="botton_save">Guardar</button>
     </form>
-    
-    
+    <h3 class="ultimed_sales_title">Ultimas ventas</h3>
+<div class="ultimed_sales" id="ultimed_sales">
+  
+</div>
+
     
 
     <script src="/javaScript/home.js"></script>
