@@ -97,7 +97,7 @@ const btnPost = document.getElementById('finalizar')
 btnPost.addEventListener("click", async e => {
   e.preventDefault();
 
-/* const sucur = document.getElementById('sucursal')
+const sucur = document.getElementById('sucursal')
 const amount = document.getElementById('input1')
 const p_total = document.getElementById('input2')
 const resul = document.getElementById('resultado')
@@ -114,7 +114,7 @@ const ventaNueva = {
 }
 const sale = JSON.stringify(ventaNueva)
 
-await enviarVenta(sale); */
+await enviarVenta(sale);
 
 btnPost.classList.replace('botton_save', 'botton_pressed');
 
@@ -128,11 +128,11 @@ window.location.reload()
 
 function traer(){
 	
-  const urlTest = 'http://localhost:3000/api/v1/ventas'
+ // const urlTest = 'http://localhost:3000/api/v1/ventas'
   const cajaGrande = document.getElementById('ultimed_sales');
   //cajaGrande.innerHTML = "";
 	window
-	.fetch(urlTest)
+	.fetch(urlUpload)
 		.then((respuesta)=> respuesta.json())
 		.then((responseJson)=>{
 			const todosLosElementos = [];
