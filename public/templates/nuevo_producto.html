@@ -8,29 +8,26 @@
   </head>
   <body>
     <h1>Nuevo Producto</h1>
-    <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
-    <ul id="suggestionsList"></ul>
+    
 
     <form id="formulario" enctype="multipart/form-data">
-      <h3 class="lines">Sucursal:</h3>
-      <p id="sucursal">B17</p>
-      <h3 class="lines">Cantidad:</h3>
-      <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
-      <h3 class="lines">Precio Unitario:</h3>
-      <p> <span id="resultado"></span></p>
-       <h3 class="lines">Total:</h3>
-      <input type="number" name="pt" id="input2" class="inputSecond" oninput="multiplyValues()" />
-      <h3 class="lines">Utilidad:</h3>
-      <p> <span id="util"></span></p>
-      <h3 class="lines">Articulo:</h3>
-      <p id="name"></p>
-      <h3 class="lines">Costo:</h3>
-      <p id="costo"></p>
-      <h3 class="lines">Stock:</h3>
-      <p id="stock"></p>
-      <h3 class="lines">Ingreso:</h3>
-      <p id="creacion"></p>
-      <button id="finalizar" class="botton_save">Guardar</button>
+      
+      <h3 class="lines">Nombre:</h3>
+      <input type="text" name="name" id="input_name" class="inputSecond" />
+    
+       <h3 class="lines">Costo:</h3>
+      <input type="number" name="cost" id="input_cost" class="inputSecond" />
+     
+      <h3 class="lines">Proveedor:</h3>
+      <input type="text" name="supplier" id="inputSupplier" class="inputSecond"/>
+     
+      <h3 class="lines">Precio Sugerido:</h3>
+      <input type="number" name="firstPrice" id="inputFirstPrice" class="inputSecond" />
+     
+      <h3 class="lines">Precio más bajo:</h3>
+      <input type="number" name="lastPrice" id="inputLastPrice" class="inputSecond"/>
+     
+      <button id="crearProduct" class="botton_save">Crear</button>
     </form>
     <h3 class="ultimed_sales_title">Ultimas ventas</h3>
 <div class="ultimed_sales" id="ultimed_sales">
@@ -39,6 +36,6 @@
 
     
 
-    <script src="/javaScript/home.js"></script>
+    <script src="/javaScript/nuevo_producto.js"></script>
   </body>
 </html>
