@@ -4,9 +4,10 @@ const createProductSchema = require("../../schemas/products.schema");
 const router = express.Router();
 
 
-const { getProducts} = require('../../controllers/products.controllers')
+const { getProducts, postProduct} = require('../../controllers/products.controllers')
 
 router.get("/", getProducts)
+router.post("/", postProduct);
 
 
 

@@ -1,4 +1,13 @@
 const { Pool } = require("pg");
+
+const moment = require('moment-timezone');
+  // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
+  moment.tz.setDefault('America/Lima');
+    // Crea un objeto moment con la hora actual en Lima
+  const fechaActual = moment();
+
+
+
 const config = require("../config/config");
 const { response } = require("express");
 //const { description } = require("../schemas/ventas.schema");
@@ -22,4 +31,24 @@ const getProducts = async (req, res) => {
   res.json(response.rows);
 };
 
-module.exports = { getProducts };
+const postProduct = async (req, res, next) => {
+  const { name, cost, stock, supplier, lowest_price, list_price, branch } = req.body;
+ 
+  const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+  
+  console.log(req.body);
+  const response = await pool.query('INSERT INTO products (name, cost, stock, created, supplier, lowest_price, list_price, branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [name, cost, stock, fechaActual.toDate(), supplier, lowest_price, list_price, branch]);
+  console.log(response);
+
+  res.send("product created");
+
+   
+  console.log(req.body);
+  
+  res.send(req.body)
+  
+  
+};
+
+
+module.exports = { getProducts, postProduct };
