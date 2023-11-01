@@ -6,18 +6,7 @@ const moment = require('moment-timezone');
     // Crea un objeto moment con la hora actual en Lima
   const fechaActual = moment();
 
-
-
 const config = require("../config/config");
-const { response } = require("express");
-//const { description } = require("../schemas/ventas.schema");
-
-const moment = require('moment-timezone');
-  // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
-  moment.tz.setDefault('America/Lima');
-    // Crea un objeto moment con la hora actual en Lima
-  const fechaActual = moment();
-
 
 const pool = new Pool({
   user: config.config.dbUser,
@@ -44,6 +33,8 @@ const response = await pool.query("SELECT * FROM products WHERE id_product = $1"
 res.json(response.rows);
 };
 
+
+
 const deleteProductsById = async (req, res) => {
   const id = req.params.id
   const response = await pool.query("DELETE FROM products WHERE id_product = $1", [id] )
@@ -51,8 +42,6 @@ const deleteProductsById = async (req, res) => {
   res.json(`Product: ${id} deleted successfully`);
   };
   
-
-
 const postProduct = async (req, res) => {
   const { name, cost, supplier, lowest_price, list_price } = req.body;
  
@@ -63,10 +52,7 @@ const postProduct = async (req, res) => {
   console.log(response);
 
   res.send("product created");
-
-   
   console.log(req.body);
-  
   res.send(req.body)
 };
 
@@ -77,6 +63,5 @@ const updateProductsById = async (req, res) => {
   console.log(response);
   res.json(`Product: ${id} updated successfully`);
   };
-
 
 module.exports = {updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };

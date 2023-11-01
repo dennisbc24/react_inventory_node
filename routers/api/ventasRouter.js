@@ -5,9 +5,10 @@ const Venta = require("../../modelMongo/ventas");
 
 const router = express.Router();
 
-const { getSales, postSales } = require("../../controllers/sales.controllers");
+const { getSales, postSales , getSalesByDate} = require("../../controllers/sales.controllers");
 
 router.get("/", getSales);
+router.get("/salesByDate", getSalesByDate);
 router.post("/", postSales);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const urlBase = 'https://inventario.elwayardo.com'
 const baseLocal = 'http://localhost:3000'
 
-const urlUpload = `${baseLocal}/api/v1/products`
+const urlUpload = `${urlBase}/api/v1/products`
 
 
 const crearProduct = (formDataParam) => {
