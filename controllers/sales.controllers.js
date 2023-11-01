@@ -1,7 +1,3 @@
-
-
-
-
 const { Pool } = require("pg");
 
 const moment = require('moment-timezone');
@@ -12,7 +8,7 @@ const moment = require('moment-timezone');
 
 
 const config = require("../config/config");
-const { response } = require("express");
+const { response, query } = require("express");
 const { parseJSON } = require("date-fns");
 
 //const { description } = require("../schemas/ventas.schema");
@@ -35,6 +31,13 @@ const getSales = async (req, res) => {
   res.json(response.rows);
 };
 
+const getSalesByDate = async(req,res) => {
+
+  const date = req.query.date
+  const response = await pool.query("SELECT * FROM public.sales WHERE date = $1 ORDER BY hour DESC", [date]);
+  res.json(response.rows);
+}
+
 const postSales = async (req, res, next) => {
   const { branch, amount, product, p_total, p_unit, revenue } = req.body;
  
@@ -45,13 +48,8 @@ const postSales = async (req, res, next) => {
   console.log(response);
 
   res.send("sale created");
-
-   
   console.log(req.body);
-  
   res.send(req.body)
-  
-  
 };
 
-module.exports = { getSales, postSales };
+module.exports = { getSales, getSalesByDate, postSales };
