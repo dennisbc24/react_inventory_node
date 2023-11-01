@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/home.css" />
+    <title>inventarioX</title>
+  </head>
+  <body>
+    <h1>Nuevo Producto</h1>
+    
+
+    <form id="formulario" enctype="multipart/form-data">
+      
+      <h3 class="lines">Nombre:</h3>
+      <input type="text" name="name" id="input_name" class="inputSecond" />
+    
+       <h3 class="lines">Costo:</h3>
+      <input type="number" name="cost" id="input_cost" class="inputSecond" />
+     
+      <h3 class="lines">Proveedor:</h3>
+      <input type="text" name="supplier" id="inputSupplier" class="inputSecond"/>
+     
+      <h3 class="lines">Precio Sugerido:</h3>
+      <input type="number" name="firstPrice" id="inputFirstPrice" class="inputSecond" />
+     
+      <h3 class="lines">Precio más bajo:</h3>
+      <input type="number" name="lastPrice" id="inputLastPrice" class="inputSecond"/>
+     
+      <button id="crearProduct" class="botton_save">Crear</button>
+    </form>
+    <h3 class="ultimed_sales_title">Ultimas ventas</h3>
+<div class="ultimed_sales" id="ultimed_sales">
+  
+</div>
+
+    
+
+    <script src="/javaScript/nuevo_producto.js"></script>
+  </body>
+</html>
