@@ -47,10 +47,13 @@ function showSuggestions(inputValue) {
 
       articulos.forEach((elem) => {
         if (elem.name == nombre) {
-          document.getElementById("costo").textContent = elem.cost;
-          document.getElementById("name").textContent = elem.name;
-          document.getElementById("stock").textContent = elem.stock;
+          document.getElementById("codigo").textContent = elem.id_product;
+          document.getElementById("inputName").value = elem.name;
+          document.getElementById("inputCost").value = elem.cost;
           document.getElementById("creacion").textContent = elem.created;
+          document.getElementById("supplier").textContent = elem.supplier;
+          document.getElementById("firstPrice").value = elem.list_price;
+          document.getElementById("lowestPrice").value = elem.lowest_price;
         }
       });
     };
@@ -58,34 +61,15 @@ function showSuggestions(inputValue) {
   });
 }
 
-function multiplyValues() {
-  // Obtenemos los valores de los inputs
-  const input1 = parseFloat(document.getElementById("input1").value);
-  const input2 = parseFloat(document.getElementById("input2").value);
 
-  // Verificamos que ambos valores sean números válidos
-  if (!isNaN(input1) && !isNaN(input2)) {
-    // Realizamos la division
-    const pUnitario = input2 / input1;
-    const util = (pUnitario - costo.textContent) * input1;
-    console.log(util);
-    document.getElementById("util").textContent = util;
-    // Mostramos el resultado en el elemento con id "resultado"
-    document.getElementById("resultado").textContent = pUnitario;
-  } else {
-    // Si alguno de los valores no es válido, mostramos un mensaje de error
-    document.getElementById("resultado").textContent =
-      "Error: Ingresa números válidos";
-  }
-}
 
-const enviarVenta = (formDataParam) => {
+const enviarVenta = (formDataParam, url) => {
 
-  fetch(urlUpload, {
+  fetch(url, {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
-      method:'POST',
+      method:'PUT',
       
       body: formDataParam
   })
@@ -97,29 +81,32 @@ const btnPost = document.getElementById('finalizar')
 btnPost.addEventListener("click", async e => {
   e.preventDefault();
 
-const sucur = document.getElementById('sucursal')
-const amount = document.getElementById('input1')
-const p_total = document.getElementById('input2')
-const resul = document.getElementById('resultado')
-const item = document.getElementById('name')
-const utilidad = document.getElementById('util')
+const id_product = document.getElementById('codigo')
+const nameInput = document.getElementById('inputName')
+const costInput = document.getElementById('inputCost')
+const firstPriceInput = document.getElementById('firstPrice')
+const lowestPriceInput = document.getElementById('lowestPrice')
 
-const ventaNueva = {
-  branch: sucur.textContent,
-  amount: amount.value,
-  product: item.textContent,
-  p_total: p_total.value,
-  p_unit: parseInt(resul.textContent),
-  revenue: parseInt(utilidad.textContent),
+const id_for_update = id_product.textContent
+
+const urlPost = `${baseLocal}/api/v1/products?id_product=${id_for_update}`
+console.log(urlPost);
+const newDates = {
+  
+  name: nameInput.value,
+  cost: costInput.value,
+  firstPrice: firstPriceInput.value,
+  lowestPrice: lowestPriceInput.value,
+  
 }
-const sale = JSON.stringify(ventaNueva)
-
-await enviarVenta(sale);
+const product = JSON.stringify(newDates)
+console.log(product), urlPost;
+await enviarVenta(product, urlPost);
 
 btnPost.classList.replace('botton_save', 'botton_pressed');
 
 console.log('boton presionado');
-window.location.reload()
+//window.location.reload()
 
 });
 
@@ -183,10 +170,3 @@ const titulo = document.getElementById('titulo')
 const searchInput = document.getElementById('searchInput')
 
 
-btnUpdate.addEventListener("click", async e => {
-    
-
-    titulo.textContent = 'Actualizar producto'
-    //searchInput.style.display = 'none'
-
-  })

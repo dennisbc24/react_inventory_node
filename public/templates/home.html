@@ -7,7 +7,7 @@
     <title>inventarioX</title>
   </head>
   <body>
-    <h1>Registrar Venta</h1>
+    <h1 id="titulo">Registrar Venta</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
 
@@ -31,7 +31,9 @@
       <h3 class="lines">Creado:</h3>
       <p id="creacion"></p>
       <button id="finalizar" class="botton_save">Guardar</button>
+      
     </form>
+    <button id="updateButton">Actualizar producto</button>
     <h3 class="ultimed_sales_title">Ultimas ventas</h3>
 <div class="ultimed_sales" id="ultimed_sales">
   

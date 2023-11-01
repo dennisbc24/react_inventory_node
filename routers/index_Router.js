@@ -4,6 +4,7 @@ const express = require("express");
 const homeRouter = require("./homeRouter");
 const resumenRouter = require("./resumenRouter");
 const createProduct_frontend = require("./createProduct");
+const updateProduct_frontend = require("./updateProductFrontend");
 const salesById_frontend = require("./salesByIdFrontend");
 const apiVentas = require("./api/ventasRouter");
 const apiProducts = require("./api/productsRouter");
@@ -18,6 +19,7 @@ function routerApi(app) {
   console.log(`${publicPath}/templates`);
   app.use("/", homeRouter);
   app.use("/nuevo_producto", createProduct_frontend);
+  app.use("/actualizar_producto", updateProduct_frontend);
   app.use("/ventas_por_fecha", salesById_frontend );
   app.use("/resumen", resumenRouter);
   app.use("/api/v1", router);
