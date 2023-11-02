@@ -7,7 +7,29 @@
     <title>inventarioX</title>
   </head>
   <body>
-    <h1>Registrar Venta</h1>
+    <header>
+      <input type="checkbox" name="" id="boton-menu" class="boton-menu">
+      <label for="boton-menu" class="boton-check">
+        <p>menu</p>
+        <img src="../icons/menu.png" alt="" class="boton_open">
+        <img src="../icons/close.png" alt="" class="boton_close">
+      </label>
+      
+      <div class="caja-logo">
+        <img src="../icons/repartidor.png" alt="" class="logito">
+        <a href="#" class="main_title">El Wayardo</a>
+      </div>
+      
+      <ul class="caja_pestañas">
+        <li class="pestaña"><a href="https://inventario.elwayardo.com">Registrar Venta</a></li>
+        <li class="pestaña"><a href="https://inventario.elwayardo.com/nuevo_producto">Nuevo Producto</a></li>
+        <li class="pestaña"><a href="https://inventario.elwayardo.com/ventas_por_fecha">Buscar Ventas</a></li>
+        <li class="pestaña"><a href="https://inventario.elwayardo.com/actualizar_producto">Actualizar Producto</a></li>
+        
+
+      </ul>
+    </header>
+    <h1 id="titulo">Registrar Venta</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
 
@@ -31,7 +53,9 @@
       <h3 class="lines">Creado:</h3>
       <p id="creacion"></p>
       <button id="finalizar" class="botton_save">Guardar</button>
+      
     </form>
+    <button id="updateButton">Actualizar producto</button>
     <h3 class="ultimed_sales_title">Ultimas ventas</h3>
 <div class="ultimed_sales" id="ultimed_sales">
   

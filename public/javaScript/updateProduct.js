@@ -5,7 +5,7 @@ const todo = [];
 const urlBase = 'https://inventario.elwayardo.com'
 const baseLocal = 'http://localhost:3000'
 
-const urlUpload = `${urlBase}/api/v1/ventas`
+const urlUpload = `${urlBase}/api/v1/products/latestProducts?limit=5`
 
 
 const url = `${urlBase}/api/v1/products`;
@@ -47,10 +47,13 @@ function showSuggestions(inputValue) {
 
       articulos.forEach((elem) => {
         if (elem.name == nombre) {
-          document.getElementById("costo").textContent = elem.cost;
-          document.getElementById("name").textContent = elem.name;
-          document.getElementById("stock").textContent = elem.stock;
+          document.getElementById("codigo").textContent = elem.id_product;
+          document.getElementById("inputName").value = elem.name;
+          document.getElementById("inputCost").value = elem.cost;
           document.getElementById("creacion").textContent = elem.created;
+          document.getElementById("supplier").textContent = elem.supplier;
+          document.getElementById("inputfirstPrice").value = elem.list_price;
+          document.getElementById("inputlowestPrice").value = elem.lowest_price;
         }
       });
     };
@@ -58,34 +61,15 @@ function showSuggestions(inputValue) {
   });
 }
 
-function multiplyValues() {
-  // Obtenemos los valores de los inputs
-  const input1 = parseFloat(document.getElementById("input1").value);
-  const input2 = parseFloat(document.getElementById("input2").value);
 
-  // Verificamos que ambos valores sean números válidos
-  if (!isNaN(input1) && !isNaN(input2)) {
-    // Realizamos la division
-    const pUnitario = input2 / input1;
-    const util = (pUnitario - costo.textContent) * input1;
-    console.log(util);
-    document.getElementById("util").textContent = util;
-    // Mostramos el resultado en el elemento con id "resultado"
-    document.getElementById("resultado").textContent = pUnitario;
-  } else {
-    // Si alguno de los valores no es válido, mostramos un mensaje de error
-    document.getElementById("resultado").textContent =
-      "Error: Ingresa números válidos";
-  }
-}
 
-const enviarVenta = (formDataParam) => {
+const enviarVenta = (formDataParam, url) => {
 
-  fetch(urlUpload, {
+  fetch(url, {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
-      method:'POST',
+      method:'PATCH',
       
       body: formDataParam
   })
@@ -97,28 +81,27 @@ const btnPost = document.getElementById('finalizar')
 btnPost.addEventListener("click", async e => {
   e.preventDefault();
 
-const sucur = document.getElementById('sucursal')
-const amount = document.getElementById('input1')
-const p_total = document.getElementById('input2')
-const resul = document.getElementById('resultado')
-const item = document.getElementById('name')
-const utilidad = document.getElementById('util')
+const id_product = document.getElementById('codigo')
+const nameInput = document.getElementById('inputName')
+const costInput = document.getElementById('inputCost')
+const firstPriceInput = document.getElementById('inputfirstPrice')
+const lowestPriceInput = document.getElementById('inputlowestPrice')
 
-const ventaNueva = {
-  branch: sucur.textContent,
-  amount: amount.value,
-  product: item.textContent,
-  p_total: p_total.value,
-  p_unit: parseInt(resul.textContent),
-  revenue: parseInt(utilidad.textContent),
+const id_for_update = id_product.textContent
+
+const urlPost = `${urlBase}/api/v1/products/${id_for_update}`
+console.log(urlPost);
+const newDates = {
+  
+  name: nameInput.value,
+  cost: costInput.value,
+  list_price: firstPriceInput.value,
+  lowest_price: lowestPriceInput.value,
+
 }
-const sale = JSON.stringify(ventaNueva)
-
-await enviarVenta(sale);
-
+const product = JSON.stringify(newDates)
+await enviarVenta(product, urlPost);
 btnPost.classList.replace('botton_save', 'botton_pressed');
-
-console.log('boton presionado');
 window.location.reload()
 
 });
@@ -141,27 +124,27 @@ function traer(){
 					const div1  = document.createElement('div')
 
 
-					const amount = document.createElement('p');
-						const amountApi = elemento.amount;
-            amount.textContent = amountApi;
+					const name = document.createElement('p');
+						const nameApi = elemento.name;
+            name.textContent = nameApi;
             
             div1.className = 'ultimed_sales_article'
             
 
         
-            const product = document.createElement('p');
-						const productApi = elemento.product;
-            product.textContent = productApi;
+            const cost = document.createElement('p');
+						const costApi = elemento.cost;
+            cost.textContent = costApi;
             
             
 
             
-            const total = document.createElement('p');
-						const totalApit = elemento.p_total;
-            total.textContent = totalApit;
+            const listP = document.createElement('p');
+						const lisPApit = elemento.list_price;
+            listP.textContent = lisPApit;
             
             
-            div1.append(amount, product, total)
+            div1.append(name, cost, listP)
       
 					todosLosElementos.push(div1);
 
@@ -183,10 +166,3 @@ const titulo = document.getElementById('titulo')
 const searchInput = document.getElementById('searchInput')
 
 
-btnUpdate.addEventListener("click", async e => {
-    
-
-    titulo.textContent = 'Actualizar producto'
-    //searchInput.style.display = 'none'
-
-  })

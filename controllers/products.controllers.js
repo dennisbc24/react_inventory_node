@@ -57,11 +57,20 @@ const postProduct = async (req, res) => {
 };
 
 const updateProductsById = async (req, res) => {
-  const id = req.params.id
-  const { cost, lowest_price, list_price } = req.body;
-  const response = await pool.query("UPDATE products SET cost = $1, lowest_price = $2, list_price = $3  WHERE id_product = $4 ", [cost, lowest_price, list_price, id] )
+  const id = req.params.id_product
+  const { name, cost, lowest_price, list_price } = req.body;
+  console.log(id, name, cost, lowest_price,list_price);
+  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
   console.log(response);
   res.json(`Product: ${id} updated successfully`);
   };
 
-module.exports = {updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };
+
+  const latestUpdates = async(req,res) => {
+
+    const limit = req.query.limit
+    const response = await pool.query("SELECT * FROM public.products ORDER BY id_product DESC LIMIT $1", [limit]);
+    res.json(response.rows);
+  }
+
+module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };

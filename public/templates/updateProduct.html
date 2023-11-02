@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/home.css" />
-
     <title>Document</title>
 </head>
 <body>
@@ -30,10 +29,36 @@
   
         </ul>
       </header>
-    <h3 >Ultimas ventas</h3>
-    <div id="salesByDate"></div>
-    
+    <h1 id="titulo">Actualizar Producto</h1>
+    <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
+    <ul id="suggestionsList"></ul>
 
-    <script src="/javaScript/salesById.js"></script>
+    <form id="formulario" enctype="multipart/form-data">
+      <h3 class="lines">Cod:</h3>
+      <p id="codigo">-----</p>
+      <h3 class="lines">Nombre:</h3>
+      <input type="text" name="name" id="inputName" class="inputSecond" />
+      <h3 class="lines">Cost:</h3>
+      <input type="text" name="cost" id="inputCost" class="inputSecond" />
+      <h3 class="lines">Creado:</h3>
+      <p id="creacion">-----</p>
+      <h3 class="lines">Proveedor:</h3>
+      <p id="supplier">-----</p>
+       <h3 class="lines">Precio Sugerido:</h3>
+      <input type="number" name="firstPrice" id="inputfirstPrice" class="inputSecond" />
+      <h3 class="lines">Precio Más Bajo:</h3>
+      <input type="number" name="lowestPrice" id="inputlowestPrice" class="inputSecond" />
+      
+   
+      <button id="finalizar" class="botton_save">Guardar</button>
+      
+    </form>
+   
+    <h3 class="ultimed_sales_title">Ultimas ventas</h3>
+<div class="ultimed_sales" id="ultimed_sales">
+  
+</div>
+
+    <script src="/javaScript/updateProduct.js"></script>
 </body>
 </html>

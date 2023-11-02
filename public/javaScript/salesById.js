@@ -3,7 +3,7 @@ const baseLocal = 'http://localhost:3000'
 
 
 
-const urlInsomnia = `${urlBase}/api/v1/ventas/salesByDate?date=2023-10-31`
+const urlInsomnia = `${urlBase}/api/v1/ventas/salesByDate?date=2023-11-01`
 
 function traer() {
   
