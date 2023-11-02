@@ -5,7 +5,7 @@ const todo = [];
 const urlBase = 'https://inventario.elwayardo.com'
 const baseLocal = 'http://localhost:3000'
 
-const urlUpload = `${urlBase}/api/v1/ventas`
+const urlUpload = `${urlBase}/api/v1/products/latestProducts?limit=5`
 
 
 const url = `${urlBase}/api/v1/products`;
@@ -89,7 +89,7 @@ const lowestPriceInput = document.getElementById('inputlowestPrice')
 
 const id_for_update = id_product.textContent
 
-const urlPost = `${baseLocal}/api/v1/products/${id_for_update}`
+const urlPost = `${urlBase}/api/v1/products/${id_for_update}`
 console.log(urlPost);
 const newDates = {
   
@@ -124,27 +124,27 @@ function traer(){
 					const div1  = document.createElement('div')
 
 
-					const amount = document.createElement('p');
-						const amountApi = elemento.amount;
-            amount.textContent = amountApi;
+					const name = document.createElement('p');
+						const nameApi = elemento.name;
+            name.textContent = nameApi;
             
             div1.className = 'ultimed_sales_article'
             
 
         
-            const product = document.createElement('p');
-						const productApi = elemento.product;
-            product.textContent = productApi;
+            const cost = document.createElement('p');
+						const costApi = elemento.cost;
+            cost.textContent = costApi;
             
             
 
             
-            const total = document.createElement('p');
-						const totalApit = elemento.p_total;
-            total.textContent = totalApit;
+            const listP = document.createElement('p');
+						const lisPApit = elemento.list_price;
+            listP.textContent = lisPApit;
             
             
-            div1.append(amount, product, total)
+            div1.append(name, cost, listP)
       
 					todosLosElementos.push(div1);
 

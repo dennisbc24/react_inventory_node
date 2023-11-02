@@ -65,4 +65,12 @@ const updateProductsById = async (req, res) => {
   res.json(`Product: ${id} updated successfully`);
   };
 
-module.exports = {updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };
+
+  const latestUpdates = async(req,res) => {
+
+    const limit = req.query.limit
+    const response = await pool.query("SELECT * FROM public.products ORDER BY id_product DESC LIMIT $1", [limit]);
+    res.json(response.rows);
+  }
+
+module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };
