@@ -52,8 +52,8 @@ function showSuggestions(inputValue) {
           document.getElementById("inputCost").value = elem.cost;
           document.getElementById("creacion").textContent = elem.created;
           document.getElementById("supplier").textContent = elem.supplier;
-          document.getElementById("firstPrice").value = elem.list_price;
-          document.getElementById("lowestPrice").value = elem.lowest_price;
+          document.getElementById("inputfirstPrice").value = elem.list_price;
+          document.getElementById("inputlowestPrice").value = elem.lowest_price;
         }
       });
     };
@@ -69,7 +69,7 @@ const enviarVenta = (formDataParam, url) => {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
-      method:'PUT',
+      method:'PATCH',
       
       body: formDataParam
   })
@@ -84,29 +84,25 @@ btnPost.addEventListener("click", async e => {
 const id_product = document.getElementById('codigo')
 const nameInput = document.getElementById('inputName')
 const costInput = document.getElementById('inputCost')
-const firstPriceInput = document.getElementById('firstPrice')
-const lowestPriceInput = document.getElementById('lowestPrice')
+const firstPriceInput = document.getElementById('inputfirstPrice')
+const lowestPriceInput = document.getElementById('inputlowestPrice')
 
 const id_for_update = id_product.textContent
 
-const urlPost = `${baseLocal}/api/v1/products?id_product=${id_for_update}`
+const urlPost = `${baseLocal}/api/v1/products/${id_for_update}`
 console.log(urlPost);
 const newDates = {
   
   name: nameInput.value,
   cost: costInput.value,
-  firstPrice: firstPriceInput.value,
-  lowestPrice: lowestPriceInput.value,
-  
+  list_price: firstPriceInput.value,
+  lowest_price: lowestPriceInput.value,
+
 }
 const product = JSON.stringify(newDates)
-console.log(product), urlPost;
 await enviarVenta(product, urlPost);
-
 btnPost.classList.replace('botton_save', 'botton_pressed');
-
-console.log('boton presionado');
-//window.location.reload()
+window.location.reload()
 
 });
 

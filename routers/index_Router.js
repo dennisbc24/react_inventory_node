@@ -20,14 +20,11 @@ function routerApi(app) {
   app.use("/", homeRouter);
   app.use("/nuevo_producto", createProduct_frontend);
   app.use("/actualizar_producto", updateProduct_frontend);
-  app.use("/ventas_por_fecha", salesById_frontend );
+  app.use("/ventas_por_fecha", salesById_frontend);
   app.use("/resumen", resumenRouter);
   app.use("/api/v1", router);
-  router.use("/ventas", apiVentas);
-  router.use("/products", apiProducts);
+    router.use("/ventas", apiVentas);
+    router.use("/products", apiProducts);
 }
 
 module.exports = routerApi;
-
-
-

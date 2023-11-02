@@ -57,7 +57,7 @@ const postProduct = async (req, res) => {
 };
 
 const updateProductsById = async (req, res) => {
-  const id = req.query.id_product
+  const id = req.params.id_product
   const { name, cost, lowest_price, list_price } = req.body;
   console.log(id, name, cost, lowest_price,list_price);
   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
