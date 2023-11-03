@@ -3,17 +3,17 @@ const baseLocal = 'http://localhost:3000'
 
 
 
-const urlInsomnia = `${urlBase}/api/v1/ventas/salesByDate?date=2023-11-01`
 
-function traer() {
+
+function traer(url) {
   
   
   
     // const urlTest = 'http://localhost:3000/api/v1/ventas'
-  const cajaGrande = document.getElementById("salesByDate");
-  //cajaGrande.innerHTML = "";
+  const cajaGrande = document.getElementById("ultimed_sales");
+  cajaGrande.innerHTML = "";
   window
-    .fetch(urlInsomnia)
+    .fetch(url)
     .then((respuesta) => respuesta.json())
     .then((responseJson) => {
       const todosLosElementos = [];
@@ -24,18 +24,18 @@ function traer() {
         const amountApi = elemento.amount;
         amount.textContent = amountApi;
 
-        div1.className = "sales_article_byDate";
+        div1.className = "ultimed_sales_article";
 
         const product = document.createElement("p");
         const productApi = elemento.product;
         product.textContent = productApi;
 
         const total = document.createElement("p");
-        const totalApi = elemento.p_total;
+        const totalApi = `S/.${elemento.p_total}`;
         total.textContent = totalApi;
 
         const revenue = document.createElement("p");
-        const revenueApi = elemento.revenue;
+        const revenueApi = `S/.${elemento.revenue}`;
         revenue.textContent = revenueApi;
 
         div1.append(amount, product, total, revenue);
@@ -49,4 +49,18 @@ function traer() {
     });
 }
 
-traer();
+
+const btnGet = document.getElementById('getSales')
+
+btnGet.addEventListener('click', async e => {
+  e.preventDefault();
+
+  const inputDate = document.getElementById('dateSales')
+  const titleText = document.getElementById('titleText')
+  const urlInsomnia = `${urlBase}/api/v1/ventas/salesByDate?date=${inputDate.value}`
+  titleText.textContent = inputDate.value
+  
+  traer(urlInsomnia);
+})
+
+
