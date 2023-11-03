@@ -17,6 +17,9 @@ function traer(url) {
     .then((respuesta) => respuesta.json())
     .then((responseJson) => {
       const todosLosElementos = [];
+      let sumAllSales = [];
+      let sumRevenue = [];
+      
       responseJson.forEach((elemento) => {
         const div1 = document.createElement("div");
 
@@ -31,12 +34,17 @@ function traer(url) {
         product.textContent = productApi;
 
         const total = document.createElement("p");
-        const totalApi = `S/.${elemento.p_total}`;
+        const getTotal = elemento.p_total
+        sumAllSales.push(parseInt(getTotal))
+        const totalApi = `S/.${getTotal}`;
         total.textContent = totalApi;
 
         const revenue = document.createElement("p");
-        const revenueApi = `S/.${elemento.revenue}`;
+        const getRevenue = elemento.revenue
+        sumRevenue.push(parseInt(getRevenue))
+        const revenueApi = `S/.${getRevenue}`;
         revenue.textContent = revenueApi;
+        
 
         div1.append(amount, product, total, revenue);
 
@@ -46,6 +54,14 @@ function traer(url) {
 
         //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
       });
+      
+        
+        
+       
+        let ganancia = sumRevenue.reduce((a, b) => a + b, 0);
+        let total = sumAllSales.reduce((a, b) => a + b, 0);
+
+console.log(ganancia, total);
     });
 }
 

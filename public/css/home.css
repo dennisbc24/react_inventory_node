@@ -147,6 +147,11 @@ input[type="text"]{
     align-items: center;
     margin: 0px 80px;
 }
+
+#formulario p{
+  
+  color: white;
+}
 .inputSecond{
   height: 23px;
   border-radius: 5px;
@@ -163,7 +168,7 @@ input[type="text"]{
 }
 
 p{
-  color: var(--color-third);
+  color: var(--dark-font);
 }
 #suggestionsList {
     list-style-type: none;
@@ -196,8 +201,20 @@ p{
     font-size: smaller;
     
 }
+
+.header_chard{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 6px;
+}
+
+.header_chard p{
+  font-weight: 600;
+  color: var(--color-third);
+}
 .ultimed_sales{
-  background-color: var(--color-fourth);
+  background-color: var(--color-third);
   border-radius: 5px;
   padding: 0 5px;
 }
@@ -207,7 +224,7 @@ p{
 }
 
 .ultimed_sales_article{
-  
+  padding: 0 6px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
 }
