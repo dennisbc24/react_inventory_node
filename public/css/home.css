@@ -121,6 +121,9 @@ h1{
 h2{
   text-align: center;
 }
+h3{
+  color: var(--color-third);
+}
 .lines{
   text-align: end;
   color: var(--color-third);
@@ -150,6 +153,13 @@ input[type="text"]{
     border: solid var(--color-third) 1px;
     max-width: 45px;
     
+}
+
+.inputUpdate{
+  height: 23px;
+  border-radius: 5px;
+    border: solid var(--color-third) 1px;
+    max-width: 120px;
 }
 
 p{
