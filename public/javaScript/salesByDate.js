@@ -19,6 +19,8 @@ function traer(url) {
       const todosLosElementos = [];
       let sumAllSales = [];
       let sumRevenue = [];
+      const nodeSumTotal = document.getElementById('sumTotal')
+      const nodeSumRevenue = document.getElementById('sumRevenue')
       
       responseJson.forEach((elemento) => {
         const div1 = document.createElement("div");
@@ -61,7 +63,8 @@ function traer(url) {
         let ganancia = sumRevenue.reduce((a, b) => a + b, 0);
         let total = sumAllSales.reduce((a, b) => a + b, 0);
 
-console.log(ganancia, total);
+        nodeSumTotal.textContent = `Total venta: S/.${total}`
+        nodeSumRevenue.textContent = `Total ganancia: S/.${ganancia}`
     });
 }
 
