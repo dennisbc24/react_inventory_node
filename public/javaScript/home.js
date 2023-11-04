@@ -139,14 +139,22 @@ function traer(){
 			responseJson.forEach((elemento) => {
 				
 					const div1  = document.createElement('div')
-
+          div1.className = 'ultimed_sales_article'
 
 					const amount = document.createElement('p');
 						const amountApi = elemento.amount;
             amount.textContent = amountApi;
             
-            div1.className = 'ultimed_sales_article'
-            
+           
+            const date = document.createElement('p');
+            const dateApi = elemento.date;
+            const fechaCorta = new Date(dateApi).toLocaleDateString("es-ES", {
+              year: "2-digit",
+              month: "2-digit",
+              day: "2-digit"
+            });
+
+            date.textContent = fechaCorta;
 
         
             const product = document.createElement('p');
@@ -161,7 +169,7 @@ function traer(){
             total.textContent = totalApit;
             
             
-            div1.append(amount, product, total)
+            div1.append(amount, date,product, total)
       
 					todosLosElementos.push(div1);
 
@@ -178,15 +186,4 @@ traer();
 
 
 
-const btnUpdate = document.getElementById('updateButton')
-const titulo = document.getElementById('titulo')
-const searchInput = document.getElementById('searchInput')
 
-
-btnUpdate.addEventListener("click", async e => {
-    
-
-    titulo.textContent = 'Actualizar producto'
-    //searchInput.style.display = 'none'
-
-  })
