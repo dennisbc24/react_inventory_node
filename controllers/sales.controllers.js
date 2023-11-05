@@ -2,14 +2,12 @@ const { Pool } = require("pg");
 
 const moment = require('moment-timezone');
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
-  moment.tz.setDefault('America/Lima');
+  //moment.tz.setDefault('America/Lima');
     // Crea un objeto moment con la hora actual en Lima
-  const fechaActual = moment();
+  //const fechaActual = moment();
 
 
 const config = require("../config/config");
-const { response, query } = require("express");
-const { parseJSON } = require("date-fns");
 
 //const { description } = require("../schemas/ventas.schema");
 
@@ -42,6 +40,7 @@ const postSales = async (req, res, next) => {
   const { branch, amount, product, p_total, p_unit, revenue } = req.body;
  
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+  moment.tz.setDefault('America/Lima');
   const horaActual = fechaActual.format('HH:mm:ss'); // Formatea la hora
   console.log(req.body);
   const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, fechaActual.toDate(), amount, product, p_total, p_unit, revenue, horaActual]);

@@ -148,7 +148,7 @@ function traer(){
            
             const date = document.createElement('p');
             const dateApi = elemento.date;
-            const fechaCorta = new Date(dateApi).toLocaleDateString("es-ES", {
+            const fechaCorta = new Date(dateApi).toLocaleDateString("es-PE", {
               year: "2-digit",
               month: "2-digit",
               day: "2-digit"
