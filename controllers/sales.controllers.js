@@ -37,13 +37,13 @@ const getSalesByDate = async(req,res) => {
 }
 
 const postSales = async (req, res, next) => {
-  const { branch, amount, product, p_total, p_unit, revenue } = req.body;
+  const { branch, date ,amount, product, p_total, p_unit, revenue } = req.body;
  
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   moment.tz.setDefault('America/Lima');
   const horaActual = fechaActual.format('HH:mm:ss'); // Formatea la hora
   console.log(req.body);
-  const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, fechaActual.toDate(), amount, product, p_total, p_unit, revenue, horaActual]);
+  const response = await pool.query('INSERT INTO sales (branch, date, amount, product, p_total, p_unit, revenue, hour) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [branch, date, amount, product, p_total, p_unit, revenue, horaActual]);
   console.log(response);
 
   res.send("sale created");

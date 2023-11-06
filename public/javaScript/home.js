@@ -19,6 +19,20 @@ fetch(url)
     });
   });
 
+
+
+//fecha de la ventan por defecto
+const dateSale = document.getElementById('dateSale')
+
+const fechaActual = new Date();
+
+const año = fechaActual.getFullYear();
+const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
+const dia = fechaActual.getDate();
+const fechaFormateada = `${año}-${mes}-0${dia}`;
+
+dateSale.value = fechaFormateada
+
 /* 
 En este ejemplo, el input de búsqueda tiene un evento oninput que llama a la función showSuggestions() cada vez que se escribe algo en el campo de entrada. La función showSuggestions() obtiene el valor del input y busca nombres que coincidan en el array nombres. Luego, crea elementos <li> para cada nombre coincidente y los agrega como elementos secundarios de la lista <ul> con el id suggestionsList.
 Cuando haces clic en una sugerencia, el valor del input se establece en el nombre seleccionado y la lista de sugerencias se vacía.
@@ -105,7 +119,8 @@ const item = document.getElementById('name')
 const utilidad = document.getElementById('util')
 
 const ventaNueva = {
-  branch: sucur.textContent,
+  branch: sucur.value,
+  date: dateSale.value,
   amount: amount.value,
   product: item.textContent,
   p_total: p_total.value,

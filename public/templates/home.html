@@ -35,7 +35,14 @@
 
     <form id="formulario" enctype="multipart/form-data">
       <h3 class="lines">Establecimiento:</h3>
-      <p id="sucursal">B17</p>
+      <select name="listaCategory" id="sucursal">
+        <!-- <option disabled selected>Seleciona la categoria</option> -->
+        <option value="B17">B17</option>
+        <option value="Luz Marina">Luz Marina</option>
+        
+      </select>
+      <h3 class="lines">Fecha:</h3>
+      <input type="date" name="date" id="dateSale">
       <h3 class="lines">Cantidad:</h3>
       <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
       <h3 class="lines">Precio Unitario:</h3>
@@ -63,6 +70,7 @@
       <p>Precio Total</p>
     </div>
 <div class="ultimed_sales" id="ultimed_sales">
+  
   
 </div>
 
