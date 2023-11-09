@@ -26,57 +26,38 @@
         <li class="pestaña"><a href="https://inventario.elwayardo.com/ventas_por_fecha">Buscar Ventas</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/actualizar_producto">Actualizar Producto</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/gastos">Registrar Gasto</a></li>
-        
 
       </ul>
     </header>
-    <h1 id="titulo">Registrar Venta</h1>
-    <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
-    <ul id="suggestionsList"></ul>
+    <h1>Nuevo Producto</h1>
+    
 
     <form id="formulario" enctype="multipart/form-data">
-      <h3 class="lines">Establecimiento:</h3>
-      <select name="listaCategory" id="sucursal">
+      
+      <h3 class="lines">Concepto:</h3>
+      <input type="text" name="name" id="input_name" class="inputSecond" />
+    
+       <h3 class="lines">Fecha:</h3>
+      <input type="date" name="" id="inputDate">
+     
+      <h3 class="lines">Monto:</h3>
+      <input type="number" name="" id="inputAmount">
+     
+      <h3 class="lines">Vendedor:</h3>
+      <select name="" id="inputSucursal">
         <!-- <option disabled selected>Seleciona la categoria</option> -->
         <option value="B17">B17</option>
         <option value="Luz Marina">Luz Marina</option>
-        
-      </select>
-      <h3 class="lines">Fecha:</h3>
-      <input type="date" name="date" id="dateSale">
-      <h3 class="lines">Cantidad:</h3>
-      <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
-      <h3 class="lines">Precio Unitario:</h3>
-      <p> <span id="resultado"></span></p>
-       <h3 class="lines">Total:</h3>
-      <input type="number" name="pt" id="input2" class="inputSecond" oninput="multiplyValues()" />
-      <h3 class="lines">Ganancia:</h3>
-      <p> <span id="util"></span></p>
-      <h3 class="lines">Nombre:</h3>
-      <p id="name"></p>
-      <h3 class="lines">Costo:</h3>
-      <p id="costo"></p>
-      <h3 class="lines">Stock:</h3>
-      <p id="stock"></p>
-      <h3 class="lines">Creado:</h3>
-      <p id="creacion"></p>
-      <button id="finalizar" class="botton_save">Guardar</button>
-      
+     
+      <button id="crearProduct" class="botton_save">Crear</button>
     </form>
-    
     <h3 class="ultimed_sales_title">Ultimas ventas</h3>
-    <div class="header_chard">
-      <p>Cant</p>
-      <p>Articulo</p>
-      <p>Precio Total</p>
-    </div>
 <div class="ultimed_sales" id="ultimed_sales">
-  
   
 </div>
 
     
 
-    <script src="/javaScript/home.js"></script>
+    <script src="/javaScript/gastos.js"></script>
   </body>
 </html>

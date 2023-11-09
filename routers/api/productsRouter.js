@@ -12,6 +12,6 @@ router.get("/", getProductsById)
 router.get("/latestProducts", latestUpdates)
 
 router.post("/", postProduct)
-router.delete("/", deleteProductsById)
+router.delete("/:id", deleteProductsById)
 
 module.exports = router;
