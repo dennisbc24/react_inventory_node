@@ -3,7 +3,7 @@ const articulos = [];
 const todo = [];
 
 const urlBase = 'https://inventario.elwayardo.com'
-const baseLocal = 'http://localhost:3000'
+//const urlBase = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/ventas`
 
@@ -29,7 +29,7 @@ const fechaActual = new Date();
 const año = fechaActual.getFullYear();
 const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
 const dia = fechaActual.getDate();
-const fechaFormateada = `${año}-${mes}-0${dia}`;
+const fechaFormateada = `${año}-${mes}-${dia}`;
 
 dateSale.value = fechaFormateada
 
