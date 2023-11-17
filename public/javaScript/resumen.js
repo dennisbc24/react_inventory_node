@@ -1,56 +1,76 @@
 //const urlBase = 'https://inventario.elwayardo.com'
 const urlBase = 'http://localhost:3000'
 
-
-
-
-
-function traer(url) {
+function traerGanancia(url) {
     // const urlTest = 'http://localhost:3000/api/v1/ventas'
   const cajaGrande = document.getElementById("summary");
-  cajaGrande.innerHTML = "";
+  //cajaGrande.innerHTML = "";
   window
     .fetch(url)
     .then((respuesta) => respuesta.json())
     .then((responseJson) => {
       const todosLosElementos = [];
      
-      
       responseJson.forEach((elemento) => {
         const div1 = document.createElement("div");
-
-        const amount = document.createElement("p");
-        const amountApi = elemento.branch;
-        amount.textContent = amountApi;
-
         div1.className = "ultimed_sales_article";
 
-        const product = document.createElement("p");
-        const productApi = elemento.mes;
-        product.textContent = productApi;
+        const branch = document.createElement("p");
+        const branchApi = elemento.branch;
+        branch.textContent = branchApi;
 
-        
+        const concept = document.createElement("p")
+        concept.textContent = `Ganancia ${branchApi}`
 
-        
+        const sum = document.createElement("p");
+        const sumApi = elemento.suma_revenue;
+        sum.textContent = sumApi;
 
-        div1.append(amount, product, total);
+        div1.append(branch,concept,sum);
 
         todosLosElementos.push(div1);
 
         cajaGrande.append(...todosLosElementos);
-
-        //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
-      });
+ });
       
-        
-        
-       
-        /* let ganancia = sumRevenue.reduce((a, b) => a + b, 0);
-        let total = sumAllSales.reduce((a, b) => a + b, 0);
-
-        nodeSumTotal.textContent = `Total venta: S/.${total}`
-        nodeSumRevenue.textContent = `Total ganancia: S/.${ganancia}` */
     });
+}
+
+
+function traerGastos(url) {
+  // const urlTest = 'http://localhost:3000/api/v1/ventas'
+const cajaGrande = document.getElementById("summary2");
+//cajaGrande.innerHTML = "";
+window
+  .fetch(url)
+  .then((respuesta) => respuesta.json())
+  .then((responseJson) => {
+    const todosLosElementos = [];
+   
+    responseJson.forEach((elemento) => {
+      const div1 = document.createElement("div");
+      div1.className = "ultimed_sales_article";
+
+      const branch = document.createElement("p");
+      const branchApi = elemento.branch;
+      branch.textContent = branchApi;
+
+      const concept = document.createElement("p");
+      const conceptApi = elemento.concept;
+      concept.textContent = conceptApi;
+
+      const amount = document.createElement("p");
+      const amountApi = elemento.amount;
+      amount.textContent = amountApi;
+
+      div1.append(branch, concept, amount);
+
+      todosLosElementos.push(div1);
+
+      cajaGrande.append(...todosLosElementos);
+});
+    
+  });
 }
 
 
@@ -64,9 +84,11 @@ btnGet.addEventListener('click', async e => {
   
   
   const date = inputMonth.value;
-    const month = date.substring(0,4)
-    const year = date.substring(5,7)
+    const year = date.substring(0,4)
+    const month = date.substring(5,7)
     const urlInsomnia = `${urlBase}/api/v1/ventas/salesByMonth?year=${year}&month=${month}`
-    
-  traer(urlInsomnia);
+    const urlInsomnia2 = `http://localhost:3000/api/v1/box/byMonth?year=${year}&month=${month}`
+    console.log(urlInsomnia);
+  traerGanancia(urlInsomnia);
+  traerGastos(urlInsomnia2);
 })
