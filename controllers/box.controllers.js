@@ -21,6 +21,18 @@ const getBox = async (req, res) => {
   res.json(response.rows);
 };
 
+const getByMonth = async (req, res) => {
+  try {
+    const month = req.query.month
+    const year = req.query.year
+    console.log(month,year);
+    const response = await pool.query("SELECT bill, concept, amount FROM public.box WHERE	EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 AND bill = 'true' GROUP BY bill, concept, amount", [year,month]);
+    res.json(response.rows);
+  } catch (error) {
+    console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 // const getProductsById = async (req, res) => {
 // const id = req.params.id
 // const response = await pool.query("SELECT * FROM products WHERE id_product = $1", [id] )
@@ -57,4 +69,4 @@ const deleteBoxById = async (req, res) => {
   
 
 
-module.exports = {getBox, postBox, deleteBoxById}
+module.exports = {getBox, postBox, deleteBoxById, getByMonth}

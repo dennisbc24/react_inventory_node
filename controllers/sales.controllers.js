@@ -36,6 +36,21 @@ const getSalesByDate = async(req,res) => {
   res.json(response.rows);
 }
 
+const getSalesByMonth = async(req,res) => {
+try {
+  const month = req.query.month
+  const year = req.query.year
+  console.log(month,year);
+  const response = await pool.query("SELECT branch, EXTRACT(MONTH FROM date) AS mes, SUM(revenue) AS suma_revenue FROM public.sales WHERE EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 GROUP BY branch, EXTRACT(MONTH FROM date) ORDER BY branch, mes;", [year,month]);
+  res.json(response.rows);
+} catch (error) {
+  console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+}
+  
+  
+}
+
 const postSales = async (req, res, next) => {
   const { branch, date ,amount, product, p_total, p_unit, revenue } = req.body;
  
@@ -51,4 +66,8 @@ const postSales = async (req, res, next) => {
   res.send(req.body)
 };
 
-module.exports = { getSales, getSalesByDate, postSales };
+
+
+
+
+module.exports = { getSales, getSalesByDate, postSales, getSalesByMonth };
