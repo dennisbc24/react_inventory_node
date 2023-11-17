@@ -1,21 +1,72 @@
-const url = "http://localhost:3000/api/v1/ventas/filter?desde='2023-05-01'&hasta='2023-05-10'";
-const url2 = "http://localhost:3000/api/v1/ventas/filter?desde='2023-05-10'&hasta='2023-05-20'";
-const url3 = "http://localhost:3000/api/v1/ventas/filter?desde='2023-05-20'&hasta='2023-05-30'";
+//const urlBase = 'https://inventario.elwayardo.com'
+const urlBase = 'http://localhost:3000'
 
-// Realiza ambas solicitudes fetch y espera a que ambas se completen
-Promise.all([fetch(url), fetch(url2),  fetch(url3)])
-    .then(responses => {
-        // Convierte ambas respuestas en datos JSON
-        const [data1, data2, data3] = responses.map(response => response.json());
-        return Promise.all([data1, data2, data3]);
-    })
-    .then(([data1, data2, data3]) => {
-        // Ahora puedes acceder a los datos de ambas respuestas aquí
-        console.log('Datos de la primera solicitud:', data1[0]);
-        console.log('Datos de la segunda solicitud:', data2[0]);
-        console.log('Datos de la segunda solicitud:', data3[0]);
-    })
-    .catch(e => {
-        console.error('Hubo un error:', e);
+
+
+
+
+function traer(url) {
+    // const urlTest = 'http://localhost:3000/api/v1/ventas'
+  const cajaGrande = document.getElementById("summary");
+  cajaGrande.innerHTML = "";
+  window
+    .fetch(url)
+    .then((respuesta) => respuesta.json())
+    .then((responseJson) => {
+      const todosLosElementos = [];
+     
+      
+      responseJson.forEach((elemento) => {
+        const div1 = document.createElement("div");
+
+        const amount = document.createElement("p");
+        const amountApi = elemento.branch;
+        amount.textContent = amountApi;
+
+        div1.className = "ultimed_sales_article";
+
+        const product = document.createElement("p");
+        const productApi = elemento.mes;
+        product.textContent = productApi;
+
+        
+
+        
+
+        div1.append(amount, product, total);
+
+        todosLosElementos.push(div1);
+
+        cajaGrande.append(...todosLosElementos);
+
+        //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
+      });
+      
+        
+        
+       
+        /* let ganancia = sumRevenue.reduce((a, b) => a + b, 0);
+        let total = sumAllSales.reduce((a, b) => a + b, 0);
+
+        nodeSumTotal.textContent = `Total venta: S/.${total}`
+        nodeSumRevenue.textContent = `Total ganancia: S/.${ganancia}` */
     });
+}
+
+
+const btnGet = document.getElementById('getSales')
+
+btnGet.addEventListener('click', async e => {
+  e.preventDefault();
+
+  const inputMonth = document.getElementById('inputMonth')
+  
+  
+  
+  const date = inputMonth.value;
+    const month = date.substring(0,4)
+    const year = date.substring(5,7)
+    const urlInsomnia = `${urlBase}/api/v1/ventas/salesByMonth?year=${year}&month=${month}`
     
+  traer(urlInsomnia);
+})

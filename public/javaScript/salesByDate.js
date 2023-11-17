@@ -6,9 +6,6 @@ const baseLocal = 'http://localhost:3000'
 
 
 function traer(url) {
-  
-  
-  
     // const urlTest = 'http://localhost:3000/api/v1/ventas'
   const cajaGrande = document.getElementById("ultimed_sales");
   cajaGrande.innerHTML = "";
