@@ -137,3 +137,9 @@ p{
     margin-bottom: 23px;
     background-color: darkred;
 }
+
+.total_summary{
+	display: flex;
+	gap: 7px;
+	justify-content: flex-end;
+}

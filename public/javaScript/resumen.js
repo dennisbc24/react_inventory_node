@@ -33,9 +33,15 @@ function traerGanancia(url) {
       });
 
       const suma = responseJson.reduce((total, objeto)=>total + parseFloat(objeto.suma_revenue), 0);
+      const total = document.createElement("div")
+      total.className = 'total_summary'
+      const titulo = document.createElement("p")
+      titulo.textContent="Ganancia Total"
       const sumSummary = document.createElement("p");
+      sumSummary.id = "sumSummary"
       sumSummary.textContent = suma;
-      cajaGrande.append(sumSummary)
+      total.append(titulo, sumSummary)
+      cajaGrande.append(total)
     });
 }
 
@@ -71,9 +77,15 @@ function traerGastos(url) {
         cajaGrande.append(...todosLosElementos);
       });
       const suma = responseJson.reduce((total, objeto)=>total + parseFloat(objeto.amount), 0);
+      const total = document.createElement("div")
+      total.className = 'total_summary'
+      const titulo = document.createElement("p")
+      titulo.textContent="Total Gastos"
       const sumSummary = document.createElement("p");
+      sumSummary.id = "sumBils"
       sumSummary.textContent = suma;
-      cajaGrande.append(sumSummary)
+      total.append(titulo, sumSummary)
+      cajaGrande.append(total)
     });
 }
 
@@ -93,3 +105,46 @@ btnGet.addEventListener("click", async (e) => {
   traerGanancia(urlInsomnia);
   traerGastos(urlInsomnia2);
 });
+
+function sumInputs() {
+  const alquilerB17 = parseFloat(document.getElementById('alquilerB17').value)
+  const alquilerQori = parseFloat(document.getElementById('alquilerQori').value)
+  const alquilerDep = parseFloat(document.getElementById('alquilerDep').value)
+  const text = document.getElementById('subTotal')
+  const sumSummary = parseFloat(document.getElementById('sumSummary').textContent)
+  
+  if (!isNaN(alquilerB17) & !isNaN(alquilerQori) & !isNaN(alquilerDep) & !isNaN(sumSummary)) {
+    
+    const totalAlquiler = alquilerB17+alquilerQori+alquilerDep;
+    
+    
+    text.textContent = sumSummary-totalAlquiler 
+    
+  } else {
+   
+    text.textContent = 'ingrese valores correctos'
+  }
+} 
+
+function sumInputs2() {
+  const salaryDennis = parseFloat(document.getElementById('salaryDennis').value)
+  const bonusDennis = parseFloat(document.getElementById('bonusDennis').value)
+  const salaryLuz = parseFloat(document.getElementById('salaryLuz').value)
+  const text = document.getElementById('total')
+  const subTotal = parseFloat(document.getElementById('subTotal').textContent)
+  const sumBils = parseFloat(document.getElementById('sumBils').textContent)
+  
+  if (!isNaN(salaryDennis) & !isNaN(bonusDennis) & !isNaN(salaryLuz)) {
+    
+    const totalSalaries = salaryDennis+bonusDennis+salaryLuz;
+  
+    
+    
+    text.textContent = sumBils-totalSalaries+subTotal; 
+    
+  } else {
+   
+    text.textContent = 'ingrese valores correctos'
+  }
+} 
+
