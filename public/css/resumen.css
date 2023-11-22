@@ -143,3 +143,10 @@ p{
 	gap: 7px;
 	justify-content: flex-end;
 }
+
+.subT{
+	display: flex;
+	justify-content: flex-end;
+    gap: 11px;
+	background-color: var(--dark-font);
+}
