@@ -100,7 +100,7 @@ btnGet.addEventListener("click", async (e) => {
   const year = date.substring(0, 4);
   const month = date.substring(5, 7);
   const urlInsomnia = `${urlBase}/api/v1/ventas/salesByMonth?year=${year}&month=${month}`;
-  const urlInsomnia2 = `http://localhost:3000/api/v1/box/byMonth?year=${year}&month=${month}`;
+  const urlInsomnia2 = `${urlBase}/api/v1/box/byMonth?year=${year}&month=${month}`;
   
   traerGanancia(urlInsomnia);
   traerGastos(urlInsomnia2);
