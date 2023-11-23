@@ -1,5 +1,5 @@
-//const urlBase = 'https://inventario.elwayardo.com'
-const urlBase = "http://localhost:3000";
+const urlBase = 'https://inventario.elwayardo.com'
+//const urlBase = "http://localhost:3000";
 
 function traerGanancia(url) {
   const cajaGrande = document.getElementById("summary");
