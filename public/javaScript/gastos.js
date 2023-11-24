@@ -39,6 +39,7 @@ btnPost.addEventListener("click", async e => {
   const date = document.getElementById('inputDate')
   const amount = document.getElementById('inputAmount')
   const sucursal = document.getElementById('inputSucursal')
+  const inputBoolean = document.getElementById('inputBoolean')
 
   
   
@@ -46,7 +47,8 @@ btnPost.addEventListener("click", async e => {
     concept: name.value,
     amount: parseInt(amount.value),
     date: date.value,
-    branch: sucursal.value
+    branch: sucursal.value,
+    bill: inputBoolean.value
     
     
   }

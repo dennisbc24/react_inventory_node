@@ -49,10 +49,10 @@ const getByMonth = async (req, res) => {
 //   };
   
 const postBox = async (req, res) => {
-  const { concept, date ,amount, branch } = req.body;
+  const { concept, date ,amount, branch, bill} = req.body;
 
   console.log(req.body);
-  const response = await pool.query('INSERT INTO box (concept, date ,amount, branch) VALUES($1, $2, $3, $4)', [concept, date ,amount, branch]);
+  const response = await pool.query('INSERT INTO box (concept, date ,amount, branch, bill) VALUES($1, $2, $3, $4, $5)', [concept, date ,amount, branch, bill]);
   console.log(response);
 
   res.send("money movement created");
