@@ -26,7 +26,7 @@ const getByMonth = async (req, res) => {
     const month = req.query.month
     const year = req.query.year
     console.log(month,year);
-    const response = await pool.query("SELECT branch, bill, concept, amount FROM public.box WHERE	EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 AND bill = 'true' GROUP BY branch, bill, concept, amount", [year,month]);
+    const response = await pool.query("SELECT * FROM public.box WHERE	EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 ORDER BY date DESC" , [year,month]);
     res.json(response.rows);
   } catch (error) {
     console.error('Error executing query:', error);

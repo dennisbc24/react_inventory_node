@@ -228,3 +228,15 @@ p{
   display: flex;
   justify-content: space-between;
 }
+
+ table{
+  width: 100%;
+background-color: var(--ligth-font);
+ }
+table, th, td{
+  border: solid 1px black;
+  border-collapse: collapse;
+}
+th, td{
+  padding: 3px;
+}

@@ -1,5 +1,5 @@
-const urlBase = 'https://inventario.elwayardo.com'
-//const urlBase = "http://localhost:3000";
+//const urlBase = 'https://inventario.elwayardo.com'
+const urlBase = "http://localhost:3000";
 
 function traerGanancia(url) {
   const cajaGrande = document.getElementById("summary");
@@ -53,30 +53,37 @@ function traerGastos(url) {
     .then((respuesta) => respuesta.json())
     .then((responseJson) => {
       const todosLosElementos = [];
+      const conteo = [];
 
       responseJson.forEach((elemento) => {
-        const div1 = document.createElement("div");
-        div1.className = "row_summary";
 
-        const branch = document.createElement("p");
-        const branchApi = elemento.branch;
-        branch.textContent = branchApi;
+        if(elemento.bill==true){
+          const div1 = document.createElement("div");
+          div1.className = "row_summary";
+  
+          const branch = document.createElement("p");
+          const branchApi = elemento.branch;
+          branch.textContent = branchApi;
+  
+          const concept = document.createElement("p");
+          const conceptApi = elemento.concept;
+          concept.textContent = conceptApi;
+  
+          const amount = document.createElement("p");
+          const amountApi = elemento.amount;
+          amount.textContent = amountApi;
+  
+          div1.append(branch, concept, amount);
+  
+          todosLosElementos.push(div1);
+  
+          cajaGrande.append(...todosLosElementos);
 
-        const concept = document.createElement("p");
-        const conceptApi = elemento.concept;
-        concept.textContent = conceptApi;
-
-        const amount = document.createElement("p");
-        const amountApi = elemento.amount;
-        amount.textContent = amountApi;
-
-        div1.append(branch, concept, amount);
-
-        todosLosElementos.push(div1);
-
-        cajaGrande.append(...todosLosElementos);
+          conteo.push(elemento.amount)
+        }
+        
       });
-      const suma = responseJson.reduce((total, objeto)=>total + parseFloat(objeto.amount), 0);
+      const suma = conteo.reduce((total, objeto)=>total + parseFloat(objeto), 0);
       const total = document.createElement("div")
       total.className = 'total_summary'
       const titulo = document.createElement("p")
