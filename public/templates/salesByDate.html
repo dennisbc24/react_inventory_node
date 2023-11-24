@@ -33,20 +33,34 @@
     <h3 >Buscar ventas por fecha</h3>
     <input type="date" name="date" id="dateSales">
     <button id="getSales">Buscar</button>
-    <h3 id="titleText"></h3>
-    <div class="header_chard">
-      <p>Cant</p>
-      <p>Articulo</p>
-      <p>Precio Total</p>
-      <p>Ganancia</p>
-    </div>
-    <div class="ultimed_sales" id="ultimed_sales"> </div>
-    <div id="sums">
-      <h3 id="sumTotal"></h3>
-      <h3 id="sumRevenue"></h3>
-    </div>
     
+    
+<h3 id="titleText"></h3>
 
+    <section id="result">
+      <table id="tableSales">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Vendedor</th>
+            <th>Fecha</th>
+            <th>Cantidad</th>
+            <th>Product</th>    
+            <th>P. Total</th>
+            <th>P. Unitario</th>
+            <th>Utilidad</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            
+          </tr>
+        </thead>
+        <tbody id="bodyTable">
+          
+        </tbody>
+      </table>
+    </section>
+<h3 id="sumTotal"></h3>
+<h3 id="sumRevenue"></h3>
     <script src="/javaScript/salesByDate.js"></script>
 </body>
 </html>

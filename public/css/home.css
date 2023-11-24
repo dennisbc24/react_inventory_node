@@ -229,14 +229,58 @@ p{
   justify-content: space-between;
 }
 
+#result{
+  width: auto;
+  
+  
+  overflow-x: scroll;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
  table{
-  width: 100%;
-background-color: var(--ligth-font);
+
+  min-width: 600px;
+  
+  background-color: var(--ligth-font);
  }
 table, th, td{
   border: solid 1px black;
   border-collapse: collapse;
 }
 th, td{
+  
   padding: 3px;
 }
+
+th:nth-child(1),
+td:nth-child(1) {
+            width: 45px;
+        }
+th:nth-child(2),
+td:nth-child(2) {
+            width: 125px;
+        }
+
+th:nth-child(3),
+td:nth-child(3) {
+            width: 100px;
+        }
+
+th:nth-child(4),
+td:nth-child(4) {
+            width: 65px;
+        }
+
+th:nth-child(5),
+td:nth-child(5) {
+            width: 70px;
+        }
+th:nth-child(6),
+td:nth-child(6) {
+            width: 100px;
+        }
+
+        #tableSales{
+          min-width: 800px;
+        }
+        

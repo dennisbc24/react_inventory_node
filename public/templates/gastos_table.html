@@ -31,48 +31,33 @@
         </ul>
       </header>
     <h3 >Buscar gastos por mes</h3>
-    <input type="month" name="inputMonth" id="inputMonth">
+    <input type="month" name="inputMonth" id="inputMonth" >
       <button id="getSales">Buscar</button>
     <h3 id="titleText"></h3>
-    <div class="header_chard">
-      <p>Cant</p>
-      <p>Articulo</p>
-      <p>Precio Total</p>
-      <p>Ganancia</p>
-    </div>
+    
     <div class="ultimed_sales" id="ultimed_sales"> </div>
     <div id="sums">
       <h3 id="sumTotal"></h3>
       <h3 id="sumRevenue"></h3>
     </div>
-
-    <table id="tablita">
-        <thead>
-          <tr>
-            <th>id</th>
-            <th>Concepto</th>
-            <th>Fecha</th>
-            <th>Monto</th>
-            <th>Persona</th>    
-            <th>Gasto</th>
-          </tr>
-        </thead>
-        <tbody id="bodyTable">
-          <tr>
-            <td>1043</td>
-            <td>Compra albergue</td>
-            <td>2023-10-01</td>
-            <td>-30</td>
-            <td>luz</td>
-            <td>Si</td>
-          </tr>
-          <tr>
-            <td>Dato 4</td>
-            <td>Dato 5</td>
-            <td>Dato 6</td>
-          </tr>
-        </tbody>
-      </table>
+<section id="result">
+  <table id="tablita">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>Concepto</th>
+        <th>Fecha</th>
+        <th>Monto</th>
+        <th>Persona</th>    
+        <th>Gasto</th>
+      </tr>
+    </thead>
+    <tbody id="bodyTable">
+      
+    </tbody>
+  </table>
+</section>
+    
     
 
     <script src="/javaScript/gastos_table.js"></script>

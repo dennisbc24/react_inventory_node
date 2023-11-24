@@ -41,8 +41,12 @@ function traerGastos(url) {
             branch.textContent = branchApi;
 
             const bill = document.createElement("td");
-            const billApi = elemento.bill;
-            bill.textContent = billApi;
+            if (elemento.bill==true) {
+            bill.textContent = 'Sí es un gasto';
+            } else {
+            bill.textContent = 'No es un gasto';
+            }
+            
     
             
     
@@ -54,20 +58,11 @@ function traerGastos(url) {
     
             cajaGrande.append(...todosLosElementos);
   
-            //conteo.push(elemento.amount)
+           
           
           
         });
-        /* const suma = conteo.reduce((total, objeto)=>total + parseFloat(objeto), 0);
-        const total = document.createElement("div")
-        total.className = 'total_summary'
-        const titulo = document.createElement("p")
-        titulo.textContent="Total Gastos"
-        const sumSummary = document.createElement("p");
-        sumSummary.id = "sumBils"
-        sumSummary.textContent = suma;
-        total.append(titulo, sumSummary)
-        cajaGrande.append(total) */
+        
       });
   }
 
@@ -87,6 +82,6 @@ btnGet.addEventListener("click", async (e) => {
   const urlInsomnia = `${urlBase}/api/v1/ventas/salesByMonth?year=${year}&month=${month}`;
   const urlInsomnia2 = `${urlBase}/api/v1/box/byMonth?year=${year}&month=${month}`;
   
-  //traerGanancia(urlInsomnia);
+  
   traerGastos(urlInsomnia2);
 });

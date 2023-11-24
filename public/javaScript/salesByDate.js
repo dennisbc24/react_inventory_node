@@ -1,13 +1,13 @@
 const urlBase = 'https://inventario.elwayardo.com'
-const baseLocal = 'http://localhost:3000'
+//const urlBase = 'http://localhost:3000'
 
 
 
 
 
 function traer(url) {
-    // const urlTest = 'http://localhost:3000/api/v1/ventas'
-  const cajaGrande = document.getElementById("ultimed_sales");
+    
+  const cajaGrande = document.getElementById("bodyTable");
   cajaGrande.innerHTML = "";
   window
     .fetch(url)
@@ -20,45 +20,67 @@ function traer(url) {
       const nodeSumRevenue = document.getElementById('sumRevenue')
       
       responseJson.forEach((elemento) => {
-        const div1 = document.createElement("div");
+        const tr = document.createElement("tr");
+            
+    
+            const id = document.createElement("td");
+            const idApi = elemento.id_sale;
+            id.textContent = idApi;
 
-        const amount = document.createElement("p");
-        const amountApi = elemento.amount;
-        amount.textContent = amountApi;
+            const branch = document.createElement("td");
+            const branchApi = elemento.branch;
+            branch.textContent = branchApi;
 
-        div1.className = "ultimed_sales_article";
+            const date = document.createElement("td");
+            const dateApi = elemento.date;
+            const cut = dateApi.substring(0,10);
+            date.textContent = cut;
 
-        const product = document.createElement("p");
-        const productApi = elemento.product;
-        product.textContent = productApi;
+            const amount = document.createElement("td");
+            const amountApi = elemento.amount;
+            amount.textContent = amountApi;
 
-        const total = document.createElement("p");
-        const getTotal = elemento.p_total
-        sumAllSales.push(parseInt(getTotal))
-        const totalApi = `S/.${getTotal}`;
-        total.textContent = totalApi;
+            const product = document.createElement("td");
+            const productApi = elemento.product;
+            product.textContent = productApi;
 
-        const revenue = document.createElement("p");
-        const getRevenue = elemento.revenue
-        sumRevenue.push(parseInt(getRevenue))
-        const revenueApi = `S/.${getRevenue}`;
-        revenue.textContent = revenueApi;
-        
+            const p_total = document.createElement("td");
+            const totalApi = elemento.p_total;
+            p_total.textContent = totalApi;
 
-        div1.append(amount, product, total, revenue);
+            const p_unit = document.createElement("td");
+            const unitApi = elemento.p_unit;
+            p_unit.textContent = unitApi;
 
-        todosLosElementos.push(div1);
+            const revenue = document.createElement("td");
+            const revenueApi = elemento.revenue;
+            revenue.textContent = revenueApi;
+
+            const hour = document.createElement("td");
+            const hourApi = elemento.hour;
+            hour.textContent = hourApi;
+
+            const customer = document.createElement("td");
+            const custumerApi = elemento.customer;
+            customer.textContent = custumerApi;
+
+            
+
+            tr.append(id,branch,date,amount,product,p_total,p_unit,revenue,hour,customer);
+
+        todosLosElementos.push(tr);
 
         cajaGrande.append(...todosLosElementos);
+        sumAllSales.push(elemento.p_total)
+        sumRevenue.push(elemento.revenue)
 
-        //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
       });
       
         
         
        
-        let ganancia = sumRevenue.reduce((a, b) => a + b, 0);
-        let total = sumAllSales.reduce((a, b) => a + b, 0);
+        let ganancia = sumRevenue.reduce((a, b) => a + parseFloat(b), 0);
+        let total = sumAllSales.reduce((a, b) => a + parseFloat(b), 0);
 
         nodeSumTotal.textContent = `Total venta: S/.${total}`
         nodeSumRevenue.textContent = `Total ganancia: S/.${ganancia}`
