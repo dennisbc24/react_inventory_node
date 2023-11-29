@@ -258,7 +258,7 @@ td:nth-child(1) {
         }
 th:nth-child(2),
 td:nth-child(2) {
-            width: 125px;
+            width: 80px;
         }
 
 th:nth-child(3),
