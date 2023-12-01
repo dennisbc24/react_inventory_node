@@ -21,4 +21,18 @@ const getSummaries = async (req, res) => {
   };
 
 
-module.exports = {getSummaries};
+  const getSummaryByMonth = async(req,res) => {
+    try {
+      const month = req.query.month
+      const year = req.query.year
+      const response = await pool.query("SELECT * FROM public.summaries WHERE EXTRACT(YEAR FROM month_summary) = $1 AND EXTRACT(MONTH FROM month_summary) = $2", [year,month]);
+      res.json(response.rows);
+    } catch (error) {
+      console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+      
+      
+    }
+
+module.exports = {getSummaries, getSummaryByMonth};
