@@ -164,7 +164,7 @@ input[type="text"]{
   height: 23px;
   border-radius: 5px;
     border: solid var(--color-third) 1px;
-    max-width: 120px;
+    min-width: 170px;
 }
 
 p{
@@ -258,7 +258,7 @@ td:nth-child(1) {
         }
 th:nth-child(2),
 td:nth-child(2) {
-            width: 125px;
+            width: 80px;
         }
 
 th:nth-child(3),

@@ -58,21 +58,71 @@
 </div>
 
         <div class="row">
-          <p>Sueldo 1</p>
+          <p>Sueldo Dennis</p>
           <input type="number" name="" id="salaryDennis" oninput="sumInputs2()">
         </div>
         <div class="row">
-          <p>Sueldo 2</p>
+          <p>Sueldo Luz Marina</p>
           <input type="number" name="" id="bonusDennis" oninput="sumInputs2()">
         </div>
           <div class="row">
-            <p>Sueldo 3</p>
+            <p>Sueldo Miguel</p>
             <input type="number" name="" id="salaryLuz" oninput="sumInputs2()">
           </div>
           <div class="subT">
-            <p id="total"></p>
+            <p id="total">0</p>
            </div>
-        
+
+
+
+           <section id="result">
+           <table id="tableSales">
+            <thead>
+              <tr>
+                <th>id</th>
+                <th>Porcentaje</th>
+                <th>Dividendos</th>
+                <th>Reinvertido 50%</th>
+                <th>Retirado 50%</th>    
+                
+                
+              </tr>
+              
+            </thead>
+            <tbody id="bodyTable">
+              <tr>
+                <th>Dennis</th>
+
+                <td id="porcentaje_dennis">5.67</td>
+                <td id="equivalent_dennis">S/.0.04</td>
+                <td id="withdrawn_dennis">S/.0.02</td>
+                <td id="invested_dennis">S/.0.02</td>    
+                
+                
+              </tr>
+              <tr>
+                <th>Luz Marina</th>
+
+                <td id="porcentaje_luz">55.33</td>
+                <td id="equivalent_luz">S/.0.04</td>
+                <td id="withdrawn_luz">S/.0.02</td>
+                <td id="invested_luz">S/.0.02</td>    
+                
+                
+              </tr>
+              <tr>
+                <th>Miguel</th>
+
+                <td id="porcentaje_miguel">39</td>
+                <td id="equivalent_miguel">S/.0.04</td>
+                <td id="withdrawn_miguel">S/.0.02</td>
+                <td id="invested_miguel">S/.0.02</td>    
+                
+                
+              </tr>
+            </tbody>
+          </table>
+        </section>
   
       
     <script src="/javaScript/resumen.js"></script>

@@ -8,10 +8,12 @@ const updateProduct_frontend = require("./updateProductFrontend");
 const salesById_frontend = require("./salesByIdFrontend");
 const gastos_frontend = require("./gastosRouter");
 const gastosByDate_frontend = require("./gastosByDateFrontend");
+const summaries_frontend = require("./summariesFrontend");
 
 const apiVentas = require("./api/ventasRouter");
 const apiProducts = require("./api/productsRouter");
 const apiBox = require("./api/boxRouter");
+const apiSummaries = require("./api/summariesRouter");
 const publicPath = __dirname.replace("routers", "public");
 
 function routerApi(app) {
@@ -20,7 +22,7 @@ function routerApi(app) {
   app.engine("html", require("ejs").renderFile);
   app.set("view engine", "html");
   app.use(express.static(publicPath));
-  console.log(`${publicPath}/templates`);
+  
   app.use("/", homeRouter);
   app.use("/nuevo_producto", createProduct_frontend);
   app.use("/actualizar_producto", updateProduct_frontend);
@@ -28,10 +30,12 @@ function routerApi(app) {
   app.use("/gastos_por_fecha", gastosByDate_frontend);
   app.use("/gastos", gastos_frontend);
   app.use("/resumen", resumenRouter);
+  app.use("/summaries", summaries_frontend);
   app.use("/api/v1", router);
     router.use("/ventas", apiVentas);
     router.use("/products", apiProducts);
     router.use("/box", apiBox);
+    router.use("/summaries", apiSummaries);
 }
 
 module.exports = routerApi;

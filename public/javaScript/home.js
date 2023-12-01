@@ -2,11 +2,10 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
-const urlBase = 'https://inventario.elwayardo.com'
+const urlBase = "https://inventario.elwayardo.com";
 //const urlBase = 'http://localhost:3000'
 
-const urlUpload = `${urlBase}/api/v1/ventas`
-
+const urlUpload = `${urlBase}/api/v1/ventas`;
 
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
@@ -19,10 +18,8 @@ fetch(url)
     });
   });
 
-
-
 //fecha de la ventan por defecto
-const dateSale = document.getElementById('dateSale')
+const dateSale = document.getElementById("dateSale");
 
 const fechaActual = new Date();
 
@@ -31,7 +28,7 @@ const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que s
 const dia = fechaActual.getDate();
 const fechaFormateada = `${año}-${mes}-${dia}`;
 
-dateSale.value = fechaFormateada
+dateSale.value = fechaFormateada;
 
 /* 
 En este ejemplo, el input de búsqueda tiene un evento oninput que llama a la función showSuggestions() cada vez que se escribe algo en el campo de entrada. La función showSuggestions() obtiene el valor del input y busca nombres que coincidan en el array nombres. Luego, crea elementos <li> para cada nombre coincidente y los agrega como elementos secundarios de la lista <ul> con el id suggestionsList.
@@ -41,19 +38,20 @@ Puedes ajustar este código según tus necesidades, como modificar el array nomb
 
 function showSuggestions(inputValue) {
   
+  
+  
   const suggestionsList = document.getElementById("suggestionsList");
   suggestionsList.innerHTML = "";
 
   if (inputValue.length === 0) {
     return;
   }
-  
-  const matchingNames = nombres.filter((nombre) =>
-    nombre.toLowerCase().startsWith(inputValue.toLowerCase())
-  );
+
+  const matchingNames = nombres.filter((elemento) => elemento.toLowerCase().startsWith(inputValue.toLowerCase())  );
 
   matchingNames.forEach((nombre) => {
     const li = document.createElement("li");
+    
     li.textContent = nombre;
     li.onclick = function async() {
       document.getElementById("searchInput").value = nombre;
@@ -95,111 +93,91 @@ function multiplyValues() {
 }
 
 const enviarVenta = (formDataParam) => {
-
   fetch(urlUpload, {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
-      method:'POST',
-      
-      body: formDataParam
-  })
-  
+    method: "POST",
+
+    body: formDataParam,
+  });
 };
 
-const btnPost = document.getElementById('finalizar')
+const btnPost = document.getElementById("finalizar");
 
-btnPost.addEventListener("click", async e => {
+btnPost.addEventListener("click", async (e) => {
   e.preventDefault();
 
-const sucur = document.getElementById('sucursal')
-const amount = document.getElementById('input1')
-const p_total = document.getElementById('input2')
-const resul = document.getElementById('resultado')
-const item = document.getElementById('name')
-const utilidad = document.getElementById('util')
+  const sucur = document.getElementById("sucursal");
+  const amount = document.getElementById("input1");
+  const p_total = document.getElementById("input2");
+  const resul = document.getElementById("resultado");
+  const item = document.getElementById("name");
+  const utilidad = document.getElementById("util");
 
-const ventaNueva = {
-  branch: sucur.value,
-  date: dateSale.value,
-  amount: amount.value,
-  product: item.textContent,
-  p_total: p_total.value,
-  p_unit: parseInt(resul.textContent),
-  revenue: parseInt(utilidad.textContent),
-}
-const sale = JSON.stringify(ventaNueva)
+  const ventaNueva = {
+    branch: sucur.value,
+    date: dateSale.value,
+    amount: amount.value,
+    product: item.textContent,
+    p_total: p_total.value,
+    p_unit: parseInt(resul.textContent),
+    revenue: parseInt(utilidad.textContent),
+  };
+  const sale = JSON.stringify(ventaNueva);
 
-await enviarVenta(sale);
+  await enviarVenta(sale);
 
-btnPost.classList.replace('botton_save', 'botton_pressed');
+  btnPost.classList.replace("botton_save", "botton_pressed");
 
-console.log('boton presionado');
-window.location.reload()
-
+  console.log("boton presionado");
+  window.location.reload();
 });
 
-
-
-
-function traer(){
-	
- // const urlTest = 'http://localhost:3000/api/v1/ventas'
-  const cajaGrande = document.getElementById('ultimed_sales');
+function traer() {
+  // const urlTest = 'http://localhost:3000/api/v1/ventas'
+  const cajaGrande = document.getElementById("ultimed_sales");
   //cajaGrande.innerHTML = "";
-	window
-	.fetch(urlUpload)
-		.then((respuesta)=> respuesta.json())
-		.then((responseJson)=>{
-			const todosLosElementos = [];
-			responseJson.forEach((elemento) => {
-				
-					const div1  = document.createElement('div')
-          div1.className = 'ultimed_sales_article'
+  window
+    .fetch(urlUpload)
+    .then((respuesta) => respuesta.json())
+    .then((responseJson) => {
+      const todosLosElementos = [];
+      responseJson.forEach((elemento) => {
+        const div1 = document.createElement("div");
+        div1.className = "ultimed_sales_article";
 
-					const amount = document.createElement('p');
-						const amountApi = elemento.amount;
-            amount.textContent = amountApi;
-            
-           
-            const date = document.createElement('p');
-            const dateApi = elemento.date;
-            const fechaCorta = new Date(dateApi).toLocaleDateString("es-PE", {
-              year: "2-digit",
-              month: "2-digit",
-              day: "2-digit"
-            });
+        const amount = document.createElement("p");
+        const amountApi = elemento.amount;
+        amount.textContent = amountApi;
 
-            date.textContent = fechaCorta;
+        const date = document.createElement("p");
+        const dateApi = elemento.date;
+        const fechaCorta = new Date(dateApi).toLocaleDateString("es-PE", {
+          year: "2-digit",
+          month: "2-digit",
+          day: "2-digit",
+        });
 
-        
-            const product = document.createElement('p');
-						const productApi = elemento.product;
-            product.textContent = productApi;
-            
-            
+        date.textContent = fechaCorta;
 
-            
-            const total = document.createElement('p');
-						const totalApit = elemento.p_total;
-            total.textContent = totalApit;
-            
-            
-            div1.append(amount, date,product, total)
-      
-					todosLosElementos.push(div1);
+        const product = document.createElement("p");
+        const productApi = elemento.product;
+        product.textContent = productApi;
 
-					
+        const total = document.createElement("p");
+        const totalApit = elemento.p_total;
+        total.textContent = totalApit;
 
-					cajaGrande.append(...todosLosElementos);
-					
-          //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
-			});
-	})
+        div1.append(amount, date, product, total);
+
+        todosLosElementos.push(div1);
+
+        cajaGrande.append(...todosLosElementos);
+
+        //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
+      });
+    });
 }
 
 traer();
-
-
-
-

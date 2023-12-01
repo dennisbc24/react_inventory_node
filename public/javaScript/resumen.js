@@ -1,5 +1,5 @@
-//const urlBase = 'https://inventario.elwayardo.com'
-const urlBase = "http://localhost:3000";
+const urlBase = 'https://inventario.elwayardo.com'
+//const urlBase = "http://localhost:3000";
 
 function traerGanancia(url) {
   const cajaGrande = document.getElementById("summary");
@@ -148,12 +148,51 @@ function sumInputs2() {
     const totalSalaries = salaryDennis+bonusDennis+salaryLuz;
   
     
-    
-    text.textContent = `Utilidad EL Wayardo: S/.${(subTotal-totalSalaries).toFixed(2)}`; 
+    let finalTotal = subTotal-totalSalaries
+    text.textContent = `Utilidad EL Wayardo: S/.${finalTotal.toFixed(2)}`; 
+
+
+   // let finalTotal = document.getElementById('total')
+
+let equivalent_dennis = document.getElementById('equivalent_dennis')
+let porcentaje_dennis = document.getElementById('porcentaje_dennis')
+let withdrawn_dennis = document.getElementById('withdrawn_dennis')
+let invested_dennis = document.getElementById('invested_dennis')
+
+let dividing = finalTotal * (parseFloat(porcentaje_dennis.textContent))/100
+equivalent_dennis.textContent = `S/.${dividing.toFixed(2)}`
+withdrawn_dennis.textContent = `S/.${(dividing/2).toFixed(2)}`
+invested_dennis.textContent = `S/.${(dividing/2).toFixed(2)}`
+
+
+
+let equivalent_luz = document.getElementById('equivalent_luz')
+let porcentaje_luz = document.getElementById('porcentaje_luz')
+let withdrawn_luz = document.getElementById('withdrawn_luz')
+let invested_luz = document.getElementById('invested_luz')
+
+let dividing2 = finalTotal * (parseFloat(porcentaje_luz.textContent))/100
+
+equivalent_luz.textContent = `S/.${dividing2.toFixed(2)}`
+withdrawn_luz.textContent = `S/.${(dividing2/2).toFixed(2)}`
+invested_luz.textContent = `S/.${(dividing2/2).toFixed(2)}`
+
+
+
+let equivalent_miguel = document.getElementById('equivalent_miguel')
+let porcentaje_miguel = document.getElementById('porcentaje_miguel')
+let withdrawn_miguel = document.getElementById('withdrawn_miguel')
+let invested_miguel = document.getElementById('invested_miguel')
+
+let dividing3 = finalTotal * (parseFloat(porcentaje_miguel.textContent))/100
+equivalent_miguel.textContent = `S/.${dividing3.toFixed(2)}`
+withdrawn_miguel.textContent = `S/.${(dividing3/2).toFixed(2)}`
+invested_miguel.textContent = `S/.${(dividing3/2).toFixed(2)}`
     
   } else {
    
     text.textContent = 'ingrese valores correctos'
   }
 } 
+
 
