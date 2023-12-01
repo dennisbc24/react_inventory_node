@@ -32,28 +32,3 @@ routerApi(app);
     console.log("empezando el server puerto " + port);
   });
 
-
-// Crear un objeto Date para obtener la fecha actual
-const fechaActual = new Date();
-
-// Obtener los componentes de la fecha (año, mes, día)
-const año = fechaActual.getFullYear();
-const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
-const dia = fechaActual.getDate();
-
-// Obtener los componentes de la hora (hora, minuto, segundo)
-const hora = fechaActual.getHours();
-const minuto = fechaActual.getMinutes();
-const segundo = fechaActual.getSeconds();
-
-// Formatear la fecha y la hora como desees
-const fechaFormateada = `${año}-${mes}-${dia}`;
-const horaFormateada = `${hora}:${minuto}:${segundo}`;
-
-// Mostrar la fecha y hora en la consola o en la página web
-console.log("Fecha actual: " + fechaFormateada);
-console.log("Hora actual: " + horaFormateada);
-
-  
-  
- 
