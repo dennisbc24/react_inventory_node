@@ -40,13 +40,14 @@ Puedes ajustar este código según tus necesidades, como modificar el array nomb
  */
 
 function showSuggestions(inputValue) {
+  
   const suggestionsList = document.getElementById("suggestionsList");
   suggestionsList.innerHTML = "";
 
   if (inputValue.length === 0) {
     return;
   }
-
+  
   const matchingNames = nombres.filter((nombre) =>
     nombre.toLowerCase().startsWith(inputValue.toLowerCase())
   );
