@@ -33,7 +33,7 @@ function traer(url) {
             const nameRevenue = document.createElement('td')
             const amountRevenue = document.createElement('td')
             nameRevenue.textContent = `Ganancia ${nombreRevenue}`
-            amountRevenue.textContent = `S/.${montoRevenue}`
+            amountRevenue.textContent = `S/.${montoRevenue.toFixed(2)}`
 
             trGanancia.append(nameRevenue, amountRevenue)
             todosLosElementos.push(trGanancia)
@@ -48,7 +48,7 @@ function traer(url) {
             const name = document.createElement('td')
             const amount = document.createElement('td')
             name.textContent = `Alquiler de ${nombre}`
-            amount.textContent = `S/.${monto}`
+            amount.textContent = `S/.${monto.toFixed(2)}`
 
             sumRent.push(monto)
 
@@ -57,21 +57,23 @@ function traer(url) {
             
          });
          const trSumRent = document.createElement('tr')
-         const nameSumRent = document.createElement('th')
-         const amountSumRent = document.createElement('th')
+         const nameSumRent = document.createElement('td')
+         const amountSumRent = document.createElement('td')
          nameSumRent.textContent = 'Total alquileres'
          const sumRentText = sumRent.reduce((a, b) => a + parseFloat(b), 0);
-         amountSumRent.textContent = `S/.${sumRentText}`
+         amountSumRent.textContent = `S/.${sumRentText.toFixed(2)}`
+         trSumRent.style.fontWeight = 700
          trSumRent.append(nameSumRent,amountSumRent)
          todosLosElementos.push(trSumRent)
 
          //Bills
          const trBills = document.createElement('tr')
-         const nameSpent = document.createElement('th')
-         const amountSpent = document.createElement('th')
+         const nameSpent = document.createElement('td')
+         const amountSpent = document.createElement('td')
          nameSpent.textContent = 'Total Gasto'
          amountSpent.textContent = `S/.${spent}`
          trBills.append(nameSpent, amountSpent)
+         trBills.style.fontWeight = 700
          todosLosElementos.push(trBills)
          
 
@@ -83,7 +85,7 @@ function traer(url) {
             const nameSal = document.createElement('td')
             const amountSal = document.createElement('td')
             nameSal.textContent = `Sueldo ${nombreSal}`
-            amountSal.textContent = `S/.${montoSal}`
+            amountSal.textContent = `S/.${montoSal.toFixed(2)}`
 
             trSalaries.append(nameSal, amountSal)
             todosLosElementos.push(trSalaries) 
@@ -91,11 +93,12 @@ function traer(url) {
 
          //utility
          const trUtility = document.createElement('tr')
-         const nameUtility = document.createElement('th')
-         const amountUtility = document.createElement('th')
+         const nameUtility = document.createElement('td')
+         const amountUtility = document.createElement('td')
          nameUtility.textContent = 'Utilidad Global'
          amountUtility.textContent = `S/.${utilityArray}`
          trUtility.append(nameUtility, amountUtility)
+         trUtility.style.fontWeight = 700
          todosLosElementos.push(trUtility)
 
 
@@ -107,7 +110,7 @@ function traer(url) {
             const nameDiv = document.createElement('td')
             const amountDiv = document.createElement('td')
             nameDiv.textContent = `Dividendo ${nombreDiv}`
-            amountDiv.textContent = `S/.${montoDiv}`
+            amountDiv.textContent = `S/.${montoDiv.toFixed(2)}`
 
             trDiv.append(nameDiv, amountDiv)
             todosLosElementos.push(trDiv) 
@@ -131,8 +134,9 @@ function traer(url) {
     e.preventDefault();
   
     const inputMonth = document.getElementById("inputMonth");
-  
+   const titleSummary = document.getElementById('titulo')
     const date = inputMonth.value;
+    titleSummary.textContent = `Resumen de ${date}`
     const year = date.substring(0, 4);
     const month = date.substring(5, 7);
     const urlInsomnia = `${urlBase}/api/v1/summaries/summaryByMonth?year=${year}&month=${month}`;

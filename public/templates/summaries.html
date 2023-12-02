@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/home.css" />
+    <link rel="stylesheet" href="/css/summaries.css" />
     <title>inventarioX</title>
   </head>
   <body>
@@ -47,11 +47,14 @@
     </header>
     <h1 id="titulo">Resumen</h1>
 
-    <input type="month" name="inputMonth" id="inputMonth" />
-    <button id="getSummaries">Buscar</button>
+    <section id="searchSummary">
+      <input type="month" name="inputMonth" id="inputMonth" />
+      <button id="getSummaries">Buscar</button>
+    </section>
+    
 
-    <section>
-      <table>
+    <section id="data">
+      <table id="tableSummaries">
         <thead>
           <tr>
             <th>Concepto</th>
