@@ -43,6 +43,8 @@
         <option value="luz">Luz Marina</option>
         
       </select>
+
+      
       <h3 class="lines">Fecha:</h3>
       <input type="date" name="date" id="dateSale">
       <h3 class="lines">Cantidad:</h3>
@@ -64,14 +66,29 @@
       <button id="finalizar" class="botton_save">Guardar</button>
       
     </form>
+    <section id="result">
+      <table id="tableSales">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Vendedor</th>
+            <th>Fecha</th>
+            <th>Cantidad</th>
+            <th>Product</th>    
+            <th>P. Total</th>
+            <th>P. Unitario</th>
+            <th>Utilidad</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            
+          </tr>
+        </thead>
+        <tbody id="bodyTable">
+          
+        </tbody>
+      </table>
+    </section>
     
-    <h3 class="ultimed_sales_title">Ultimas ventas</h3>
-    <div class="header_chard">
-      <p>Cant</p>
-      <p>Articulo</p>
-      <p>Precio Total</p>
-    </div>
-<div class="ultimed_sales" id="ultimed_sales">
   
   
 </div>

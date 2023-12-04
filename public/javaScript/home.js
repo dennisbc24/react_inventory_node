@@ -134,50 +134,81 @@ btnPost.addEventListener("click", async (e) => {
   window.location.reload();
 });
 
-function traer() {
-  // const urlTest = 'http://localhost:3000/api/v1/ventas'
-  const cajaGrande = document.getElementById("ultimed_sales");
-  //cajaGrande.innerHTML = "";
+
+function traer(url) {
+    
+  const cajaGrande = document.getElementById("bodyTable");
+  cajaGrande.innerHTML = "";
   window
-    .fetch(urlUpload)
+    .fetch(url)
     .then((respuesta) => respuesta.json())
     .then((responseJson) => {
       const todosLosElementos = [];
+      
+      const nodeSumTotal = document.getElementById('sumTotal')
+      const nodeSumRevenue = document.getElementById('sumRevenue')
+      
       responseJson.forEach((elemento) => {
-        const div1 = document.createElement("div");
-        div1.className = "ultimed_sales_article";
+        const tr = document.createElement("tr");
+            
+    
+            const id = document.createElement("td");
+            const idApi = elemento.id_sale;
+            id.textContent = idApi;
 
-        const amount = document.createElement("p");
-        const amountApi = elemento.amount;
-        amount.textContent = amountApi;
+            const branch = document.createElement("td");
+            const branchApi = elemento.branch;
+            branch.textContent = branchApi;
 
-        const date = document.createElement("p");
-        const dateApi = elemento.date;
-        const fechaCorta = new Date(dateApi).toLocaleDateString("es-PE", {
-          year: "2-digit",
-          month: "2-digit",
-          day: "2-digit",
-        });
+            const date = document.createElement("td");
+            const dateApi = elemento.date;
+            const cut = dateApi.substring(0,10);
+            date.textContent = cut;
 
-        date.textContent = fechaCorta;
+            const amount = document.createElement("td");
+            const amountApi = elemento.amount;
+            amount.textContent = amountApi;
 
-        const product = document.createElement("p");
-        const productApi = elemento.product;
-        product.textContent = productApi;
+            const product = document.createElement("td");
+            const productApi = elemento.product;
+            product.textContent = productApi;
 
-        const total = document.createElement("p");
-        const totalApit = elemento.p_total;
-        total.textContent = totalApit;
+            const p_total = document.createElement("td");
+            const totalApi = elemento.p_total;
+            p_total.textContent = totalApi;
 
-        div1.append(amount, date, product, total);
+            const p_unit = document.createElement("td");
+            const unitApi = elemento.p_unit;
+            p_unit.textContent = unitApi;
 
-        todosLosElementos.push(div1);
+            const revenue = document.createElement("td");
+            const revenueApi = elemento.revenue;
+            revenue.textContent = revenueApi;
+
+            const hour = document.createElement("td");
+            const hourApi = elemento.hour;
+            hour.textContent = hourApi;
+
+            const customer = document.createElement("td");
+            const custumerApi = elemento.customer;
+            customer.textContent = custumerApi;
+
+            
+
+            tr.append(id,branch,date,amount,product,p_total,p_unit,revenue,hour,customer);
+
+        todosLosElementos.push(tr);
 
         cajaGrande.append(...todosLosElementos);
+        
 
-        //masonryLayout(document.getElementById('articulos'), document.querySelectorAll('.articulos__container'), 2)
       });
+      
+        
+        
+       
+        
     });
 }
 
-traer();
+traer(urlUpload);
