@@ -68,8 +68,8 @@ const updateProductsById = async (req, res) => {
 
   const latestUpdates = async(req,res) => {
 
-    const limit = req.query.limit
-    const response = await pool.query("SELECT * FROM public.products ORDER BY id_product DESC LIMIT $1", [limit]);
+    //const limit = req.query.limit
+    const response = await pool.query("SELECT * FROM public.products ORDER BY id_product DESC LIMIT 7");
     res.json(response.rows);
   }
 

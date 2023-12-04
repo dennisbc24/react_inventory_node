@@ -1,8 +1,8 @@
 const urlBase = 'https://inventario.elwayardo.com'
-const baseLocal = 'http://localhost:3000'
+//const urlBase = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/products`
-
+const urlLatest = `${urlBase}/api/v1/products/latestproducts`
 
 const crearProduct = (formDataParam) => {
 
@@ -47,3 +47,71 @@ btnPost.addEventListener("click", async e => {
   window.location.reload()
   
   });
+
+  function traer(url) {
+    
+    const cajaGrande = document.getElementById("bodyTable");
+    cajaGrande.innerHTML = "";
+    window
+      .fetch(url)
+      .then((respuesta) => respuesta.json())
+      .then((responseJson) => {
+        const todosLosElementos = [];
+        
+        
+        
+        responseJson.forEach((elemento) => {
+          const tr = document.createElement("tr");
+              
+      
+              const id = document.createElement("td");
+              const idApi = elemento.id_product;
+              id.textContent = idApi;
+
+              const name = document.createElement("td");
+              const nameApi = elemento.name;
+              name.textContent = nameApi;
+  
+              const cost = document.createElement("td");
+              const costApi = elemento.cost;
+              cost.textContent = costApi;
+
+              const created = document.createElement("td");
+              const createdApi = elemento.created;
+              const cut = createdApi.substring(0,10);
+              created.textContent = cut;
+
+              const supplier = document.createElement("td");
+              const supplierApi = elemento.supplier;
+              supplier.textContent = supplierApi;
+  
+
+              const p_lista = document.createElement("td");
+              const listaApi = elemento.list_price;
+              p_lista.textContent = listaApi;
+  
+              const p_lowest = document.createElement("td");
+              const lowestApi = elemento.lowest_price;
+              p_lowest.textContent = lowestApi;
+  
+  
+              
+  
+              tr.append(id,name,cost,created,supplier,p_lista,p_lowest);
+  
+          todosLosElementos.push(tr);
+  
+          cajaGrande.append(...todosLosElementos);
+          
+  
+        });
+        
+          
+          
+         
+          
+      });
+  }
+  
+  traer(urlLatest);
+  
