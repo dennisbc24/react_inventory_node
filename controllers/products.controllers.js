@@ -48,7 +48,7 @@ const postProduct = async (req, res) => {
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   
   console.log(req.body);
-  const response = await pool.query('INSERT INTO products (name, cost, stock, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6, $7 )', [name, cost, 0, fechaActual.toDate(), supplier, lowest_price, list_price]);
+  const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 )', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
   console.log(response);
 
   res.send("product created");
