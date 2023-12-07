@@ -21,7 +21,7 @@ const pool = new Pool({
 
 const getProducts = async (req, res) => {
   const response = await pool.query(
-    "SELECT * FROM products ORDER BY id_product ASC"
+    "SELECT * FROM products ORDER BY name ASC"
   );
  
   res.json(response.rows);

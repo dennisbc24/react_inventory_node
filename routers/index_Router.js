@@ -10,10 +10,16 @@ const gastos_frontend = require("./gastosRouter");
 const gastosByDate_frontend = require("./gastosByDateFrontend");
 const summaries_frontend = require("./summariesFrontend");
 
+//API
 const apiVentas = require("./api/ventasRouter");
 const apiProducts = require("./api/productsRouter");
 const apiBox = require("./api/boxRouter");
 const apiSummaries = require("./api/summariesRouter");
+const apiBranches = require('./api/branchesRouter')
+const apiUsers = require('./api/usersRouter')
+const apiExistence = require('./api/existenceRouter')
+
+//get url temmplates
 const publicPath = __dirname.replace("routers", "public");
 
 function routerApi(app) {
@@ -36,6 +42,9 @@ function routerApi(app) {
     router.use("/products", apiProducts);
     router.use("/box", apiBox);
     router.use("/summaries", apiSummaries);
+    router.use("/branches", apiBranches);
+    router.use("/users", apiUsers);
+    router.use("/existence", apiExistence);
 }
 
 module.exports = routerApi;
