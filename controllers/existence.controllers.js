@@ -1,5 +1,7 @@
 const { Pool } = require("pg");
-
+const moment = require('moment-timezone');
+  // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
+  moment.tz.setDefault('America/Lima');
 const config = require("../config/config");
 
 const pool = new Pool({
@@ -16,7 +18,8 @@ const pool = new Pool({
 const postExistence = async (req, res) => {
 try {
     const { amount, fk_branch, fk_product, fk_user } = req.body;
-    const response = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user) VALUES ($1, $2, $3, $4)', [amount, fk_branch, fk_product, fk_user]);
+    const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+    const response = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, fk_product, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
       
     res.send("existence registered");
     
