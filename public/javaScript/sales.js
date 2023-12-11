@@ -2,10 +2,15 @@ const nombres = [];
 const articulos = [];
 const todo = [];
 
+let id_product = ''
+
 const urlBase = "https://inventario.elwayardo.com";
 //const urlBase = 'http://localhost:3000'
 
+
 const urlUpload = `${urlBase}/api/v1/ventas`;
+const urlUploadVendings = `${urlBase}/api/v1/ventas/vendings`;
+const urlUMofifyExistence = `${urlBase}/api/v1/existence/vendings`;
 
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
@@ -64,6 +69,7 @@ function showSuggestions(inputValue) {
           document.getElementById("name").textContent = elem.name;
           document.getElementById("stock").textContent = elem.stock;
           document.getElementById("creacion").textContent = elem.created;
+          id_product = elem.id_product;
         }
       });
     };
@@ -93,7 +99,7 @@ function multiplyValues() {
 }
 
 const enviarVenta = (formDataParam) => {
-  fetch(urlUpload, {
+  fetch(urlUploadVendings, {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
@@ -103,6 +109,16 @@ const enviarVenta = (formDataParam) => {
   });
 };
 
+const modifyStock = (formDataParam) => {
+  fetch(urlUMofifyExistence, {
+    headers: {
+      "Content-Type": "application/json", //esto fue para que el body no llegue vacio
+    },
+    method: "PATCH",
+
+    body: formDataParam,
+  });
+};
 const btnPost = document.getElementById("finalizar");
 
 btnPost.addEventListener("click", async (e) => {
@@ -112,21 +128,37 @@ btnPost.addEventListener("click", async (e) => {
   const amount = document.getElementById("input1");
   const p_total = document.getElementById("input2");
   const resul = document.getElementById("resultado");
-  const item = document.getElementById("name");
+  const userId = document.getElementById("userSelect");
   const utilidad = document.getElementById("util");
+  const customer = document.getElementById("inputCustomer")
 
   const ventaNueva = {
-    branch: sucur.value,
+   
     date: dateSale.value,
     amount: amount.value,
-    product: item.textContent,
     p_total: p_total.value,
     p_unit: parseInt(resul.textContent),
     revenue: parseInt(utilidad.textContent),
+    customer: customer.value,
+    fk_id_product: id_product,
+    fk_id_user: userId.value,
+    fk_id_branch:sucur.value
   };
   const sale = JSON.stringify(ventaNueva);
 
+  
+
+  const ToModify = {
+    amount: amount.value, 
+    fk_branch: sucur.value, 
+    fk_product:id_product, 
+    fk_user:userId.value
+    
+  };
+  const dataToModify = JSON.stringify(ToModify);
+
   await enviarVenta(sale);
+  await modifyStock(dataToModify);
 
   btnPost.classList.replace("botton_save", "botton_pressed");
 

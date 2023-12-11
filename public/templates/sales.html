@@ -31,7 +31,7 @@
 
       </ul>
     </header>
-    <h1 id="titulo">Registrar Venta</h1>
+    <h1 id="titulo">Registrar Venta New</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
 
@@ -39,8 +39,26 @@
       <h3 class="lines">Establecimiento:</h3>
       <select name="listaCategory" id="sucursal">
         <!-- <option disabled selected>Seleciona la categoria</option> -->
-        <option value="B17">B17</option>
-        <option value="luz">Luz Marina</option>
+        <option value=1>B17</option>
+        <option value=3>Qoripata</option>
+        <option value=7>Tambobamba</option>
+        <option value=4>Deposito</option>
+        <option value=5>Los Nogales</option>
+        <option value=6>Los Incas</option>
+        
+
+        
+      </select>
+
+      <h3 class="lines">Usuario:</h3>
+      <select name="listaCategory" id="userSelect">
+        
+        <option value=1>Dennis</option>
+        <option value=2>Luz</option>
+        <option value=3>Miguel Angel</option>
+        
+        
+
         
       </select>
 
@@ -49,6 +67,7 @@
       <input type="date" name="date" id="dateSale">
       <h3 class="lines">Cantidad:</h3>
       <input type="number" name="Cantidad" id="input1" class="inputSecond" oninput="multiplyValues()" />
+      
       <h3 class="lines">Precio Unitario:</h3>
       <p> <span id="resultado"></span></p>
        <h3 class="lines">Total:</h3>
@@ -63,6 +82,8 @@
       <p id="stock"></p>
       <h3 class="lines">Creado:</h3>
       <p id="creacion"></p>
+      <h3 class="lines">Cliente:</h3>
+      <input type="text" name="customer" id="inputCustomer" class="inputSecond"  />
       <button id="finalizar" class="botton_save">Guardar</button>
       
     </form>

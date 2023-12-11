@@ -29,13 +29,29 @@ try {
 }
 };
 
-  const getExistenceJoin = async (req, res) => {
-    const response = await pool.query("SELECT public.branches.name AS branch_name,amount, public.products.name AS product,public.existence.created, updated,   id_existence FROM public.existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product WHERE  public.existence.fk_product = '558'");
+
+const postExistence_Vendings = async (req, res) => {
+  try {
+      const { amount, fk_branch, fk_product, fk_user } = req.body;
+      const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+      const response = await pool.query('UPDATE public.existence SET amount = amount - $1, fk_user = $2, updated = $3 WHERE fk_branch = $4 AND fk_product = $5 ;', [amount, fk_user, fechaActual.toDate(), fk_branch, fk_product]);
+        
+      res.send("existence updated");
+      console.log(req.body);
+      
+  } catch (e) {
+      console.error(e);
+  }
+  };
+
+
+const getExistenceJoin = async (req, res) => {
+    const response = await pool.query("SELECT public.branches.name AS branch_name,amount, public.products.name AS product,public.existence.created, updated, id_existence FROM public.existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product WHERE  public.existence.fk_product = '558'");
    
     res.json(response.rows);
   };
 
-  module.exports ={postExistence,getExistenceJoin }
+  module.exports ={postExistence,getExistenceJoin, postExistence_Vendings }
 
 
   

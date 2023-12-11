@@ -1,5 +1,5 @@
-const urlBase = 'https://inventario.elwayardo.com'
-//const urlBase = 'http://localhost:3000'
+//const urlBase = 'https://inventario.elwayardo.com'
+const urlBase = 'http://localhost:3000'
 
 const urlUpload = `${urlBase}/api/v1/products`
 const urlLatest = `${urlBase}/api/v1/products/latestproducts`
@@ -27,6 +27,9 @@ btnPost.addEventListener("click", async e => {
   const supplier = document.getElementById('inputSupplier')
   const lowest_price = document.getElementById('inputLastPrice')
   const list_price = document.getElementById('inputFirstPrice')
+  const sucur = document.getElementById("sucursal");
+  const amount = document.getElementById("inputAmount");
+  const userId=document.getElementById("userSelect")
   
   
   const newProduct = {
@@ -35,6 +38,9 @@ btnPost.addEventListener("click", async e => {
     supplier: supplier.value,
     lowest_price: parseInt(lowest_price.value),
     list_price: parseInt(list_price.value),
+    fk_id_user: userId.value,
+    fk_id_branch:sucur.value,
+    amount: amount.value
     
   }
   const product = JSON.stringify(newProduct)

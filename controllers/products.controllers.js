@@ -43,17 +43,18 @@ const deleteProductsById = async (req, res) => {
   };
   
 const postProduct = async (req, res) => {
-  const { name, cost, supplier, lowest_price, list_price } = req.body;
+  const { name, cost, supplier, lowest_price, list_price, amount, fk_branch, fk_user } = req.body;
  
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   
   console.log(req.body);
-  const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 )', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
-  console.log(response);
+  const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
+  newProductId = response.rows[0].id_product;
+  const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
 
   res.send("product created");
-  console.log(req.body);
-  res.send(req.body)
+  console.log(req.body)
+  res.send(req.body);
 };
 
 const updateProductsById = async (req, res) => {
