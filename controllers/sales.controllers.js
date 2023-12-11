@@ -1,4 +1,5 @@
 const { Pool } = require("pg");
+const { postExistence} = require('./existence.controllers')
 
 const moment = require('moment-timezone');
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
@@ -66,8 +67,22 @@ const postSales = async (req, res, next) => {
   res.send(req.body)
 };
 
+const newPostSales = async (req, res, next) => {
+  const {date ,amount, p_total, p_unit, revenue, customer, fk_product, fk_user, fk_branch } = req.body;
+  
+ // Crea un objeto moment con la hora actual en Lima
+    const response0 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, fk_product, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+      
+  const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+  moment.tz.setDefault('America/Lima');
+  const horaActual = fechaActual.format('HH:mm:ss'); // Formatea la hora
+  console.log(req.body);
+  const response = await pool.query('INSERT INTO vendings (date, amount, p_unit, p_total,revenue,hour,customer, fk_id_product,fk_id_existence, fk_id_user, fk_id_branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, &10, &11)', [date, amount, p_unit, p_total,revenue,horaActual,customer, fk_id_product,fk_id_existence, fk_id_user, fk_id_branch]);
+  console.log(response);
 
+  res.send("sale created");
+  console.log(req.body);
+  res.send(req.body)
+};
 
-
-
-module.exports = { getSales, getSalesByDate, postSales, getSalesByMonth };
+module.exports = { getSales, getSalesByDate, postSales, getSalesByMonth, newPostSales };

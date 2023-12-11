@@ -101,3 +101,4 @@ btnPost.addEventListener("click", async (e) => {
   window.location.reload();
 });
 
+module.exports = {enviarVenta}
