@@ -47,10 +47,16 @@ const postProduct = async (req, res) => {
  
   const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   
-  console.log(req.body);
-  const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
-  newProductId = response.rows[0].id_product;
-  const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+  if (supplier=='') {
+    const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price) VALUES($1, $2, $3, $4, $5 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price]);
+    newProductId = response.rows[0].id_product;
+    const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+  } else {
+    const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
+    newProductId = response.rows[0].id_product;
+    const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+  }
+
 
   res.send("product created");
   console.log(req.body)
@@ -61,8 +67,8 @@ const updateProductsById = async (req, res) => {
   const id = req.params.id_product
   const { name, cost, lowest_price, list_price } = req.body;
   console.log(id, name, cost, lowest_price,list_price);
-  /* const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
-  console.log(response); */
+  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
+  console.log(response);
   res.json(`Product: ${id} updated successfully`);
   };
 

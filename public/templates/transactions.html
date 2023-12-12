@@ -27,15 +27,29 @@
         <li class="pestaña"><a href="https://inventario.elwayardo.com/actualizar_producto">Actualizar Producto</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/gastos">Registrar Gasto</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/summaries">Resumenes</a></li>
+        
 
       </ul>
     </header>
-    <h1>Nuevo Producto</h1>
-    
+    <h1 id="titulo">Traslado de Mercaderia</h1>
+    <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
+    <ul id="suggestionsList"></ul>
 
     <form id="formulario" enctype="multipart/form-data">
+      <h3 class="lines">Origen:</h3>
+      <select name="listaCategory" id="pointA">
+        <!-- <option disabled selected>Seleciona la categoria</option> -->
+        <option value=1>B17</option>
+        <option value=3>Qoripata</option>
+        <option value=7>Tambobamba</option>
+        <option value=4>Deposito</option>
+        <option value=5>Los Nogales</option>
+        <option value=6>Los Incas</option>
+
+      </select>
+
       <h3 class="lines">Usuario:</h3>
-      <select name="listaCategory" id="userSelect" >
+      <select name="listaCategory" id="userSelect">
         
         <option value=1>Dennis</option>
         <option value=2>Luz</option>
@@ -45,8 +59,21 @@
 
         
       </select>
-      <h3 class="lines">Establecimiento:</h3>
-      <select name="listaCategory" id="sucursal">
+
+      
+      <h3 class="lines">Fecha:</h3>
+      <input type="date" name="date" id="dateTransaction">
+      <h3 class="lines">Cantidad:</h3>
+      <input type="number" name="Cantidad" id="input1" class="inputSecond" />
+      
+      
+       
+      
+      <h3 class="lines">Nombre:</h3>
+      <p id="name"></p>
+      
+      <h3 class="lines">Destino:</h3>
+      <select name="listaCategory" id="pointB">
         <!-- <option disabled selected>Seleciona la categoria</option> -->
         <option value=1>B17</option>
         <option value=3>Qoripata</option>
@@ -54,43 +81,26 @@
         <option value=4>Deposito</option>
         <option value=5>Los Nogales</option>
         <option value=6>Los Incas</option>
-        
 
-        
       </select>
-      <h3 class="lines">Cantidad:</h3>
-      <input type="number" name="Cantidad" id="inputAmount" class="inputSecond" />
-      <h3 class="lines">Nombre:</h3>
-      <input type="text" name="name" id="input_name"/>
-    
-       <h3 class="lines">Costo:</h3>
-      <input type="number" name="cost" id="input_cost"  />
-     
-      <h3 class="lines">Proveedor:</h3>
-      <input type="text" name="supplier" id="inputSupplier" />
-     
-      <h3 class="lines">Precio Sugerido:</h3>
-      <input type="number" name="firstPrice" id="inputFirstPrice"  />
-     
-      <h3 class="lines">Precio más bajo:</h3>
-      <input type="number" name="lastPrice" id="inputLastPrice" />
-     
-      <button id="crearProduct" class="botton_save">Crear</button>
+      
+      <button id="finalizar" class="botton_save">Guardar</button>
+      
     </form>
-    <h3 class="ultimed_sales_title">Ultimas ventas</h3>
     <section id="result">
       <table id="tableSales">
         <thead>
           <tr>
-            <th>Id</th>
-            <th>Nombre</th>
-            <th>Costo</th>
-            <th>Creado</th>
-            
-            <th>Proveedor</th>    
-            <th>Precio Lista</th>
-            <th>Precio mas bajo</th>
-          
+            <th>id</th>
+            <th>Vendedor</th>
+            <th>Fecha</th>
+            <th>Cantidad</th>
+            <th>Product</th>    
+            <th>P. Total</th>
+            <th>P. Unitario</th>
+            <th>Utilidad</th>
+            <th>Hora</th>
+            <th>Cliente</th>
             
           </tr>
         </thead>
@@ -99,9 +109,13 @@
         </tbody>
       </table>
     </section>
+    
+  
+  
+</div>
 
     
 
-    <script src="/javaScript/nuevo_producto.js"></script>
+    <script src="/javaScript/transactions.js"></script>
   </body>
 </html>
