@@ -1,8 +1,11 @@
 const nombres = [];
 const articulos = [];
-const todo = [];
+
+const suppliersNames = []
+const suppliersAll = []
 
 let id_product = ''
+let id_supplier = ''
 
 const urlBase = "https://inventario.elwayardo.com";
 //const urlBase = 'http://localhost:3000'
@@ -10,10 +13,12 @@ const urlBase = "https://inventario.elwayardo.com";
 
 const urlUpload = `${urlBase}/api/v1/ventas`;
 
-const urlTransaction = `${urlBase}/api/v1/transactions`;
+const urlEntries = `${urlBase}/api/v1/entries`;
 
+const urlSuppliers = `${urlBase}/api/v1/suppliers`;
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
+
 fetch(url)
   .then((res) => res.json())
   .then((respuestaJson) => {
@@ -23,17 +28,16 @@ fetch(url)
     });
   });
 
-//fecha de la ventan por defecto
-const dateSale = document.getElementById("dateTransaction");
 
-const fechaActual = new Date();
+  fetch(urlSuppliers)
+  .then((res) => res.json())
+  .then((respuestaJson) => {
+    respuestaJson.forEach((supplier) => {
+      suppliersAll.push(supplier);
+      suppliersNames.push(supplier.name);
+    });
+  });
 
-const año = fechaActual.getFullYear();
-const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
-const dia = fechaActual.getDate();
-const fechaFormateada = `${año}-${mes}-${dia}`;
-
-dateSale.value = fechaFormateada;
 
 /* 
 En este ejemplo, el input de búsqueda tiene un evento oninput que llama a la función showSuggestions() cada vez que se escribe algo en el campo de entrada. La función showSuggestions() obtiene el valor del input y busca nombres que coincidan en el array nombres. Luego, crea elementos <li> para cada nombre coincidente y los agrega como elementos secundarios de la lista <ul> con el id suggestionsList.
@@ -42,9 +46,6 @@ Puedes ajustar este código según tus necesidades, como modificar el array nomb
  */
 
 function showSuggestions(inputValue) {
-  
-  
-  
   const suggestionsList = document.getElementById("suggestionsList");
   suggestionsList.innerHTML = "";
 
@@ -76,6 +77,39 @@ function showSuggestions(inputValue) {
   });
 }
 
+
+function showSuggestionsSuppliers(inputValue) {
+    const suggestionsList = document.getElementById("suggestionsSupplier");
+    suggestionsList.innerHTML = "";
+  
+    if (inputValue.length === 0) {
+      return;
+    }
+  
+    const matchingNames = suppliersNames.filter((elemento) => elemento.toLowerCase().startsWith(inputValue.toLowerCase())  );
+  
+    matchingNames.forEach((nombre) => {
+      const li = document.createElement("li");
+      
+      li.textContent = nombre;
+      li.onclick = function async() {
+        document.getElementById("searchSupplier").value = nombre;
+  
+        suggestionsList.innerHTML = "";
+  
+        suppliersAll.forEach((elem) => {
+          if (elem.name == nombre) {
+            
+            document.getElementById("supplier").textContent = elem.name;
+            
+            id_supplier = elem.id_supplier;
+          }
+        });
+      };
+      suggestionsList.appendChild(li);
+    });
+  }
+
 function multiplyValues() {
   // Obtenemos los valores de los inputs
   const input1 = parseFloat(document.getElementById("input1").value);
@@ -98,7 +132,7 @@ function multiplyValues() {
 }
 
 const enviarVenta = (formDataParam) => {
-  fetch(urlTransaction, {
+  fetch(urlEntries, {
     headers: {
       "Content-Type": "application/json", //esto fue para que el body no llegue vacio
     },
@@ -113,31 +147,24 @@ const btnPost = document.getElementById("finalizar");
 btnPost.addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const sucurA = document.getElementById("pointA");
+  
   const sucurB = document.getElementById("pointB");
   const amount = document.getElementById("input1");
-  const dateTransaction = document.getElementById("dateTransaction");
+  
   const userId = document.getElementById("userSelect");
   
-
-
   const ventaNueva = {
-   
-    pointA: sucurA.value,
+     
     pointB: sucurB.value,
     amount: amount.value,
     fk_user:userId.value,
-    date:dateTransaction.value,
+    fk_supplier:id_supplier,
     fk_product: id_product
 
   };
   const sale = JSON.stringify(ventaNueva);
 
-  
-
-  
-
-  await enviarVenta(sale);
+   await enviarVenta(sale);
   
 
   btnPost.classList.replace("botton_save", "botton_pressed");

@@ -12,6 +12,7 @@ const summaries_frontend = require("./summariesFrontend");
 const existence_frontend = require("./existenceRouter");
 const sales_frontend = require("./salesRouter");
 const transactions_frontend = require("./transactionsFrontend");
+const entries_frontend = require("./entriesFrontend");
 
 //API
 const apiVentas = require("./api/ventasRouter");
@@ -22,6 +23,9 @@ const apiBranches = require('./api/branchesRouter')
 const apiUsers = require('./api/usersRouter')
 const apiExistence = require('./api/existenceRouter')
 const apiTransactions = require('./api/transactionsRouter')
+const apiEntries = require('./api/entriesRouter')
+const apiSuppliers = require('./api/suppliersRouter')
+
 
 //get url temmplates
 const publicPath = __dirname.replace("routers", "public");
@@ -44,6 +48,7 @@ function routerApi(app) {
   app.use("/existence", existence_frontend)
   app.use("/sales", sales_frontend)
   app.use("/transactions", transactions_frontend)
+  app.use("/entries", entries_frontend)
 
   app.use("/api/v1", router);
     router.use("/ventas", apiVentas);
@@ -54,6 +59,8 @@ function routerApi(app) {
     router.use("/users", apiUsers);
     router.use("/existence", apiExistence);
     router.use("/transactions", apiTransactions);
+    router.use("/entries", apiEntries);
+    router.use("/suppliers", apiSuppliers);
 }
 
 module.exports = routerApi;

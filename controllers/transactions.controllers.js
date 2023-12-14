@@ -41,8 +41,7 @@ const postTransactions = async (req, res) => {
       res.send("no existe punto de salida");
     } else if (existenceB == undefined) {
       console.log("no existe punto de llegada");
-      const createExistence = await pool.query(
-        "INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id_existence", [  amount,  pointB,   fk_product,  fk_user,   fechaActual.toDate(),     fechaActual.toDate(), ]  );
+      const createExistence = await pool.query("INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id_existence", [  amount,  pointB,   fk_product,  fk_user,   fechaActual.toDate(),     fechaActual.toDate(), ]  );
       newExistenceId = createExistence.rows[0].id_existence;
       const createTransaction = await pool.query("INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6) ", [ existenceA.id_existence, newExistenceId, amount, fk_user,  date,   fk_product,  ]);
       
