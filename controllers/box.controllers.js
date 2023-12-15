@@ -33,21 +33,8 @@ const getByMonth = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-// const getProductsById = async (req, res) => {
-// const id = req.params.id
-// const response = await pool.query("SELECT * FROM products WHERE id_product = $1", [id] )
-// res.json(response.rows);
-// };
 
 
-
-// const deleteProductsById = async (req, res) => {
-//   const id = req.params.id
-//   const response = await pool.query("DELETE FROM products WHERE id_product = $1", [id] )
-//   console.log(response);
-//   res.json(`Product: ${id} deleted successfully`);
-//   };
-  
 const postBox = async (req, res) => {
   const { concept, date ,amount, branch, bill} = req.body;
 

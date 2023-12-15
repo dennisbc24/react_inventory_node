@@ -24,6 +24,7 @@ const postTransactions = async (req, res) => {
       [pointA, fk_product]
     );
     const existenceA = responseA.rows[0];
+
     const responseB = await pool.query(
       "SELECT id_existence FROM public.existence WHERE fk_branch= $1 AND fk_product= $2;",
       [pointB, fk_product]
@@ -41,10 +42,29 @@ const postTransactions = async (req, res) => {
       res.send("no existe punto de salida");
     } else if (existenceB == undefined) {
       console.log("no existe punto de llegada");
-      const createExistence = await pool.query("INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id_existence", [  amount,  pointB,   fk_product,  fk_user,   fechaActual.toDate(),     fechaActual.toDate(), ]  );
+      const createExistence = await pool.query(
+        "INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id_existence",
+        [
+          amount,
+          pointB,
+          fk_product,
+          fk_user,
+          fechaActual.toDate(),
+          fechaActual.toDate(),
+        ]
+      );
       newExistenceId = createExistence.rows[0].id_existence;
-      const createTransaction = await pool.query("INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6) ", [ existenceA.id_existence, newExistenceId, amount, fk_user,  date,   fk_product,  ]);
-      
+      const createTransaction = await pool.query(
+        "INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6) ",
+        [
+          existenceA.id_existence,
+          newExistenceId,
+          amount,
+          fk_user,
+          date,
+          fk_product,
+        ]
+      );
     } else {
       console.log(existenceA.id_existence, existenceB.id_existence);
       console.log("si existen los 2");
@@ -57,7 +77,16 @@ const postTransactions = async (req, res) => {
         [amount, fk_user, fechaActual.toDate(), pointB, fk_product]
       );
       const createTransaction = await pool.query(
-        "INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6)",  [     existenceA.id_existence,     existenceB.id_existence,     amount,      fk_user,      date,      fk_product,   ]  );
+        "INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6)",
+        [
+          existenceA.id_existence,
+          existenceB.id_existence,
+          amount,
+          fk_user,
+          date,
+          fk_product,
+        ]
+      );
     }
   } catch (e) {
     console.error(e);
