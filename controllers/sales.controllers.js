@@ -83,6 +83,8 @@ const postVendings = async (req, res, next) => {
     fk_id_product,
     fk_id_user,
     fk_id_branch,
+    product,
+    branch
   } = req.body;
 
   // Crea un objeto moment con la hora actual en Lima
@@ -93,7 +95,7 @@ const postVendings = async (req, res, next) => {
 
   if (customer == "") {
     const response = await pool.query(
-      "INSERT INTO sales (date, amount, p_unit, p_total,revenue,hour,fk_product, fk_id_user, fk_id_branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+      "INSERT INTO sales (date, amount, p_unit, p_total,revenue,hour,fk_product, fk_id_user, fk_id_branch, product, branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
       [
         date,
         amount,
@@ -104,12 +106,14 @@ const postVendings = async (req, res, next) => {
         fk_id_product,
         fk_id_user,
         fk_id_branch,
+        product,
+        branch
       ]
     );
     console.log(response);
   } else {
     const response = await pool.query(
-      "INSERT INTO sales (date, amount, p_unit, p_total,revenue,hour,customer, fk_product, fk_id_user, fk_id_branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+      "INSERT INTO sales (date, amount, p_unit, p_total,revenue,hour,customer, fk_product, fk_id_user, fk_id_branch, product, branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12)",
       [
         date,
         amount,
@@ -121,6 +125,8 @@ const postVendings = async (req, res, next) => {
         fk_id_product,
         fk_id_user,
         fk_id_branch,
+        product, 
+        branch
       ]
     );
     console.log(response);

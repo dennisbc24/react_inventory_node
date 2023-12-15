@@ -131,6 +131,7 @@ btnPost.addEventListener("click", async (e) => {
   const userId = document.getElementById("userSelect");
   const utilidad = document.getElementById("util");
   const customer = document.getElementById("inputCustomer")
+  const name = document.getElementById("name")
 
   const ventaNueva = {
    
@@ -142,7 +143,9 @@ btnPost.addEventListener("click", async (e) => {
     customer: customer.value,
     fk_id_product: id_product,
     fk_id_user: userId.value,
-    fk_id_branch:sucur.value
+    fk_id_branch:sucur.value,
+    branch:'nuevo',
+    product:name.textContent
   };
   const sale = JSON.stringify(ventaNueva);
 
