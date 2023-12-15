@@ -7,15 +7,16 @@ const suppliersAll = []
 let id_product = ''
 let id_supplier = ''
 
-const urlBase = "https://inventario.elwayardo.com";
-//const urlBase = 'http://localhost:3000'
+//const urlBase = "https://inventario.elwayardo.com";
+const urlBase = 'http://localhost:3000'
 
 
 const urlUpload = `${urlBase}/api/v1/ventas`;
 
 const urlEntries = `${urlBase}/api/v1/entries`;
-
 const urlSuppliers = `${urlBase}/api/v1/suppliers`;
+
+
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
 
@@ -152,6 +153,7 @@ btnPost.addEventListener("click", async (e) => {
   const amount = document.getElementById("input1");
   
   const userId = document.getElementById("userSelect");
+  const newSupplier = document.getElementById("searchSupplier")
   
   const ventaNueva = {
      
@@ -159,7 +161,8 @@ btnPost.addEventListener("click", async (e) => {
     amount: amount.value,
     fk_user:userId.value,
     fk_supplier:id_supplier,
-    fk_product: id_product
+    fk_product: id_product,
+    string_supplier: newSupplier.value
 
   };
   const sale = JSON.stringify(ventaNueva);
