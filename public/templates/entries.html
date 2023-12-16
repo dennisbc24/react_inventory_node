@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/home.css" />
+    <link rel="stylesheet" href="/css/entries.css" />
     <title>inventarioX</title>
   </head>
   <body>
@@ -82,20 +82,34 @@
       <button id="finalizar" class="botton_save">Guardar</button>
       
     </form>
+
+    <section id="queryExistence">
+      <table id="tableExiste">
+        <thead>
+          <tr>
+            <th>Local</th>
+            <th>Cantidad</th>
+            <th>Producto</th>
+                      
+          </tr>
+        </thead>
+        <tbody id="bodyTableExistence">
+          
+        </tbody>
+      </table>
+    </section>
+    
     <section id="result">
       <table id="tableSales">
         <thead>
           <tr>
-            <th>id</th>
-            <th>Vendedor</th>
-            <th>Fecha</th>
-            <th>Cantidad</th>
-            <th>Product</th>    
-            <th>P. Total</th>
-            <th>P. Unitario</th>
-            <th>Utilidad</th>
-            <th>Hora</th>
-            <th>Cliente</th>
+            <th class="column_result">Local</th>
+            <th class="column_result">Cantidad</th>
+            <th class="column_result">Producto</th>
+            <th class="column_result">Usuario</th>
+            <th class="column_result">Actualizado</th>    
+            <th class="column_result">Cod Ingreso</th>
+          
             
           </tr>
         </thead>

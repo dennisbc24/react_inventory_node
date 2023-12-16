@@ -7,18 +7,58 @@ const suppliersAll = []
 let id_product = ''
 let id_supplier = ''
 
-//const urlBase = "https://inventario.elwayardo.com";
-const urlBase = 'http://localhost:3000'
+const urlBase = "https://inventario.elwayardo.com";
+//const urlBase = 'http://localhost:3000'
 
-
-const urlUpload = `${urlBase}/api/v1/ventas`;
 
 const urlEntries = `${urlBase}/api/v1/entries`;
 const urlSuppliers = `${urlBase}/api/v1/suppliers`;
-
+const urlExist = `${urlBase}/api/v1/existence`;
 
 const url = `${urlBase}/api/v1/products`;
 const urlFindOne = `${urlBase}/api/v1/products/findOne?name=`;
+
+const getExistence = (urlExistence) => {
+
+    
+  const cajaGrande = document.getElementById("bodyTableExistence");
+  cajaGrande.innerHTML = "";
+  window
+    .fetch(urlExistence)
+    .then((respuesta) => respuesta.json())
+    .then((responseJson) => {
+      const todosLosElementos = [];
+      
+      //const nodeSumTotal = document.getElementById('sumTotal')
+      //const nodeSumRevenue = document.getElementById('sumRevenue')
+      
+      responseJson.forEach((elemento) => {
+        const tr = document.createElement("tr");
+        tr.className = "column_result"
+
+            const branch = document.createElement("td");
+            const branchApi = elemento.branch_name;
+            branch.textContent = branchApi;
+    
+            const amount = document.createElement("td");
+            const amountApi = elemento.amount;
+            amount.textContent = amountApi;
+
+            const name = document.createElement("td");
+            const productApi = elemento.product;
+            name.textContent = productApi;
+           
+
+            tr.append(branch,amount,name);
+
+        todosLosElementos.push(tr);
+
+        cajaGrande.append(...todosLosElementos);
+        
+
+      });
+    });
+};
 
 fetch(url)
   .then((res) => res.json())
@@ -73,6 +113,9 @@ function showSuggestions(inputValue) {
           id_product = elem.id_product;
         }
       });
+
+const urlGet = `${urlExist}?product=${id_product}`
+      getExistence(urlGet)
     };
     suggestionsList.appendChild(li);
   });
@@ -108,29 +151,10 @@ function showSuggestionsSuppliers(inputValue) {
         });
       };
       suggestionsList.appendChild(li);
+
+      
     });
   }
-
-function multiplyValues() {
-  // Obtenemos los valores de los inputs
-  const input1 = parseFloat(document.getElementById("input1").value);
-  const input2 = parseFloat(document.getElementById("input2").value);
-
-  // Verificamos que ambos valores sean números válidos
-  if (!isNaN(input1) && !isNaN(input2)) {
-    // Realizamos la division
-    const pUnitario = input2 / input1;
-    const util = (pUnitario - costo.textContent) * input1;
-    console.log(util);
-    document.getElementById("util").textContent = util;
-    // Mostramos el resultado en el elemento con id "resultado"
-    document.getElementById("resultado").textContent = pUnitario;
-  } else {
-    // Si alguno de los valores no es válido, mostramos un mensaje de error
-    document.getElementById("resultado").textContent =
-      "Error: Ingresa números válidos";
-  }
-}
 
 const enviarVenta = (formDataParam) => {
   fetch(urlEntries, {
@@ -193,21 +217,11 @@ function traer(url) {
       responseJson.forEach((elemento) => {
         const tr = document.createElement("tr");
             
-    
-            const id = document.createElement("td");
-            const idApi = elemento.id_sale;
-            id.textContent = idApi;
+        const branch = document.createElement("td");
+        const branchApi = elemento.branch;
+        branch.textContent = branchApi;
 
-            const branch = document.createElement("td");
-            const branchApi = elemento.branch;
-            branch.textContent = branchApi;
-
-            const date = document.createElement("td");
-            const dateApi = elemento.date;
-            const cut = dateApi.substring(0,10);
-            date.textContent = cut;
-
-            const amount = document.createElement("td");
+        const amount = document.createElement("td");
             const amountApi = elemento.amount;
             amount.textContent = amountApi;
 
@@ -215,29 +229,21 @@ function traer(url) {
             const productApi = elemento.product;
             product.textContent = productApi;
 
-            const p_total = document.createElement("td");
-            const totalApi = elemento.p_total;
-            p_total.textContent = totalApi;
+            const user = document.createElement("td");
+            const userApi = elemento.usuario;
+            user.textContent = userApi;
 
-            const p_unit = document.createElement("td");
-            const unitApi = elemento.p_unit;
-            p_unit.textContent = unitApi;
+            const date = document.createElement("td");
+            const dateApi = elemento.updated;
+            const cut = dateApi.substring(0,10);
+            date.textContent = cut;
 
-            const revenue = document.createElement("td");
-            const revenueApi = elemento.revenue;
-            revenue.textContent = revenueApi;
+            const id = document.createElement("td");
+            const idApi = elemento.id_entry;
+            id.textContent = idApi;
 
-            const hour = document.createElement("td");
-            const hourApi = elemento.hour;
-            hour.textContent = hourApi;
-
-            const customer = document.createElement("td");
-            const custumerApi = elemento.customer;
-            customer.textContent = custumerApi;
-
-            
-
-            tr.append(id,branch,date,amount,product,p_total,p_unit,revenue,hour,customer);
+   
+            tr.append(branch,amount,product,user,date,id);
 
         todosLosElementos.push(tr);
 
@@ -253,4 +259,4 @@ function traer(url) {
     });
 }
 
-traer(urlUpload);
+traer(urlEntries);
