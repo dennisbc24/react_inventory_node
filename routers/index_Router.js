@@ -13,6 +13,7 @@ const existence_frontend = require("./existenceRouter");
 const sales_frontend = require("./salesRouter");
 const transactions_frontend = require("./transactionsFrontend");
 const entries_frontend = require("./entriesFrontend");
+const deleteSale_frontend = require("./deleteSaleFrontend");
 
 //API
 const apiVentas = require("./api/ventasRouter");
@@ -49,6 +50,7 @@ function routerApi(app) {
   app.use("/sales", sales_frontend)
   app.use("/transactions", transactions_frontend)
   app.use("/entries", entries_frontend)
+  app.use("/deleteSale", deleteSale_frontend)
 
   app.use("/api/v1", router);
     router.use("/ventas", apiVentas);

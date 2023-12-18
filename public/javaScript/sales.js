@@ -238,10 +238,7 @@ function traer(url) {
         
 
       });
-      
-        
-        
-       
+ 
         
     });
 }

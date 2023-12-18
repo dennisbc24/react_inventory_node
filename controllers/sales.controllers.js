@@ -136,10 +136,40 @@ const postVendings = async (req, res, next) => {
   res.send("sale created");
 };
 
+
+const deleteSalesById = async (req, res) => {
+  const id = req.query.id
+
+  const ask = await pool.query("SELECT EXISTS (SELECT 1 FROM public.sales WHERE id_sale = $1)", [id]);
+  console.log(ask);
+
+if (ask.rows[0].exists==true) {
+  const response = await pool.query("SELECT * FROM sales WHERE id_sale=$1", [id] )
+  console.log(response.rows);
+  const amount = response.rows[0].amount
+  const product = response.rows[0].fk_product
+  const branch = response.rows[0].fk_id_branch
+
+  const responseUpdateExistence = await pool.query("UPDATE existence SET amount = amount + $1 WHERE fk_branch = $2 AND fk_product = $3 ;",[amount, branch, product]);
+
+ const deleteSale = await pool.query("DELETE FROM sales WHERE id_sale=$1", [id] )
+  
+ res.json(`Product: ${id} deleted successfully`);
+ 
+} else {
+  res.json(`Product: ${id} no existe`);
+}
+
+
+  
+  };
+
+
 module.exports = {
   getSales,
   getSalesByDate,
   postSales,
   getSalesByMonth,
   postVendings,
+  deleteSalesById
 };
