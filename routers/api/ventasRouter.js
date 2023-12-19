@@ -1,7 +1,5 @@
 const express = require("express");
-const validationSchema = require("../../middlewares/validation.handler");
 const createVentaSchema = require("../../schemas/ventas.schema");
-const Venta = require("../../modelMongo/ventas");
 
 const router = express.Router();
 

@@ -4,18 +4,7 @@ const urlBase = 'https://inventario.elwayardo.com'
 const urlUpload = `${urlBase}/api/v1/products`
 const urlLatest = `${urlBase}/api/v1/products/latestproducts`
 
-const crearProduct = (formDataParam) => {
-
-    fetch(urlUpload, {
-      headers: {
-        "Content-Type": "application/json", //esto fue para que el body no llegue vacio
-      },
-        method:'POST',
-        
-        body: formDataParam
-    })
-    
-  };
+import { sendData } from "./funcions.js";
 
   const btnPost = document.getElementById('crearProduct')
 
@@ -45,7 +34,7 @@ btnPost.addEventListener("click", async e => {
   }
   const product = JSON.stringify(newProduct)
   
-  await crearProduct(product);
+  await sendData(urlUpload,'POST',product);
   
   btnPost.classList.replace('botton_save', 'botton_pressed');
   

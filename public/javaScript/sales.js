@@ -41,18 +41,21 @@ Cuando haces clic en una sugerencia, el valor del input se establece en el nombr
 Puedes ajustar este código según tus necesidades, como modificar el array nombres o cambiar el estilo CSS de la lista de sugerencias.
  */
 
+function normalizeString(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+
 function showSuggestions(inputValue) {
   
-  
-  
-  const suggestionsList = document.getElementById("suggestionsList");
+    const suggestionsList = document.getElementById("suggestionsList");
   suggestionsList.innerHTML = "";
 
   if (inputValue.length === 0) {
     return;
   }
 
-  const matchingNames = nombres.filter((elemento) => elemento.toLowerCase().startsWith(inputValue.toLowerCase())  );
+  const matchingNames = nombres.filter((elemento) => normalizeString(elemento).includes(inputValue.toLowerCase())  );
 
   matchingNames.forEach((nombre) => {
     const li = document.createElement("li");
@@ -244,3 +247,46 @@ function traer(url) {
 }
 
 traer(urlUpload);
+
+
+
+
+
+
+const products = ["sartén grande facusa", "sartén facusa pequeña"];
+
+function normalizeString(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function highlightMatches(product, searchInput) {
+  const normalizedProduct = normalizeString(product);
+  const startIndex = normalizedProduct.indexOf(searchInput);
+  
+  if (startIndex !== -1) {
+    const highlightedText = product.substring(0, startIndex) +
+      '<span class="highlight">' + product.substring(startIndex, startIndex + searchInput.length) + '</span>' +
+      product.substring(startIndex + searchInput.length);
+    return highlightedText;
+  } else {
+    return product;
+  }
+}
+
+function searchSuggestions() {
+  const searchInput = normalizeString(document.getElementById("searchInput").value);
+  const suggestionsList = document.getElementById("suggestionsList");
+
+  // Clear previous suggestions
+  suggestionsList.innerHTML = "";
+
+  // Filter products based on normalized input
+  const filteredProducts = products.filter(product => normalizeString(product).includes(searchInput));
+
+  // Display suggestions with highlighted matches
+  filteredProducts.forEach(product => {
+    const listItem = document.createElement("li");
+    listItem.innerHTML = highlightMatches(product, searchInput);
+    suggestionsList.appendChild(listItem);
+  });
+}
