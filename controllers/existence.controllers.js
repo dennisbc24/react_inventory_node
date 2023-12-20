@@ -94,4 +94,13 @@ const getExistenceJoin = async (req, res) => {
   res.json(response.rows);
 };
 
-module.exports = { postExistence, getExistenceJoin, postExistence_Vendings };
+const getInventaryByBranch = async (req, res) => {
+  const id_branch= req.query.branch
+  
+  const response = await pool.query("SELECT amount,products.name AS product , products.cost AS costo,branches.name AS sucursal FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product WHERE fk_branch = $1 AND amount != 0 ORDER BY product ASC",[id_branch]);
+
+  res.json(response.rows);
+};
+
+
+module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch };

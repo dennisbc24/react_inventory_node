@@ -86,15 +86,22 @@ Cuando haces clic en una sugerencia, el valor del input se establece en el nombr
 Puedes ajustar este código según tus necesidades, como modificar el array nombres o cambiar el estilo CSS de la lista de sugerencias.
  */
 
+
+function normalizeString(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+
 function showSuggestions(inputValue) {
-  const suggestionsList = document.getElementById("suggestionsList");
+  
+    const suggestionsList = document.getElementById("suggestionsList");
   suggestionsList.innerHTML = "";
 
   if (inputValue.length === 0) {
     return;
   }
 
-  const matchingNames = nombres.filter((elemento) => elemento.toLowerCase().startsWith(inputValue.toLowerCase())  );
+  const matchingNames = nombres.filter((elemento) => normalizeString(elemento).includes(inputValue.toLowerCase())  );
 
   matchingNames.forEach((nombre) => {
     const li = document.createElement("li");
@@ -107,15 +114,13 @@ function showSuggestions(inputValue) {
 
       articulos.forEach((elem) => {
         if (elem.name == nombre) {
-          
+          document.getElementById("costo").textContent = elem.cost;
           document.getElementById("name").textContent = elem.name;
-          
+          document.getElementById("stock").textContent = elem.stock;
+          document.getElementById("creacion").textContent = elem.created;
           id_product = elem.id_product;
         }
       });
-
-const urlGet = `${urlExist}?product=${id_product}`
-      getExistence(urlGet)
     };
     suggestionsList.appendChild(li);
   });
