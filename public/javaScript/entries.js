@@ -114,10 +114,9 @@ function showSuggestions(inputValue) {
 
       articulos.forEach((elem) => {
         if (elem.name == nombre) {
-          document.getElementById("costo").textContent = elem.cost;
+          
           document.getElementById("name").textContent = elem.name;
-          document.getElementById("stock").textContent = elem.stock;
-          document.getElementById("creacion").textContent = elem.created;
+          
           id_product = elem.id_product;
         }
       });
