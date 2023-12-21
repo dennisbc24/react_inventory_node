@@ -120,6 +120,8 @@ function showSuggestions(inputValue) {
           id_product = elem.id_product;
         }
       });
+
+      getExistence(`${urlExist}?product=${id_product}`)
     };
     suggestionsList.appendChild(li);
   });
@@ -153,6 +155,8 @@ function showSuggestionsSuppliers(inputValue) {
             id_supplier = elem.id_supplier;
           }
         });
+
+        
       };
       suggestionsList.appendChild(li);
 

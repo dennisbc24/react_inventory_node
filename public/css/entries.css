@@ -267,7 +267,7 @@ p{
  table{
 
   min-width: 600px;   
- text-align: center;
+ text-align: left;
  border-collapse: collapse;
  background-color: var(--persian-blue-300);
  color: var(--ligth-text)

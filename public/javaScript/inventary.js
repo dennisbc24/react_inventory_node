@@ -43,8 +43,8 @@ function traer(url) {
       });
        
       cajaGrande.append(...todosLosElementos);
-      sumAllSales.push(elemento.p_total)
-      sumRevenue.push(elemento.revenue)
+      
+      
     });
 }
 
