@@ -212,3 +212,13 @@ function traer(url) {
 }
 
 traer(urlUpload);
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  var submenuToggle = document.querySelector(".submenu-toggle");
+  var submenuContainer = document.querySelector(".submenu-container");
+
+  submenuToggle.addEventListener("click", function() {
+    submenuContainer.classList.toggle("active");
+  });
+});

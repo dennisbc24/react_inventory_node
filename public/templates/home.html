@@ -6,6 +6,14 @@
     <link rel="stylesheet" href="/css/home.css" />
     <title>inventarioX</title>
   </head>
+
+
+
+
+
+
+
+
   <body>
     <header>
       <input type="checkbox" name="" id="boton-menu" class="boton-menu">
@@ -21,7 +29,14 @@
       </div>
       
       <ul class="caja_pestañas">
-        <li class="pestaña"><a href="https://inventario.elwayardo.com">Registrar Venta</a></li>
+        <li class="pestaña">
+          <a href="https://inventario.elwayardo.com">Registrar Venta</a>
+          <ul>
+            <li>hola</li>
+            <li>hola</li>
+            <li>hola</li>
+          </ul>
+        </li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/nuevo_producto">Nuevo Producto</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/ventas_por_fecha">Buscar Ventas</a></li>
         <li class="pestaña"><a href="https://inventario.elwayardo.com/actualizar_producto">Actualizar Producto</a></li>
@@ -34,6 +49,11 @@
     <h1 id="titulo">Registrar Venta</h1>
     <input type="text" id="searchInput" placeholder="busca el item aquí" oninput="showSuggestions(this.value)" />
     <ul id="suggestionsList"></ul>
+
+    
+
+
+
 
     <form id="formulario" enctype="multipart/form-data">
       <h3 class="lines">Establecimiento:</h3>
@@ -93,7 +113,7 @@
   
 </div>
 
-    
+  
 
     <script src="/javaScript/home.js"></script>
   </body>
