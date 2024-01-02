@@ -44,7 +44,7 @@ const getSalesByMonth = async (req, res) => {
     const year = req.query.year;
     console.log(month, year);
     const response = await pool.query(
-      "SELECT branch, EXTRACT(MONTH FROM date) AS mes, SUM(revenue) AS suma_revenue FROM public.sales WHERE EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 GROUP BY branch, EXTRACT(MONTH FROM date) ORDER BY branch, mes;",
+      "SELECT EXTRACT(MONTH FROM date) AS mes,SUM(revenue) AS suma_revenue, users.name AS usuario FROM public.sales INNER JOIN public.branches ON sales.fk_id_branch = branches.id_branch INNER JOIN public.users ON sales.fk_id_user = users.id_user WHERE EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 GROUP BY  EXTRACT(MONTH FROM date),  usuario ORDER BY  mes,  usuario",
       [year, month]
     );
     res.json(response.rows);

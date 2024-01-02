@@ -15,7 +15,7 @@ function traerGanancia(url) {
         div1.className = "row_summary";
 
         const branch = document.createElement("p");
-        const branchApi = elemento.branch;
+        const branchApi = elemento.usuario;
         branch.textContent = branchApi;
 
         const concept = document.createElement("p");
