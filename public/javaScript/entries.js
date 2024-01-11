@@ -5,7 +5,7 @@ const suppliersNames = []
 const suppliersAll = []
 
 let id_product = ''
-let id_supplier = ''
+let id_supplier = 18
 
 const urlBase = "https://inventario.elwayardo.com";
 //const urlBase = 'http://localhost:3000'
