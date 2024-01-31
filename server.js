@@ -15,7 +15,7 @@ app.use(express.urlencoded({extended: true})); //Esto es para formData
 const port = 3000;
 
 //donde va a encontrar los archivos estaticos
-app.use(express.static("public"));
+app.use(express.static("dist"));
 
 const routerApi = require("./routers/index_Router");
 const { now } = require("mongoose");
