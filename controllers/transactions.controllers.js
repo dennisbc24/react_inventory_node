@@ -93,4 +93,10 @@ const postTransactions = async (req, res) => {
   }
 };
 
-module.exports = { postTransactions };
+const joinTransactions = async (req, res) => {
+  const response = await pool.query("SELECT public.transactions.amount AS cantidad,users.name AS usuario,  date, products.name AS producto,br1.name AS origen, br2.name AS destino,  id_transaction   FROM public.transactions  INNER JOIN users ON transactions.fk_user = users.id_user  INNER JOIN products ON transactions.fk_product = products.id_product  INNER JOIN existence ex1 ON transactions.fk_existence_a = ex1.id_existence  INNER JOIN branches br1 ON ex1.fk_branch = br1.id_branch  INNER JOIN existence ex2 ON transactions.fk_existence_b = ex2.id_existence  INNER JOIN branches br2 ON ex2.fk_branch = br2.id_branch  ORDER BY id_transaction DESC LIMIT 15");
+ 
+  res.json(response.rows);
+};
+
+module.exports = { postTransactions, joinTransactions };
