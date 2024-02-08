@@ -97,10 +97,19 @@ const getExistenceJoin = async (req, res) => {
 const getInventaryByBranch = async (req, res) => {
   const id_branch= req.query.branch
   
-  const response = await pool.query("SELECT amount,products.name AS product , products.cost AS costo,branches.name AS sucursal FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product WHERE fk_branch = $1 AND amount != 0 ORDER BY product ASC",[id_branch]);
+  const response = await pool.query("SELECT amount,products.name AS product , products.cost AS costo,branches.name AS sucursal FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product WHERE fk_branch = $1 AND amount != 0 ORDER BY LOWER(products.name) ASC",[id_branch]);
 
   res.json(response.rows);
 };
 
 
-module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch };
+const getInventaryByProductName = async (req, res) => {
+  const keyWord= req.query.keyWord
+  
+  const response = await pool.query(`SELECT products.name AS product, SUM(amount) AS stock FROM existence INNER JOIN products ON existence.fk_product = products.id_product WHERE unaccent(lower(products.name)) ILIKE '%' || unaccent(lower('${keyWord}')) || '%' GROUP BY products.name ORDER BY stock DESC`);
+
+  res.json(response.rows);
+};
+
+
+module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName };

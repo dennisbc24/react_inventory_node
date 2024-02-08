@@ -44,8 +44,6 @@ const deleteProductsById = async (req, res) => {
   
 const postProduct = async (req, res) => {
   const { name, cost, supplier, lowest_price, list_price, amount, fk_branch, fk_user } = req.body;
- 
-  const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
   
   if (supplier=='') {
     const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price) VALUES($1, $2, $3, $4, $5 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price]);
