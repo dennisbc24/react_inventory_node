@@ -27,6 +27,7 @@ const apiExistence = require('./api/existenceRouter')
 const apiTransactions = require('./api/transactionsRouter')
 const apiEntries = require('./api/entriesRouter')
 const apiSuppliers = require('./api/suppliersRouter')
+const apiAuth = require('./api/authRouter')
 
 
 //get url temmplates
@@ -65,6 +66,7 @@ function routerApi(app) {
     router.use("/transactions", apiTransactions);
     router.use("/entries", apiEntries);
     router.use("/suppliers", apiSuppliers);
+    router.use("/auth",apiAuth );
 }
 
 module.exports = routerApi;
