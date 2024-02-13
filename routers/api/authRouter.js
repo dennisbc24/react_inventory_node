@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
-
-const config = require("../../config/config");
+const {config} = require('../../config/config')
 
 router.post("/login", 
 passport.authenticate('local', {session: false}),
@@ -14,7 +13,7 @@ try {
         sub:user.id_user,
         role: user.role
     }
-    const secret = '123'
+    const secret = config.jwtSecret
     const token = jwt.sign(payload, secret)
     res.json({user, token})
 } catch (error) {
