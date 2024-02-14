@@ -17,7 +17,7 @@ const pool = new Pool({
 
 const postTransactions = async (req, res) => {
   const { pointA, pointB, amount, fk_user, date, fk_product } = req.body;
-
+console.log(req.body);
   try {
     const responseA = await pool.query(
       "SELECT id_existence FROM public.existence WHERE fk_branch= $1 AND fk_product= $2;",
