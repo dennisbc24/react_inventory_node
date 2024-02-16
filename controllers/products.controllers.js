@@ -56,7 +56,7 @@ const postProduct = async (req, res) => {
   }
 
 
-  res.send("product created");
+  console.log("product created");
   console.log(req.body)
   res.send(req.body);
 };
