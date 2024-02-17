@@ -1,5 +1,8 @@
 const { Pool } = require("pg");
 const moment = require("moment-timezone");
+
+const {ExistenceService} = require('../services/existence_service')
+const service = new ExistenceService();
 // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
 moment.tz.setDefault("America/Lima");
 const config = require("../config/config");
@@ -111,5 +114,10 @@ const getInventaryByProductName = async (req, res) => {
   res.json(response.rows);
 };
 
+const UpdateExistenceCount = async (req, res) => {
+  const response = await service.updateCount(req.body)
+  console.log(req.body)
+  res.json(response);  
+};
 
-module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName };
+module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount };
