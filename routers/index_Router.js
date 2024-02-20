@@ -1,4 +1,5 @@
 const express = require("express");
+const passport = require('passport')
 
 //importamos los endpoints:
 const homeRouter = require("./homeRouter");
@@ -55,10 +56,10 @@ function routerApi(app) {
   app.use("/deleteSale", deleteSale_frontend)
   app.use("/inventary", inventary_frontend)
 
-  app.use("/api/v1", router);
+  app.use("/api/v1",router);
     router.use("/ventas", apiVentas);
     router.use("/products", apiProducts);
-    router.use("/box", apiBox);
+    router.use("/box",passport.authenticate('jwt', {session: false}), apiBox);
     router.use("/summaries", apiSummaries);
     router.use("/branches", apiBranches);
     router.use("/users", apiUsers);
