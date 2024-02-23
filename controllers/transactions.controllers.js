@@ -19,12 +19,13 @@ const postTransactions = async (req, res) => {
   const { pointA, pointB, amount, fk_user, date, fk_product } = req.body;
 console.log(req.body);
   try {
+    //ver si punto A existe
     const responseA = await pool.query(
       "SELECT id_existence FROM public.existence WHERE fk_branch= $1 AND fk_product= $2;",
       [pointA, fk_product]
     );
     const existenceA = responseA.rows[0];
-
+      //ver si puntoB existe
     const responseB = await pool.query(
       "SELECT id_existence FROM public.existence WHERE fk_branch= $1 AND fk_product= $2;",
       [pointB, fk_product]
@@ -56,14 +57,11 @@ console.log(req.body);
       newExistenceId = createExistence.rows[0].id_existence;
       const createTransaction = await pool.query(
         "INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6) ",
-        [
-          existenceA.id_existence,
-          newExistenceId,
-          amount,
-          fk_user,
-          date,
-          fk_product,
-        ]
+        [ existenceA.id_existence, newExistenceId, amount, fk_user, date, fk_product]
+      );
+      const incomming = await pool.query(
+        "UPDATE existence SET amount = amount - $1, fk_user = $2, updated = $3 WHERE fk_branch = $4 AND fk_product = $5 ;",
+        [amount, fk_user, fechaActual.toDate(), pointA, fk_product]
       );
     } else {
       console.log(existenceA.id_existence, existenceB.id_existence);
