@@ -67,6 +67,10 @@ function routerApi(app) {
     router.use("/entries", apiEntries);
     router.use("/suppliers", apiSuppliers);
     router.use("/auth",apiAuth );
+
+    app.use((req, res, next) => {
+      res.redirect('/');
+    });
 }
 
 module.exports = routerApi;
