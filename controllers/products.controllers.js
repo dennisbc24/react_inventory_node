@@ -33,8 +33,6 @@ const response = await pool.query("SELECT * FROM products WHERE id_product = $1"
 res.json(response.rows);
 };
 
-
-
 const deleteProductsById = async (req, res) => {
   const id = req.params.id
   const response = await pool.query("DELETE FROM products WHERE id_product = $1", [id] )
