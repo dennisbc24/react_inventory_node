@@ -60,7 +60,8 @@ function routerApi(app) {
   app.use("/api/v1",router);
     router.use("/ventas", apiVentas);
     router.use("/products", apiProducts);
-    router.use("/box",passport.authenticate('jwt', {session: false}), apiBox);
+    router.use("/box",apiBox);
+    //router.use("/box",passport.authenticate('jwt', {session: false}), apiBox);
     router.use("/summaries", apiSummaries);
     router.use("/branches", apiBranches);
     router.use("/users", apiUsers);
