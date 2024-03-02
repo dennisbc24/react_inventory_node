@@ -100,7 +100,7 @@ const getExistenceJoin = async (req, res) => {
 const getInventaryByBranch = async (req, res) => {
   const id_branch= req.query.branch
   
-  const response = await pool.query("SELECT amount,products.name AS product , products.cost AS costo,branches.name AS sucursal,existence.id_existence FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product WHERE fk_branch = $1 AND amount != 0 ORDER BY LOWER(products.name) ASC",[id_branch]);
+  const response = await pool.query("SELECT amount,products.name AS product , products.cost AS costo,branches.name AS sucursal,existence.id_existence FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product WHERE fk_branch = $1 ORDER BY LOWER(products.name) ASC",[id_branch]);
 
   res.json(response.rows);
 };
