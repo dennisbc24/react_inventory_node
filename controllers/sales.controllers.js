@@ -32,9 +32,7 @@ const getSales = async (req, res) => {
 const getSalesByDate = async (req, res) => {
   const date = req.query.date;
   const response = await pool.query(
-    "SELECT id_sale AS id,branch AS Local, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales WHERE date = $1 ORDER BY hour DESC",
-    [date]
-  );
+    "SELECT id_sale AS id,users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
   res.json(response.rows);
 };
 
