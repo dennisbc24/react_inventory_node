@@ -1,6 +1,8 @@
 const { Pool } = require("pg");
-
+const {SpendingService} = require('../services/spending_service')
 const config = require("../config/config");
+const { response } = require("express");
+const service = new SpendingService()
 
 const pool = new Pool({
   user: config.config.dbUser,
@@ -14,43 +16,26 @@ const pool = new Pool({
 });
 
 const getBox = async (req, res) => {
-  const response = await pool.query(
-    "SELECT * FROM box ORDER BY date DESC LIMIT 15"
-  );
- 
-  res.json(response.rows);
+  const response = await service.get()
+  res.json(response);
 };
 
 const getByMonth = async (req, res) => {
-  try {
-    const month = req.query.month
-    const year = req.query.year
-    console.log(month,year);
-    const response = await pool.query("SELECT * FROM public.box WHERE	EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 ORDER BY date DESC" , [year,month]);
-    res.json(response.rows);
-  } catch (error) {
-    console.error('Error executing query:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
+  const response = await service.getByMonth(req)
+  res.json(response);
 }
 
 
 const postBox = async (req, res) => {
-  const { concept, date ,amount, branch, bill} = req.body;
-
-  console.log(req.body);
-  const response = await pool.query('INSERT INTO box (concept, date ,amount, branch, bill) VALUES($1, $2, $3, $4, $5)', [concept, date ,amount, branch, bill]);
-  console.log(response);
-
-  res.send("money movement created");
+  const response = await service.post(req)
+  res.send(response);
   
   
 };
 
 const deleteBoxById = async (req, res) => {
-  const id = req.params.id
-  const response = await pool.query("DELETE FROM box WHERE id_money_movement = $1", [id] )
-  console.log(response);
+  const response = await service.delete(req)
+ 
   res.json(`Product: ${id} deleted successfully`);
   };
   

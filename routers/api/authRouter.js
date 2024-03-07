@@ -17,7 +17,9 @@ try {
     const token = jwt.sign(payload, secret)
     res.json({user, token})
 } catch (error) {
-    next(error)
+    
+    next(`error`)
+    
 }
 })
 
