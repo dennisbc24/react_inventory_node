@@ -54,8 +54,8 @@ class SpendingService {
         try {
             const id = req.params.id
             const response = await pool.query("DELETE FROM box WHERE id_money_movement = $1", [id] )
-            console.log(`Product: ${id} deleted successfully`);
-            return `Product: ${id} deleted successfully`
+            console.log(`Spending: ${id} deleted successfully`);
+            return `Spending: ${id} deleted successfully`
         } catch (error) {
             console.log(error);
         }

@@ -36,7 +36,7 @@ const postBox = async (req, res) => {
 const deleteBoxById = async (req, res) => {
   const response = await service.delete(req)
  
-  res.json(`Product: ${id} deleted successfully`);
+  res.json(response);
   };
   
 
