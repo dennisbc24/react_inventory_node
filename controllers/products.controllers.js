@@ -1,12 +1,13 @@
 const { Pool } = require("pg");
-
 const moment = require('moment-timezone');
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
   moment.tz.setDefault('America/Lima');
     // Crea un objeto moment con la hora actual en Lima
   const fechaActual = moment();
-
+  const {ProductsService} = require('../services/products_service')
+const service = new ProductsService()
 const config = require("../config/config");
+const { response } = require("express");
 
 const pool = new Pool({
   user: config.config.dbUser,
@@ -28,52 +29,29 @@ const getProducts = async (req, res) => {
 };
 
 const getProductsById = async (req, res) => {
-const id = req.params.id
-const response = await pool.query("SELECT * FROM products WHERE id_product = $1", [id] )
-res.json(response.rows);
+    const response = await service.getById(req)
+    res.json(response);
 };
 
 const deleteProductsById = async (req, res) => {
-  const id = req.params.id
-  const response = await pool.query("DELETE FROM products WHERE id_product = $1", [id] )
-  console.log(response);
-  res.json(`Product: ${id} deleted successfully`);
+  const response = await service.delete(req)
+  res.json(response);
   };
   
 const postProduct = async (req, res) => {
-  const { name, cost, supplier, lowest_price, list_price, amount, fk_branch, fk_user } = req.body;
-  
-  if (supplier=='') {
-    const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price) VALUES($1, $2, $3, $4, $5 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price]);
-    newProductId = response.rows[0].id_product;
-    const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
-  } else {
-    const response = await pool.query('INSERT INTO products (name, cost, created, supplier, lowest_price, list_price) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), supplier, lowest_price, list_price]);
-    newProductId = response.rows[0].id_product;
-    const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
-  }
-
-
-  console.log("product created");
-  console.log(req.body)
-  res.send(req.body);
+  const response = await service.create(req)
+  res.send(response);
 };
 
 const updateProductsById = async (req, res) => {
-  const id = req.params.id_product
-  const { name, cost, lowest_price, list_price } = req.body;
-  console.log(id, name, cost, lowest_price,list_price);
-  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
-  console.log(response);
-  res.json(`Product: ${id} updated successfully`);
+  const response = service.update(req)
+  res.send(response)
   };
 
 
   const latestUpdates = async(req,res) => {
-
-    //const limit = req.query.limit
-    const response = await pool.query("SELECT * FROM public.products ORDER BY id_product DESC LIMIT 7");
-    res.json(response.rows);
+    const response = await service.getLatestUpdates()
+    res.json(response);
   }
 
 module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };
