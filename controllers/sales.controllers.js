@@ -1,5 +1,5 @@
 const { Pool } = require("pg");
-const { postExistence } = require("./existence.controllers");
+//const { postExistence } = require("./existence.controllers");
 const {SalesService} = require('../services/sales_service')
 const service = new SalesService()
 const moment = require("moment-timezone");
