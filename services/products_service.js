@@ -23,8 +23,8 @@ class ProductsService {
             
                 const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price,fk_supplier]);
                 const newProductId = response.rows[0].id_product;
-                const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
-                return `Product ${name} created successfully`
+                //const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+                return `Product ${newProductId} created successfully`
               
         } catch (error) {
             console.log(error);
