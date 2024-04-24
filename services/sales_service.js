@@ -92,14 +92,12 @@ class SalesService{
       
       
     }
-    async sales(){}
+    async salesSumMonthly(req){
+      const fk_id_product = req.query.fk_id_product;
+      const response = await pool.query("SELECT EXTRACT(YEAR FROM date) AS año,EXTRACT(MONTH FROM date) AS mes,SUM(amount) AS suma_mes FROM sales WHERE fk_product = $1 AND date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months'GROUP BY EXTRACT(YEAR FROM date),EXTRACT(MONTH FROM date)ORDER BY año, mes", [fk_id_product] );
+      return response.rows
+  }
 
 }
 
 module.exports = {SalesService}
-
-
-  
-
- 
-  
