@@ -92,7 +92,7 @@ const postExistence_Vendings = async (req, res) => {
 const getExistenceJoin = async (req, res) => {
   const query_product=req.query.product
   console.log(query_product);
-  const response = await pool.query("SELECT public.branches.name AS branch_name,amount, public.products.name AS product,public.existence.created, updated, id_existence FROM public.existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product WHERE  public.existence.fk_product = $1",[query_product]);
+  const response = await pool.query("SELECT public.branches.name AS branch_name,amount, public.products.name AS product,public.existence.created, public.existence.updated, id_existence FROM public.existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product WHERE  public.existence.fk_product = $1",[query_product]);
 
   res.json(response.rows);
 };

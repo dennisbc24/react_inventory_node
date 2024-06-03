@@ -44,8 +44,8 @@ const postProduct = async (req, res) => {
 };
 
 const updateProductsById = async (req, res) => {
-  const response = service.update(req)
-  res.send(response)
+  const response = await service.update(req)
+  res.json(response);  
   };
 
 

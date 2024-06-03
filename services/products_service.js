@@ -20,7 +20,6 @@ class ProductsService {
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
       
         try {
-            
                 const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price,fk_supplier]);
                 const newProductId = response.rows[0].id_product;
                 //const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
@@ -66,12 +65,13 @@ class ProductsService {
         }
     }
     async update(req){
+        const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
         try {
             const { name, cost, lowest_price, list_price } = req.body;
             const id = req.params.id_product
-            const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4  WHERE id_product = $5 ", [name, cost, lowest_price, list_price, id] )
-            return `Product: ${id} updated successfully`
+            const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, lowest_price, list_price,fechaActual.toDate(), id] )
             
+            return `Product: ${id} updated successfully`
         } catch (error) {
             console.log(error);
             return error
