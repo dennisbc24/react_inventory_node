@@ -69,7 +69,7 @@ const postEntries = async (req, res) => {
 
 const getEntriesJoin = async (req, res) => {
   const response = await pool.query(
-    "SELECT branches.name AS branch,entries.amount,products.name AS product,users.name AS usuario,updated,id_entry FROM public.entries INNER JOIN public.users ON public.entries.fk_user = public.users.id_user INNER JOIN public.existence ON public.entries.fk_existence = public.existence.id_existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product ORDER BY id_entry DESC LIMIT 10"
+    "SELECT branches.name AS branch,entries.amount,products.name AS product,users.name AS usuario,public.existence.updated,id_entry FROM public.entries INNER JOIN public.users ON public.entries.fk_user = public.users.id_user INNER JOIN public.existence ON public.entries.fk_existence = public.existence.id_existence INNER JOIN public.branches ON public.existence.fk_branch = public.branches.id_branch INNER JOIN public.products ON public.existence.fk_product = public.products.id_product ORDER BY id_entry DESC LIMIT 10"
   );
 
   res.json(response.rows);
