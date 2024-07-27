@@ -1,5 +1,6 @@
 const { Pool } = require("pg");
 const moment = require('moment-timezone');
+
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
   moment.tz.setDefault('America/Lima');
     // Crea un objeto moment con la hora actual en Lima
@@ -55,8 +56,14 @@ const updateProductsById = async (req, res) => {
   }
 
   const saveImage = async(req, res)=> {
-    const response = await service.uploadImageService(req)
-    res.json(response)
+    try {
+      
+      const file = req.files.photo
+      const response = await service.uploadImageService(file)
+      return response
+  } catch (error) {
+      console.log(error);
+  }
   }
 
 module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById, saveImage };

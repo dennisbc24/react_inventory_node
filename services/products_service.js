@@ -1,7 +1,7 @@
 const { Pool } = require("pg");
 const config = require("../config/config");
 const moment = require("moment-timezone");
-const {uploadImage} = require('../helpers/cloudinary')
+const {uploadFile} = require('../helpers/cloudinary')
 const pool = new Pool({
   user: config.config.dbUser,
   host: config.config.dbHost,
@@ -90,9 +90,12 @@ class ProductsService {
 
     async uploadImageService(req){
         try {
-            console.log(req);
+            
+            console.log(req, 'servicio');
+            await uploadFile(req)
             /* const response = await uploadImage(req)
             return response */
+            console.log('imagen subida con exito');
         } catch (error) {
             console.log(error);
         }

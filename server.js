@@ -1,12 +1,15 @@
 const express = require("express");
-
+//libreria para subir archivos
+const fileUpload = require('express-fileupload');
 const cors = require('cors');
 
 const app = express();
+app.use(fileUpload())
 //esto para que el post reconozca el req.body 
 //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
 app.use(express.json());
 app.use(cors());
+
 
 app.use(express.json());   //esto para que el post reconozca el req.body //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
 app.use(cors());
