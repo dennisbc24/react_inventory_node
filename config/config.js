@@ -11,7 +11,13 @@ const config = {
   awsRegion: process.env.AWS_REGION,
   awsId: process.env.AWS_ACCESS_KEY,
   awsClave: process.env.AWS_SECRET_KEY,
-  awsName: process.env.AWS_BUCKET_NAME
+  awsName: process.env.AWS_BUCKET_NAME,
+
+  //cloudinary
+
+cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+cloudKey: process.env.CLOUDINARY_API_KEY,
+cloudSecret: process.env.CLOUDINARY_API_SECRET,
 };
 
 module.exports = { config };

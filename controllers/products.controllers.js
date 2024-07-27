@@ -54,4 +54,9 @@ const updateProductsById = async (req, res) => {
     res.json(response);
   }
 
-module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };
+  const saveImage = async(req, res)=> {
+    const response = await service.uploadImageService(req)
+    res.json(response)
+  }
+
+module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById, saveImage };
