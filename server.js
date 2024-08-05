@@ -1,10 +1,10 @@
 const express = require("express");
 //libreria para subir archivos
-const fileUpload = require('express-fileupload');
+//const fileUpload = require('express-fileupload');
 const cors = require('cors');
 
 const app = express();
-app.use(fileUpload())
+//app.use(fileUpload())
 //esto para que el post reconozca el req.body 
 //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
 app.use(express.json());
@@ -23,7 +23,6 @@ const port = 3000;
 app.use(express.static("dist"));
 
 const routerApi = require("./routers/index_Router");
-const { now } = require("mongoose");
 
 //esto para que el post reconozca el req.body 
 //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio

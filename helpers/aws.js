@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand, GetObjectAclCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
 const  fs  = require('fs')
 const { config } = require('../config/config');
 
@@ -57,26 +57,7 @@ async function getFile(fileName){
 
 }
 
-/* const storage = new S3({
-    region1,
-    accesKeyId1,
-    secretAccessKey1
-});
 
-const getBuckets = () => {
-    return storage.listBuckets().promise();
-};
-
-const uploadToBucket = (bucketName,file) => {
-    const stream = fs.createReadStream(file.tempFilePath);
-    const params = {
-        Bucket:bucketName,
-        Key:file.name,
-        Body:stream
-    };
-    return storage.upload(params).promise();
-};
- */
 module.exports = {
   //  getBuckets,
     //uploadToBucket,

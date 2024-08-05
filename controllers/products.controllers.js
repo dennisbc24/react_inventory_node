@@ -10,6 +10,7 @@ const service = new ProductsService()
 const config = require("../config/config");
 const { response } = require("express");
 
+
 const pool = new Pool({
   user: config.config.dbUser,
   host: config.config.dbHost,
@@ -55,15 +56,12 @@ const updateProductsById = async (req, res) => {
     res.json(response);
   }
 
-  const saveImage = async(req, res)=> {
-    try {
-      
-      const file = req.files.photo
-      const response = await service.uploadImageService(file)
-      return response
-  } catch (error) {
-      console.log(error);
-  }
-  }
+ /*  async function saveImage(buffer, mimetype) {
+    const base64 = `data:${mimetype};base64,${buffer.toString('base64')}`;
+    const result = await cloudinary.uploader.upload(base64, {
+      resource_type: 'auto',
+    });
+    return result;
+  } */
 
-module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById, saveImage };
+module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };

@@ -1,7 +1,7 @@
 const { Pool } = require("pg");
 const config = require("../config/config");
 const moment = require("moment-timezone");
-const {uploadFile} = require('../helpers/cloudinary')
+
 const pool = new Pool({
   user: config.config.dbUser,
   host: config.config.dbHost,
