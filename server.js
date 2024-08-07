@@ -1,10 +1,18 @@
 const express = require("express");
 //libreria para subir archivos
-//const fileUpload = require('express-fileupload');
+const fileUpload = require('express-fileupload');
 const cors = require('cors');
 
 const app = express();
-//app.use(fileUpload())
+//donde va a encontrar los archivos estaticos
+app.use(
+  fileUpload({
+    //esto es para que los archivos se guarden en una carpeta temporal del proyecto
+    useTempFiles: true,
+    tempFileDir: './uploads',
+    debug: true,
+  })
+);
 //esto para que el post reconozca el req.body 
 //tener en cuenta si el frontend y el backend estan en las misma ruta el body llegara vacio
 app.use(express.json());

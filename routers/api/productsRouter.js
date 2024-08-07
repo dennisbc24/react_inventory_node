@@ -13,9 +13,10 @@ router.post("/", postProduct)
 router.delete("/:id", deleteProductsById)
 
 
-router.post("/files",async (req, res) => {
-   
-  try {
+router.post("/files",async (req, res, next) => {
+  console.log(req.body);
+  
+    try {
     const imagen = req.files.photo
     //const datos = JSON.parse(req.body.datos)
 
