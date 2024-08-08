@@ -41,7 +41,11 @@ const deleteProductsById = async (req, res) => {
   };
   
 const postProduct = async (req, res) => {
-  const response = await service.create(req)
+  console.log('formData por recibir');
+  console.log(req.body);
+  console.log(req.files.photo);
+  //console.log(req);
+  //const response = await service.create(req)
   res.send(response);
 };
 

@@ -8,6 +8,12 @@ const accesKeyId1 = config.awsId;
 const secretAccessKey1 = config.awsClave;
 const bucketName = config.awsName;
 
+console.log(region1);
+console.log(accesKeyId1);
+console.log(secretAccessKey1);
+console.log(bucketName);
+
+
 const clientS3 = new S3Client({
     region: region1,
     credentials:{

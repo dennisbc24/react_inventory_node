@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {uploadFile} = require('../../helpers/aws')
+//const {uploadFile} = require('../../helpers/aws')
 
 const { latestUpdates, updateProductsById, getProducts, getProductsById ,postProduct, deleteProductsById, saveImage} = require('../../controllers/products.controllers')
 
@@ -14,16 +14,17 @@ router.delete("/:id", deleteProductsById)
 
 
 router.post("/files",async (req, res, next) => {
+  console.log('formData por recibir');
   console.log(req.body);
-  
+  console.log(req.files.photo);
     try {
     const imagen = req.files.photo
     //const datos = JSON.parse(req.body.datos)
 
-    const uploadPhoto = await uploadFile(imagen);
+    //const uploadPhoto = await uploadFile(imagen);
     //const arrayProductDB = Product.create(datos)
     //res.json(arrayProductDB);
-    console.log(uploadPhoto);
+    //console.log(uploadPhoto);
     
     res.json({message: 'archivo subido'})
 
