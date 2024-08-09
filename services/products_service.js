@@ -17,7 +17,7 @@ class ProductsService {
     constructor(){
         }
     async create(req){
-        const { name, cost, fk_supplier, lowest_price, list_price, amount, fk_branch, fk_user } = req.body;
+        const { name, cost, fk_supplier, lowest_price, list_price} = req.body;
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
       
         try {

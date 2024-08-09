@@ -45,7 +45,7 @@ const postProduct = async (req, res) => {
   console.log(req.body);
   console.log(req.files.photo);
   //console.log(req);
-  //const response = await service.create(req)
+  const response = await service.create(req)
   res.send(response);
 };
 
