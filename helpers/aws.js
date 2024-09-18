@@ -28,7 +28,7 @@ async function uploadFile(file){
     const stream = fs.createReadStream(file.tempFilePath)
     const uploadParams = {
         Bucket: bucketName,
-        Key: `products/${file.name}`,
+        Key: `products/${file.name}prueba1`,
         Body: stream
     }
 
