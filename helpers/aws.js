@@ -24,6 +24,7 @@ const clientS3 = new S3Client({
 
 //subir archivo
 async function uploadFile(file){
+    console.log(file.tempFilePath);
     const stream = fs.createReadStream(file.tempFilePath)
     const uploadParams = {
         Bucket: bucketName,

@@ -6,6 +6,7 @@ const moment = require('moment-timezone');
     // Crea un objeto moment con la hora actual en Lima
   const fechaActual = moment();
   const {ProductsService} = require('../services/products_service')
+  const {uploadFile} = require("../helpers/aws")
 const service = new ProductsService()
 const config = require("../config/config");
 const { response } = require("express");
@@ -45,8 +46,9 @@ const postProduct = async (req, res) => {
   console.log(req.body);
   console.log(req.files.photo);
   //console.log(req);
-  const response = await service.create(req)
-  res.send(response);
+  const uploadFileRequest = await uploadFile(req.files.photo)
+  //const response = await service.create(req)
+  //res.send(response);
 };
 
 const updateProductsById = async (req, res) => {
