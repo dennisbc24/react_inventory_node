@@ -71,7 +71,6 @@ class ProductsService {
             const { name, cost, lowest_price, list_price } = req.body;
             const id = req.params.id_product
             const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, lowest_price, list_price,fechaActual.toDate(), id] )
-            
             return `Product: ${id} updated successfully`
         } catch (error) {
             console.log(error);

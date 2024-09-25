@@ -28,7 +28,7 @@ async function uploadFile(file){
     const stream = fs.createReadStream(file.tempFilePath)
     const uploadParams = {
         Bucket: bucketName,
-        Key: `products/${file.name}prueba1`,
+        Key: `products/image-${file.name}`,
         Body: stream
     }
 
@@ -44,7 +44,6 @@ async function uploadFile(file){
       return res.status(500).send('Archivo subido pero no se pudo eliminar del servidor.');
     }
 console.log('file in backend removed');
-
 
 })}
 
@@ -72,7 +71,6 @@ async function getFile(fileName){
     return await clientS3.send(command)
 
 }
-
 
 module.exports = {
   //  getBuckets,

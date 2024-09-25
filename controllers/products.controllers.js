@@ -46,13 +46,20 @@ const postProduct = async (req, res) => {
   console.log(req.body);
   console.log(req.files.photo);
   //console.log(req);
-  const uploadFileRequest = await uploadFile(req.files.photo)
+  //const uploadFileRequest = await uploadFile(req.files.photo)
+  //console.log(uploadFileRequest);
+  
   //const response = await service.create(req)
   //res.send(response);
 };
 
 const updateProductsById = async (req, res) => {
-  const response = await service.update(req)
+  console.log(req.body);
+  console.log(req.files.photo);
+  const id = req.params.id_product
+  console.log(id);
+  
+  //const response = await service.update(req)
   res.json(response);  
   };
 
