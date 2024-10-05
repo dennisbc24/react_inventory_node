@@ -8,12 +8,6 @@ const accesKeyId1 = config.awsId;
 const secretAccessKey1 = config.awsClave;
 const bucketName = config.awsName;
 
-console.log(region1);
-console.log(accesKeyId1);
-console.log(secretAccessKey1);
-console.log(bucketName);
-
-
 const clientS3 = new S3Client({
     region: region1,
     credentials:{
@@ -23,20 +17,25 @@ const clientS3 = new S3Client({
 })
 
 //subir archivo
-async function uploadFile(file){
-    console.log(file.tempFilePath);
+async function uploadFile(file, name){
+    console.log('21',name);
+    console.log('22 file.path: ',file.tempFilePath);
     const stream = fs.createReadStream(file.tempFilePath)
+   console.log('24 name from aws helper: ', name);
+   console.log(name);
+   
+   
     const uploadParams = {
         Bucket: bucketName,
-        Key: `products/image-${file.name}`,
+        Key: name,
         Body: stream
     }
 
     const command = new PutObjectCommand(uploadParams)
-    const result = await clientS3.send(command)
-    console.log('resultado: ', result);
-    
+    const result = await clientS3.send(command)    
     console.log('file uploaded successfully');
+    return result
+    
  // Eliminar el archivo del servidor
  fs.unlink(file.tempFilePath, (unlinkErr) => {
     if (unlinkErr) {

@@ -54,16 +54,14 @@ const postProduct = async (req, res) => {
 };
 
 const updateProductsById = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files.photo);
+
+  //console.log('respuesta de aws:', uploadFileRequest);
   const id = req.params.id_product
   console.log(id);
   
-  //const response = await service.update(req)
+  const response = await service.update(req)
   res.json(response);  
   };
-
-
   const latestUpdates = async(req,res) => {
     const response = await service.getLatestUpdates()
     res.json(response);
