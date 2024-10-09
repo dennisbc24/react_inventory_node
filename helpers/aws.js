@@ -18,33 +18,31 @@ const clientS3 = new S3Client({
 
 //subir archivo
 async function uploadFile(file, name){
-    console.log('21',name);
-    console.log('22 file.path: ',file.tempFilePath);
     const stream = fs.createReadStream(file.tempFilePath)
-   console.log('24 name from aws helper: ', name);
-   console.log(name);
-   
-   
+   if (file.tempFilePath) {
     const uploadParams = {
         Bucket: bucketName,
-        Key: name,
+        Key: `products/image-${name}`,
         Body: stream
     }
-
     const command = new PutObjectCommand(uploadParams)
     const result = await clientS3.send(command)    
-    console.log('file uploaded successfully');
-    return result
     
  // Eliminar el archivo del servidor
  fs.unlink(file.tempFilePath, (unlinkErr) => {
     if (unlinkErr) {
       console.error('Error al eliminar el archivo:', unlinkErr);
       return res.status(500).send('Archivo subido pero no se pudo eliminar del servidor.');
+    }else{
+        console.log('file in backend removed');
     }
-console.log('file in backend removed');
+})
+   
+return result
+}
 
-})}
+
+}
 
 //eliminar archivo
 

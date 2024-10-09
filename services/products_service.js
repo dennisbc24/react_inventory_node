@@ -67,52 +67,70 @@ class ProductsService {
         }
     }
     async update(req){
+        console.log(req);
+        
+        console.log(req.params.id);
+        
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
-        console.log('71service update foto: ', req.files.photo);
-        console.log('72service update body: ', req.body);
-        console.log('73service update body: ', req.body.name);
-
        let nameFile2 = '' 
 let nameFile = req.body.name.replaceAll(' ','' )
-        console.log(nameFile, '79');
-        
-    switch (true) {
-      case req.files.photo.name.endsWith('.png'):
-        nameFile2 = `${nameFile}.png`
-        break;
-        case req.files.photo.name.endsWith('.jpg'):
-        nameFile2 = `${nameFile}.jpg`
-        break;
-        case req.files.photo.name.endsWith('.jpeg'):
-        nameFile2 = `${nameFile}.jpeg`
-        break;
-    
-      default:
-        nameFile2 = `${nameFile}.jpg`
-        break;
-    }
-    let nameFile3 = `products/image-${nameFile2}` 
-    console.log('107',nameFile2);
-    
-    let urlImage = `https://caja-for-many-products-dennis.s3.sa-east-1.amazonaws.com/products/image-${nameFile3}`
- console.log('98', urlImage);
- 
-        const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
-        console.log('respuesta de aws: ',uploadFileRequest);
-        
-        try {
-            const { name, cost, sugested_price, wholesale_price } = req.body;
-
-            const id = req.params.id_product
-            console.log('107', urlImage);
-            console.log(name, cost, sugested_price, wholesale_price);
+        if (req.files && req.files.photo) {
+            try {
+                switch (true) {
+                    case req.files.photo.name.endsWith('.png'):
+                      nameFile2 = `${nameFile}.png`
+                      break;
+                      case req.files.photo.name.endsWith('.jpg'):
+                      nameFile2 = `${nameFile}.jpg`
+                      break;
+                      case req.files.photo.name.endsWith('.jpeg'):
+                      nameFile2 = `${nameFile}.jpeg`
+                      break;
+                    default:
+                      nameFile2 = `${nameFile}.jpg`
+                      break;
+                  }  
+                  let nameFile3 = `products/image-${nameFile2}` 
+                  let urlImage = `https://caja-for-many-products-dennis.s3.sa-east-1.amazonaws.com/${nameFile3}`
+               
+                      const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
+                     
+                      const { name, cost, sugested_price, wholesale_price } = req.body;
+                const id = req.params.id        
+                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6  WHERE id_product = $7 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate(),urlImage ,id] )
+              return `Product: ${id} updated successfully`
+            } catch (error) {
+                console.log(error);
+                return error
+                
+            }
             
-            const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6  WHERE id_product = $7 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate(),urlImage ,id] )
-          return `Product: ${id} updated successfully`
-        } catch (error) {
-            console.log(error);
-            return error
+            }else{
+             nameFile2 = '' 
+             const { name, cost, sugested_price, wholesale_price } = req.body;
+                const id = req.params.id        
+                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate() ,id] )
+              return `Product: ${id} updated successfully`
         }
+
+            
+            
+    
+        // if (req.files && req.files.photo) {
+        //     try {
+                
+        //     } catch (error) {
+        //         console.log(error);
+        //         return error
+        //     }
+        // }else{
+        //     try {
+                
+        //     } catch (error) {
+                
+        //     }
+        // }
+        
     }
     async getLatestUpdates(){
         try {
@@ -127,7 +145,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
     async uploadImageService(req){
         try {
             
-            console.log(req, 'servicio');
+            
           //  await uploadFile(req)
             /* const response = await uploadImage(req)
             return response */

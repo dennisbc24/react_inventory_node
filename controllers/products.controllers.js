@@ -42,26 +42,25 @@ const deleteProductsById = async (req, res) => {
   };
   
 const postProduct = async (req, res) => {
-  console.log('formData por recibir');
-  console.log(req.body);
-  console.log(req.files.photo);
-  //console.log(req);
+  
   //const uploadFileRequest = await uploadFile(req.files.photo)
   //console.log(uploadFileRequest);
   
-  //const response = await service.create(req)
-  //res.send(response);
+  const response = await service.create(req)
+  res.send(response);
 };
 
 const updateProductsById = async (req, res) => {
 
   //console.log('respuesta de aws:', uploadFileRequest);
-  const id = req.params.id_product
+  const id = req.params.id
   console.log(id);
   
   const response = await service.update(req)
   res.json(response);  
   };
+
+  
   const latestUpdates = async(req,res) => {
     const response = await service.getLatestUpdates()
     res.json(response);
