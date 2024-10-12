@@ -19,7 +19,10 @@ class ProductsService {
         }
     async create(req){
         const { name, cost, fk_supplier, lowest_price, list_price} = req.body;
+        console.log(req.body);
+        
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
+      console.log(name, cost, fk_supplier, lowest_price, list_price);
       
         try {
                 const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price,fk_supplier]);
