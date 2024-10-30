@@ -70,9 +70,9 @@ class ProductsService {
         }
     }
     async update(req){
-        console.log(req);
         
-        console.log(req.params.id);
+
+        const id_product = req.params.id
         
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
        let nameFile2 = '' 
@@ -81,16 +81,16 @@ let nameFile = req.body.name.replaceAll(' ','' )
             try {
                 switch (true) {
                     case req.files.photo.name.endsWith('.png'):
-                      nameFile2 = `${nameFile}.png`
+                      nameFile2 = `${id_product}.png`
                       break;
                       case req.files.photo.name.endsWith('.jpg'):
-                      nameFile2 = `${nameFile}.jpg`
+                      nameFile2 = `${id_product}.jpg`
                       break;
                       case req.files.photo.name.endsWith('.jpeg'):
-                      nameFile2 = `${nameFile}.jpeg`
+                      nameFile2 = `${id_product}.jpeg`
                       break;
                     default:
-                      nameFile2 = `${nameFile}.jpg`
+                      nameFile2 = `${id_product}.jpg`
                       break;
                   }  
                   let nameFile3 = `products/image-${nameFile2}` 
