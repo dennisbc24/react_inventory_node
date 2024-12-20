@@ -23,7 +23,7 @@ class SalesService{
     }
     async getByDate(req){
         const date = req.query.date;
-        const response = await pool.query("SELECT id_sale AS id,users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
+        const response = await pool.query("SELECT id_sale AS id,users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour ASC",    [date]  );
         return response.rows
     }
     async getByMonth(req){
@@ -97,7 +97,11 @@ class SalesService{
       const response = await pool.query("SELECT EXTRACT(YEAR FROM date) AS año,EXTRACT(MONTH FROM date) AS mes,SUM(amount) AS suma_mes FROM sales WHERE fk_product = $1 AND date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months'GROUP BY EXTRACT(YEAR FROM date),EXTRACT(MONTH FROM date)ORDER BY año, mes", [fk_id_product] );
       return response.rows
   }
-
+async getSaleByProduct(req) {
+      const fk_id_product = req.query.fk_id_product;
+      const response = await pool.query("SELECT id_sale AS Codigo,public.branches.name AS Sucursal, public.users.name AS Vendedor, date AS Fecha,hour AS Hora, amount AS Cantidad,product AS Articulo, p_total, p_unit, revenue AS Ganancia,  customer AS Cliente	FROM public.sales INNER JOIN public.branches on public.sales.fk_id_branch = public.branches.id_branch	INNER join public.users on public.sales.fk_id_user = public.users.id_user	WHERE sales.fk_product = $1	ORDER BY sales.date DESC	LIMIT 50;", [fk_id_product] );
+      return response.rows
+}
 }
 
 module.exports = {SalesService}

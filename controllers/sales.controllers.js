@@ -44,6 +44,10 @@ const getSalesMonthy = async (req, res) => {
   const response = await service.salesSumMonthly(req)
   res.json(response)
 };
+const getByProduct = async (req, res) => {
+  const response = await service.getSaleByProduct(req)
+  res.json(response)
+};
 
 const postSales = async (req, res, next) => {
   // const { branch, date, amount, product, p_total, p_unit, revenue } = req.body;
@@ -80,4 +84,4 @@ module.exports = {
   postSales,
   getSalesByMonth,
   postVendings,
-  deleteSalesById,getSalesMonthy };
+  deleteSalesById,getSalesMonthy,getByProduct };
