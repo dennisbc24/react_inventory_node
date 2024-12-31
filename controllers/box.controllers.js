@@ -3,6 +3,10 @@ const {SpendingService} = require('../services/spending_service')
 const config = require("../config/config");
 const { response } = require("express");
 const service = new SpendingService()
+const {Box} = require('../services/box_service')
+const service2 = new Box()
+
+
 
 const pool = new Pool({
   user: config.config.dbUser,
@@ -14,7 +18,10 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 });
-
+const getByUSer = async(req,res)=>{
+const response = await service2.getByUser(req)
+res.json(response)
+}
 const getBox = async (req, res) => {
   const response = await service.get()
   res.json(response);
@@ -35,10 +42,13 @@ const postBox = async (req, res) => {
 
 const deleteBoxById = async (req, res) => {
   const response = await service.delete(req)
- 
   res.json(response);
   };
-  
+
+const getDebts = async (req,res)=>{
+  const debts = await service2.getDebts()
+  res.json(debts)
+};
 
 
-module.exports = {getBox, postBox, deleteBoxById, getByMonth}
+module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts}
