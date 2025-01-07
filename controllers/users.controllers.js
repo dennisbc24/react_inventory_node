@@ -1,3 +1,4 @@
+const { response } = require('express');
 const {UserService} = require('../services/users_service')
 const service = new UserService();
 const passport = require('passport')
@@ -13,5 +14,10 @@ const createUser = async (req, res) => {
   res.json(response);  
 };
 
-
-module.exports = {getUsers, createUser}
+const getCash = async (req, res) => { 
+  console.log(req.query.id);
+  
+  const response = await service.getCash(req.query.id)
+  res.json(response);
+};
+module.exports = {getUsers, createUser, getCash}

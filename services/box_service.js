@@ -52,7 +52,51 @@ class Box {
       
     }
   }
-    
+  async newDebt(req) {
+    try {
+      const {debt, expiration_date, description, currency, fk_user} = req.body      
+      const createDebt = await pool.query('INSERT INTO public.debts(	debt, expiration_date, description, currency, fk_user)	VALUES ($1, $2, $3, $4, $5);', [debt, expiration_date, description, currency, fk_user])
+      return 'new debt created sucessfully'
+    } catch (error) {
+      console.error(error);
+      
+    }
+  }
+  async getTransactionByUser(req)  {
+ try {
+  
+        
+  const  user  = req.query.user;
+  const date = req.query.date;
+
+
+  const year = date.substring(0,4)
+  const month = date.substring(5,7)
+ 
+  const response = await pool.query("select id_money_movement, concept, date, amount, bill as gasto, users.name as Vendedor from box inner join users  on box.fk_user = users.id_user WHERE EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2 and box.fk_user = $3 order by date DESC limit 30;",[ year,month, user])
+  console.log(response);
+  
+  return response.rows
+ } catch (error) {
+  console.error(error);
+  
+ }
+  }  
+
+  async getLastSpends(req) {
+    try {  
+      const  user  = req.query.user;
+         
+      const response = await pool.query("select concept, date, amount from box inner join users  on box.fk_user = users.id_user where fk_user = $1 order by date DESC limit 15;;",[user])
+      console.log(response);
+      
+      return response.rows
+     } catch (error) {
+      console.error(error);
+      
+     }
+  }
 }
-    
+
+  
 module.exports = {Box}

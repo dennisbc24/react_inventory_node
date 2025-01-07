@@ -49,6 +49,17 @@ const getDebts = async (req,res)=>{
   const debts = await service2.getDebts()
   res.json(debts)
 };
+const postDebt = async (req,res)=>{
+  const newDebt = await service2.newDebt(req)
+  res.json(newDebt)
+}
+const getTransactionByUser = async (req, res) =>{
+const getTransByUser = await service2.getTransactionByUser(req)
+res.json(getTransByUser)
+}
+const getLastSpends = async (req,res) =>{
+  const response = await service2.getLastSpends(req)
+  res.json(response)
+}
 
-
-module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts}
+module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getLastSpends}

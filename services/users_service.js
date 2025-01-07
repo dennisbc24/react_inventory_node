@@ -52,6 +52,14 @@ class UserService {
             console.log(error);
         }
     }
+    async  getCash(id) {
+        try {
+            const response = await pool.query("SELECT cash, name FROM public.users where id_user=$1", [id])
+            return response.rows
+        } catch (error) {
+            
+        }
+    }
 }
 
 module.exports = {UserService}

@@ -78,10 +78,17 @@ const deleteSalesById = async (req, res) => {
   res.send(response)
 }
 
+const getLastSales = async (req,res)=>{
+  const response = await service.getLastSales(req)
+  res.json(response)
+}
+
 module.exports = {
   getSales,
   getSalesByDate,
   postSales,
   getSalesByMonth,
   postVendings,
-  deleteSalesById,getSalesMonthy,getByProduct };
+  deleteSalesById,getSalesMonthy,getByProduct,
+  getLastSales
+};
