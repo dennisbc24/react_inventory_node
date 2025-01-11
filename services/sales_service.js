@@ -104,7 +104,7 @@ async getSaleByProduct(req) {
 }
 async getLastSales(req){
   const user = req.query.user
-  const response = await pool.query("SELECT product AS Producto,date, p_total, hour FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user   WHERE users.id_user = $1 ORDER BY date DESC, hour desc limit 15;", [user])
+  const response = await pool.query("SELECT product AS Producto,date, p_total FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user   WHERE users.id_user = $1 ORDER BY date DESC, hour desc limit 15;", [user])
   return response.rows
 }
 }
