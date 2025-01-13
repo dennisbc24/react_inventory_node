@@ -96,7 +96,21 @@ class Box {
       
      }
   }
-}
+  
+  async postMoneyTransaction (req){
+    const {concept, amount, userA, userB} = req.body
+
+   try {
+    const response = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, -$2, $3); INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $4); UPDATE public.users 	SET cash=cash+$2 WHERE id_user=$4; UPDATE public.users SET cash=cash-$2 WHERE id_user=$3;", [concept, amount, userA, userB])
+     //INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', -100, 3); INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', 100, 1); UPDATE public.users 	SET cash=cash+100 WHERE id_user=1; UPDATE public.users SET cash=cash-100 WHERE id_user=3; 
+       return "transaction money registered sucessfully"
+   } catch (error) {
+    console.error(error);
+    
+   } 
+
+
+}}
 
   
 module.exports = {Box}
