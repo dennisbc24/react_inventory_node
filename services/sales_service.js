@@ -51,6 +51,8 @@ class SalesService{
       moment.tz.setDefault("America/Lima");
       const horaActual = fechaActual.format("HH:mm:ss"); // Formatea la hora
     
+      const changeCash = await pool.query("UPDATE public.users 	SET cash = cash + $1 WHERE id_user = $2;", [amount, fk_id_user])
+
       if (customer == "") {
         const response = await pool.query(
           "INSERT INTO sales (date, amount, p_unit, p_total,revenue,hour,fk_product, fk_id_user, fk_id_branch, product, branch) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
@@ -79,11 +81,14 @@ class SalesService{
         const amount = response.rows[0].amount
         const product = response.rows[0].fk_product
         const branch = response.rows[0].fk_id_branch
+        const user = response.rows[0].fk_id_user
       
         const responseUpdateExistence = await pool.query("UPDATE existence SET amount = amount + $1 WHERE fk_branch = $2 AND fk_product = $3 ;",[amount, branch, product]);
       
        const deleteSale = await pool.query("DELETE FROM sales WHERE id_sale=$1", [id] )
         
+       const changeCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [amount, user])
+
        return `Product: ${id} deleted successfully`
        
       } else {

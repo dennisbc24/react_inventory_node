@@ -39,13 +39,15 @@ class SpendingService {
     }
     async post(req){
         try {
-            const { concept, date ,amount, branch, bill} = req.body;
-  
+            const { concept, date ,amount, user, bill} = req.body;
+    const money = -amount
     console.log(req.body);
-    const response = await pool.query('INSERT INTO box (concept, date ,amount, branch, bill) VALUES($1, $2, $3, $4, $5)', [concept, date ,amount, branch, bill]);
-    return 'money movement created'
-  
+    const response = await pool.query('INSERT INTO box (concept, date, amount, bill, fk_user) VALUES($1, $2, $3, $4, $5)', [concept, date, money, bill, user]);
+    const changeCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [amount, user])
+
     
+    return 'money movement created'
+      
         } catch (error) {
             console.log(error);
         }

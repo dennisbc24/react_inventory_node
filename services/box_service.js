@@ -99,9 +99,14 @@ class Box {
   
   async postMoneyTransaction (req){
     const {concept, amount, userA, userB} = req.body
-
+    console.log(concept, amount, userA, userB);
+     const negativeAmount = -amount
    try {
-    const response = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, -$2, $3); INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $4); UPDATE public.users 	SET cash=cash+$2 WHERE id_user=$4; UPDATE public.users SET cash=cash-$2 WHERE id_user=$3;", [concept, amount, userA, userB])
+    const response1 = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $3);", [concept, negativeAmount, userA])
+    const response2 = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $3);", [concept, amount, userB])
+    const response3 = await pool.query("UPDATE public.users 	SET cash=cash+ $1 WHERE id_user=$2;", [amount, userB])
+    const response4 = await pool.query("UPDATE public.users SET cash=cash- $1 WHERE id_user=$2;", [amount, userA])
+
      //INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', -100, 3); INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', 100, 1); UPDATE public.users 	SET cash=cash+100 WHERE id_user=1; UPDATE public.users SET cash=cash-100 WHERE id_user=3; 
        return "transaction money registered sucessfully"
    } catch (error) {
