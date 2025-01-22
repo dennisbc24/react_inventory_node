@@ -62,6 +62,22 @@ class Box {
       
     }
   }
+
+  async payDebt(req) {
+    try {
+      console.log(req.body);
+      
+      const {idDebt, total, concept, user} = req.body
+
+      const negativeAmount = -total
+      const payADebt = await pool.query('UPDATE public.debts SET  paid = true	WHERE id_debts = $1;', [idDebt])
+      const updateCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [total, user])
+      const registerSpend = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $3);", [concept, negativeAmount, user])
+  } catch (error) {
+      console.error(error);
+      
+    }
+  }
   async getTransactionByUser(req)  {
  try {
   
@@ -104,7 +120,7 @@ class Box {
    try {
     const response1 = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $3);", [concept, negativeAmount, userA])
     const response2 = await pool.query("INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ($1, $2, $3);", [concept, amount, userB])
-    const response3 = await pool.query("UPDATE public.users 	SET cash=cash+ $1 WHERE id_user=$2;", [amount, userB])
+    const response3 = await pool.query("UPDATE public.users 	SET cash = cash + $1 WHERE id_user = $2;", [amount, userB])
     const response4 = await pool.query("UPDATE public.users SET cash=cash- $1 WHERE id_user=$2;", [amount, userA])
 
      //INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', -100, 3); INSERT INTO public.box(	concept, amount, fk_user) 	VALUES ('TRD venta domingo miguel', 100, 1); UPDATE public.users 	SET cash=cash+100 WHERE id_user=1; UPDATE public.users SET cash=cash-100 WHERE id_user=3; 

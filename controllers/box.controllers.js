@@ -66,5 +66,8 @@ const postMoneyTransaction = async (req, res) => {
   const sendBody = await service2.postMoneyTransaction(req)
   res.json(sendBody)
 }
-
-module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getLastSpends, postMoneyTransaction}
+const savePayment = async (req, res)  => {
+  const savePay = await service2.payDebt(req)
+  res.json(savePay)
+}
+module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getLastSpends, postMoneyTransaction, savePayment}
