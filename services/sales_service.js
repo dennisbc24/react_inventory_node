@@ -44,6 +44,7 @@ class SalesService{
     async register(req){
 
     const {date,amount,p_total,p_unit,revenue,customer,fk_id_product,fk_id_user,fk_id_branch,product,branch} = req.body;
+    console.log(date,amount,p_total,p_unit,revenue,customer,fk_id_product,fk_id_user,fk_id_branch,product,branch);
     
       // Crea un objeto moment con la hora actual en Lima
     
@@ -51,7 +52,7 @@ class SalesService{
       moment.tz.setDefault("America/Lima");
       const horaActual = fechaActual.format("HH:mm:ss"); // Formatea la hora
     
-      const changeCash = await pool.query("UPDATE public.users 	SET cash = cash + $1 WHERE id_user = $2;", [amount, fk_id_user])
+      const changeCash = await pool.query("UPDATE public.users 	SET cash = cash + $1 WHERE id_user = $2;", [p_total, fk_id_user])
 
       if (customer == "") {
         const response = await pool.query(
@@ -78,6 +79,7 @@ class SalesService{
       if (ask.rows[0].exists==true) {
         const response = await pool.query("SELECT * FROM sales WHERE id_sale=$1", [id] )
         console.log(response.rows);
+        const p_total = response.rows[0].p_total
         const amount = response.rows[0].amount
         const product = response.rows[0].fk_product
         const branch = response.rows[0].fk_id_branch
@@ -87,7 +89,7 @@ class SalesService{
       
        const deleteSale = await pool.query("DELETE FROM sales WHERE id_sale=$1", [id] )
         
-       const changeCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [amount, user])
+       const changeCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [p_total, user])
 
        return `Product: ${id} deleted successfully`
        
