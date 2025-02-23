@@ -70,8 +70,6 @@ class ProductsService {
         }
     }
     async update(req){
-        
-
         const id_product = req.params.id
         
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
@@ -111,7 +109,9 @@ let nameFile = req.body.name.replaceAll(' ','' )
             }else{
              nameFile2 = '' 
              const { name, cost, sugested_price, wholesale_price } = req.body;
-                const id = req.params.id        
+                const id = req.params.id   
+                console.log(name, cost, sugested_price, wholesale_price);
+                     
                 const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate() ,id] )
               return `Product: ${id} updated successfully`
         }
