@@ -34,5 +34,21 @@ const getSummaries = async (req, res) => {
       
       
     }
+  const getSummariesByDay = async (req, res) => {
+    try {
+      const month = req.query.month
+    const year = req.query.year
+    console.log(month)
+    console.log(year)
+    ;
+    
+    const response = await pool.query("SELECT DATE(date) AS dia, SUM(p_total) AS total_ventas, SUM(revenue) AS ganancia       FROM sales  WHERE       EXTRACT(YEAR FROM date) = $1 AND EXTRACT(MONTH FROM date) = $2  GROUP BY dia  ORDER BY dia;",[year,month]);
+    res.json(response.rows);
+    } catch (error) {
+      console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' }); 
+    }
+    
+  }
 
-module.exports = {getSummaries, getSummaryByMonth};
+module.exports = {getSummaries, getSummaryByMonth, getSummariesByDay};
