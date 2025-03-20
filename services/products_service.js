@@ -161,8 +161,5 @@ let nameFile = req.body.name.replaceAll(' ','' )
  
 module.exports = {ProductsService}
 
-    
- 
-  
 
   

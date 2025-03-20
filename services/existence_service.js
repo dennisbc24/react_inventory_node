@@ -20,8 +20,10 @@ class ExistenceService {
     }
     
     async updateCount (body) {
-        const { id_product, id_branch, count } = body;
-
+        const { id_product, id_branch, count, id_existence } = body;
+        console.log(body);
+        
+      if (id_branch != undefined && id_product != undefined && count != undefined) {
         try {
             
           const query = await pool.query('UPDATE existence SET amount=$1 WHERE fk_branch=$2 AND fk_product=$3', [count,id_branch, id_product ]);
@@ -32,7 +34,23 @@ class ExistenceService {
         } catch (error) {
           console.log(error);
         }
+        
+      }
+      if (id_existence != undefined && count != undefined) {
+        try {
+            
+          const query = await pool.query('UPDATE existence SET amount=$1 WHERE id_existence=$2', [count,id_existence]);
+      
+        const message = `count product updated`;
+        return message;
+                
+        } catch (error) {
+          console.log(error);
+        }
+        
+      }
     }
 }
 
 module.exports = {ExistenceService}
+
