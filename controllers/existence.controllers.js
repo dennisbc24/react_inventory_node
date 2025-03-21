@@ -119,5 +119,8 @@ const UpdateExistenceCount = async (req, res) => {
   console.log(req.body)
   res.json(response);  
 };
-
-module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount };
+const getInShortSupply = async (req, res) => {
+  const response = await service.getInShortSupply()
+  res.json(response);  
+};
+module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply };
