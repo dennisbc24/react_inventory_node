@@ -105,6 +105,10 @@ const getInventaryByBranch = async (req, res) => {
   res.json(response.rows);
 };
 
+const getInventaryInStock = async (req, res) => {
+  const response = await pool.query("SELECT products.name AS product, SUM(existence.amount) AS total_amount, products.cost AS costo FROM existence INNER JOIN branches ON existence.fk_branch = branches.id_branch INNER JOIN products ON existence.fk_product = products.id_product GROUP BY products.name, products.cost HAVING SUM(existence.amount) >= 1 ORDER BY total_amount ASC, LOWER(products.name) ASC;");
+  res.json(response.rows);
+}
 
 const getInventaryByProductName = async (req, res) => {
   const keyWord= req.query.keyWord
@@ -123,4 +127,4 @@ const getInShortSupply = async (req, res) => {
   const response = await service.getInShortSupply()
   res.json(response);  
 };
-module.exports = { postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply };
+module.exports = { getInventaryInStock, postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply };
