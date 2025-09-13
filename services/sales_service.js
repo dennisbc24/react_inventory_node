@@ -24,7 +24,7 @@ class SalesService{
     }
     async getByDate(req){
         const date = req.query.date;
-        const response = await pool.query("SELECT id_sale AS id,users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
+        const response = await pool.query("SELECT users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
         return response.rows
     }
     async getByMonth(req){
