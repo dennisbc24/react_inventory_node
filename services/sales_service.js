@@ -17,7 +17,8 @@ class SalesService{
     constructor(){}
     async get(){
         const response = await pool.query(
-            "SELECT * FROM sales ORDER BY date DESC, hour DESC LIMIT 5"
+            "SELECT date AS Fecha,amount AS Cantidad, product AS Producto,p_total,p_unit,revenue AS Ganancia,hour AS Hora,customer AS Cliente FROM sales ORDER BY date DESC, hour DESC LIMIT 5"
+            
           );
           return response.rows
     }
