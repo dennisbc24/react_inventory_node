@@ -83,12 +83,28 @@ const getLastSales = async (req,res)=>{
   res.json(response)
 }
 
+const getSumSalesToday = async (req,res)=>{
+  const response = await service.getSumSalesToday(req)
+  res.json(response)
+}
+const getSumRevenueToday = async (req,res)=>{
+  const response = await service.getSumRevenueToday(req)
+  res.json(response)
+}
+const getTopSellingProducts = async (req,res)=>{
+  const response = await service.getTopSellingProducts(req)
+  res.json(response)  
+}
+
 module.exports = {
+  getTopSellingProducts,
   getSales,
   getSalesByDate,
   postSales,
   getSalesByMonth,
   postVendings,
   deleteSalesById,getSalesMonthy,getByProduct,
-  getLastSales
+  getLastSales,
+  getSumSalesToday,
+  getSumRevenueToday
 };

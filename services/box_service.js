@@ -45,7 +45,7 @@ class Box {
     
   async getDebts(){
     try {
-      const debts = await pool.query('SELECT * FROM public.debts ORDER BY expiration_date ASC ')
+      const debts = await pool.query('SELECT * FROM public.debts where  paid = false ORDER BY expiration_date ASC ')
       return debts.rows
     } catch (e) {
       console.error(e);

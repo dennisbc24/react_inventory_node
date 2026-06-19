@@ -42,36 +42,21 @@ const deleteProductsById = async (req, res) => {
   };
   
 const postProduct = async (req, res) => {
-  
-  //const uploadFileRequest = await uploadFile(req.files.photo)
-  //console.log(uploadFileRequest);
-  
   const response = await service.create(req)
   res.send(response);
 };
 
 const updateProductsById = async (req, res) => {
-
-  //console.log('respuesta de aws:', uploadFileRequest);
   const id = req.params.id
   console.log(id);
   
   const response = await service.update(req)
   res.json(response);  
   };
-
   
   const latestUpdates = async(req,res) => {
     const response = await service.getLatestUpdates()
     res.json(response);
   }
-
- /*  async function saveImage(buffer, mimetype) {
-    const base64 = `data:${mimetype};base64,${buffer.toString('base64')}`;
-    const result = await cloudinary.uploader.upload(base64, {
-      resource_type: 'auto',
-    });
-    return result;
-  } */
 
 module.exports = {latestUpdates, updateProductsById, getProducts, postProduct, getProductsById, deleteProductsById };

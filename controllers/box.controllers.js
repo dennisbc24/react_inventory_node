@@ -6,8 +6,6 @@ const service = new SpendingService()
 const {Box} = require('../services/box_service')
 const service2 = new Box()
 
-
-
 const pool = new Pool({
   user: config.config.dbUser,
   host: config.config.dbHost,
@@ -36,8 +34,6 @@ const getByMonth = async (req, res) => {
 const postBox = async (req, res) => {
   const response = await service.post(req)
   res.send(response);
-  
-  
 };
 
 const deleteBoxById = async (req, res) => {

@@ -18,14 +18,7 @@ router.post("/files",async (req, res, next) => {
   console.log(req.body);
   console.log(req.files.photo);
     try {
-    const imagen = req.files.photo
-    //const datos = JSON.parse(req.body.datos)
-
-    //const uploadPhoto = await uploadFile(imagen);
-    //const arrayProductDB = Product.create(datos)
-    //res.json(arrayProductDB);
-    //console.log(uploadPhoto);
-    
+    const imagen = req.files.photo    
     res.json({message: 'archivo subido'})
 
   }

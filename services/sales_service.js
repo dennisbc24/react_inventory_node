@@ -96,9 +96,7 @@ class SalesService{
        
       } else {
         return `Product: ${id} no existe`
-      }
-      
-      
+      }  
     }
     async salesSumMonthly(req){
       const fk_id_product = req.query.fk_id_product;
@@ -115,6 +113,23 @@ async getLastSales(req){
   const response = await pool.query("SELECT product AS Producto,date, p_total FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user   WHERE users.id_user = $1 ORDER BY date DESC, hour desc limit 15;", [user])
   return response.rows
 }
+async getSumSalesToday(req){
+  const date = req.query.date
+  console.log(date);
+  
+  const response = await pool.query("SELECT SUM(p_total) AS Venta_Total_Hoy FROM public.sales WHERE date = $1;", [date])
+  return response.rows
 }
 
+async getSumRevenueToday(req){
+  const date = req.query.date
+  console.log(date);
+  const response = await pool.query("SELECT SUM(revenue) AS Ganancia_Total_Hoy FROM public.sales WHERE date = $1;", [date])
+  return response.rows
+}
+ async getTopSellingProducts(req){
+  const response = await pool.query("SELECT products.name as producto, SUM(revenue) AS ganancia, SUM(amount) as cantidad, url_image as img FROM sales INNER join products on sales.fk_product = products.id_product WHERE     date >= CURRENT_DATE - INTERVAL '6 months' GROUP BY     products.name, img ORDER BY    ganancia DESC LIMIT 20;") 
+  return response.rows
+}
+}
 module.exports = {SalesService}

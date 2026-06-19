@@ -114,26 +114,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                      
                 const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate() ,id] )
               return `Product: ${id} updated successfully`
-        }
-
-            
-            
-    
-        // if (req.files && req.files.photo) {
-        //     try {
-                
-        //     } catch (error) {
-        //         console.log(error);
-        //         return error
-        //     }
-        // }else{
-        //     try {
-                
-        //     } catch (error) {
-                
-        //     }
-        // }
-        
+        }        
     }
     async getLatestUpdates(){
         try {

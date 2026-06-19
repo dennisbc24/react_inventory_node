@@ -61,7 +61,7 @@ const postEntries = async (req, res) => {
           ]
         );
       }
-      console.log('entry created successfully');
+      console.log('entry created successfully line');
   } catch (e) {
     console.error(e);
   }

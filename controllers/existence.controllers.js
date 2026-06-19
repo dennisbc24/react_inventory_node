@@ -127,4 +127,17 @@ const getInShortSupply = async (req, res) => {
   const response = await service.getInShortSupply()
   res.json(response);  
 };
-module.exports = { getInventaryInStock, postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply };
+
+const getInventoryValue = async (req, res) => {
+  const response = await service.getInventoryValue()
+  res.json(response);  
+}
+const getInventoryValueByProduct = async (req, res) => {
+  const response = await service.getInventoryValueByProduct()
+  res.json(response);  
+}
+const getStockLow = async (req, res) => {
+  const response = await service.getStockLow()
+  res.json(response);  
+}
+module.exports = {getStockLow, getInventoryValueByProduct, getInventoryValue, getInventaryInStock, postExistence, getExistenceJoin, postExistence_Vendings,getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply };
