@@ -95,8 +95,13 @@ const getTopSellingProducts = async (req,res)=>{
   const response = await service.getTopSellingProducts(req)
   res.json(response)  
 }
+const getBestProducts = async (req,res)=>{
+  const response = await service.getBestProducts(req)
+  res.json(response)  
+}
 
 module.exports = {
+  getBestProducts,
   getTopSellingProducts,
   getSales,
   getSalesByDate,

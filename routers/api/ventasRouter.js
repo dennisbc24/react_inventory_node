@@ -3,7 +3,7 @@ const createVentaSchema = require("../../schemas/ventas.schema");
 
 const router = express.Router();
 
-const { getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
+const { getBestProducts,getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
 
 router.get("/", getSales);
 router.get("/salesByDate", getSalesByDate);
@@ -17,6 +17,8 @@ router.get("/topSellingProducts", getTopSellingProducts)
 router.post("/", postSales);
 router.post("/vendings", postVendings)
 router.delete("/", deleteSalesById)
+router.get("/bestProducts", getBestProducts)
+
 
 
 module.exports = router;

@@ -131,5 +131,10 @@ async getSumRevenueToday(req){
   const response = await pool.query("SELECT products.name as producto, SUM(revenue) AS ganancia, SUM(amount) as cantidad, url_image as img FROM sales INNER join products on sales.fk_product = products.id_product WHERE     date >= CURRENT_DATE - INTERVAL '6 months' GROUP BY     products.name, img ORDER BY    ganancia DESC LIMIT 20;") 
   return response.rows
 }
+async getBestProducts(req){
+  const response = await pool.query("SELECT    s.fk_product,    p.name AS producto,    SUM(s.amount) AS total_unidades_vendidas,    SUM(s.revenue) AS ganancia_total,    COUNT(*) AS cantidad_ventas,    COALESCE(e.stock_actual, 0) AS stock_actual FROM public.sales s INNER JOIN public.products p     ON s.fk_product = p.id_product LEFT JOIN (    SELECT         fk_product,        SUM(amount) AS stock_actual    FROM public.existence     GROUP BY fk_product) e    ON s.fk_product = e.fk_product WHERE s.date >= CURRENT_DATE - INTERVAL '12 months'GROUP BY    s.fk_product,    p.name,    e.stock_actual ORDER BY	ganancia_total DESC,	stock_actual DESC, total_unidades_vendidas DESC LIMIT 100;")   
+  return response.rows 
 }
+}
+
 module.exports = {SalesService}

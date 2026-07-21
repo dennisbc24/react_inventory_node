@@ -62,7 +62,7 @@ class ExistenceService {
         const query = await pool.query("SELECT     existence.id_existence AS exist,    products.name AS nombre,     products.cost AS costo,     (products.cost * existence.amount) AS valor, products.id_product as idpro,    SUM(existence.amount) AS total FROM public.existence INNER JOIN products     ON existence.fk_product = products.id_product GROUP BY     existence.id_existence,    products.name,    products.cost,    existence.amount, 	idpro ORDER BY valor DESC LIMIT 30;"); 
     return query.rows;    }
     async getStockLow() {
-        const query = await pool.query("          SELECT     p.id_product,    p.name AS nombre,    p.cost AS costo,    SUM(e.amount) AS suma_total,     p.cost * SUM(e.amount) AS valor FROM     public.existence e INNER JOIN products p ON e.fk_product = p.id_product GROUP BY     p.id_product,     p.name,     p.cost HAVING SUM(e.amount) > 0 ORDER BY     suma_total ASC, costo desc LIMIT 50;");
+        const query = await pool.query("          SELECT     p.id_product,    p.name AS nombre,    p.cost AS costo,    SUM(e.amount) AS suma_total,     p.cost * SUM(e.amount) AS valor, url_image FROM     public.existence e INNER JOIN products p ON e.fk_product = p.id_product GROUP BY     p.id_product,     p.name,     p.cost HAVING SUM(e.amount) > 0 ORDER BY     suma_total ASC, costo desc LIMIT 50;");
         return query.rows;
     }
   }
