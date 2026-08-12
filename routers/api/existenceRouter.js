@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const { checkRole } = require('../../middlewares/auth.handler')
 
 
 const {getStockLow,getInventoryValueByProduct,getInventoryValue,getInventaryInStock, postExistence, getExistenceJoin, postExistence_Vendings, getInventaryByBranch, getInventaryByProductName, UpdateExistenceCount, getInShortSupply } = require('../../controllers/existence.controllers')
 
-router.post("/", postExistence)
+router.post("/", checkRole(['admin']), postExistence)
 router.get("/", getExistenceJoin)
 router.get("/shortSupply", getInShortSupply)
 router.get("/inventoryValue", getInventoryValue)

@@ -1,5 +1,6 @@
 const express = require("express");
 const createVentaSchema = require("../../schemas/ventas.schema");
+const { checkRole } = require('../../middlewares/auth.handler')
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/sumRevenueToday", getSumRevenueToday)
 router.get("/topSellingProducts", getTopSellingProducts)
 router.post("/", postSales);
 router.post("/vendings", postVendings)
-router.delete("/", deleteSalesById)
+router.delete("/", checkRole(['admin']), deleteSalesById)
 router.get("/bestProducts", getBestProducts)
 
 

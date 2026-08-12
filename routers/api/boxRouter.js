@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { checkRole } = require('../../middlewares/auth.handler')
 
 
 const { getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getLastSpends, postMoneyTransaction, savePayment} = require('../../controllers/box.controllers')
@@ -11,10 +12,10 @@ router.get("/debts", getDebts)
 router.get("/byMonth", getByMonth)
 router.get("/lastSpends", getLastSpends)
 
-router.post("/", postBox)
-router.post("/newDebt", postDebt)
-router.delete("/:id", deleteBoxById)
-router.post("/newTrans", postMoneyTransaction)
-router.post("/payDebt", savePayment)
+router.post("/", checkRole(['admin']), postBox)
+router.post("/newDebt", checkRole(['admin']), postDebt)
+router.delete("/:id", checkRole(['admin']), deleteBoxById)
+router.post("/newTrans", checkRole(['admin']), postMoneyTransaction)
+router.post("/payDebt", checkRole(['admin']), savePayment)
 
 module.exports = router;

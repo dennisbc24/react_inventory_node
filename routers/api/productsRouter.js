@@ -1,19 +1,20 @@
 const express = require("express");
 const router = express.Router();
+const { checkRole } = require('../../middlewares/auth.handler')
 //const {uploadFile} = require('../../helpers/aws')
 
 const { latestUpdates, updateProductsById, getProducts, getProductsById ,postProduct, deleteProductsById, saveImage} = require('../../controllers/products.controllers')
 
 router.get("/", getProducts)
-router.patch("/:id", updateProductsById)
+router.patch("/:id", checkRole(['admin']), updateProductsById)
 router.get("/", getProductsById)
 router.get("/latestProducts", latestUpdates)
 
-router.post("/", postProduct)
-router.delete("/:id", deleteProductsById)
+router.post("/", checkRole(['admin']), postProduct)
+router.delete("/:id", checkRole(['admin']), deleteProductsById)
 
 
-router.post("/files",async (req, res, next) => {
+router.post("/files", checkRole(['admin']), async (req, res, next) => {
   console.log('formData por recibir');
   console.log(req.body);
   console.log(req.files.photo);
