@@ -1,5 +1,3 @@
-const { Pool } = require("pg");
-//const { postExistence } = require("./existence.controllers");
 const {SalesService} = require('../services/sales_service')
 const service = new SalesService()
 const moment = require("moment-timezone");
@@ -8,21 +6,9 @@ const moment = require("moment-timezone");
 // Crea un objeto moment con la hora actual en Lima
 //const fechaActual = moment();
 
-const config = require("../config/config");
 const { response } = require("express");
 
 //const { description } = require("../schemas/ventas.schema");
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 const getSales = async (req, res) => {
   const response = await service.get()

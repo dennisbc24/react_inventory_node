@@ -1,4 +1,4 @@
-const { Pool } = require("pg");
+const { pool } = require("../config/db");
 const moment = require('moment-timezone');
 
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
@@ -8,20 +8,7 @@ const moment = require('moment-timezone');
   const {ProductsService} = require('../services/products_service')
   const {uploadFile} = require("../helpers/aws")
 const service = new ProductsService()
-const config = require("../config/config");
 const { response } = require("express");
-
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 const getProducts = async (req, res) => {
   const response = await pool.query(

@@ -1,18 +1,5 @@
-const { Pool } = require("pg");
+const { pool } = require("../config/db");
 const bcrypt = require('bcrypt')
-
-const config = require("../config/config");
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 class UserService {
     constructor(){

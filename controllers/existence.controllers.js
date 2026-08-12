@@ -1,22 +1,10 @@
-const { Pool } = require("pg");
+const { pool } = require("../config/db");
 const moment = require("moment-timezone");
 
 const {ExistenceService} = require('../services/existence_service')
 const service = new ExistenceService();
 // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
 moment.tz.setDefault("America/Lima");
-const config = require("../config/config");
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 const postExistence = async (req, res) => {
   try {
@@ -113,7 +101,7 @@ const getInventaryInStock = async (req, res) => {
 const getInventaryByProductName = async (req, res) => {
   const keyWord= req.query.keyWord
   
-  const response = await pool.query(`SELECT products.name AS product, SUM(amount) AS stock FROM existence INNER JOIN products ON existence.fk_product = products.id_product WHERE unaccent(lower(products.name)) ILIKE '%' || unaccent(lower('${keyWord}')) || '%' GROUP BY products.name ORDER BY stock DESC`);
+  const response = await pool.query(`SELECT products.name AS product, SUM(amount) AS stock FROM existence INNER JOIN products ON existence.fk_product = products.id_product WHERE unaccent(lower(products.name)) ILIKE '%' || unaccent(lower($1)) || '%' GROUP BY products.name ORDER BY stock DESC`, [keyWord]);
 
   res.json(response.rows);
 };

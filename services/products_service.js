@@ -1,18 +1,6 @@
-const { Pool } = require("pg");
-const config = require("../config/config");
+const { pool } = require("../config/db");
 const moment = require("moment-timezone");
 const {uploadFile} = require("../helpers/aws")
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 class ProductsService {
     constructor(){
@@ -61,7 +49,6 @@ class ProductsService {
     async delete(req){
         try {
             const id = req.params.id
-            console.log(response);
             const response = await pool.query("DELETE FROM products WHERE id_product = $1", [id] )
             return `Product: ${id} deleted successfully`
         } catch (error) {

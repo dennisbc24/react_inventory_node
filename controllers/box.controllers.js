@@ -1,21 +1,8 @@
-const { Pool } = require("pg");
 const {SpendingService} = require('../services/spending_service')
-const config = require("../config/config");
 const { response } = require("express");
 const service = new SpendingService()
 const {Box} = require('../services/box_service')
 const service2 = new Box()
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 const getByUSer = async(req,res)=>{
 const response = await service2.getByUser(req)
 res.json(response)

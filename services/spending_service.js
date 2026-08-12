@@ -1,16 +1,4 @@
-const { Pool } = require("pg");
-const config = require("../config/config");
-
-const pool = new Pool({
-  user: config.config.dbUser,
-  host: config.config.dbHost,
-  database: config.config.dbName,
-  password: config.config.dbPassword,
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const { pool } = require("../config/db");
 
 class SpendingService {
     constructor(){}
@@ -34,7 +22,7 @@ class SpendingService {
             return response.rows
           } catch (error) {
             console.error('Error executing query:', error);
-              res.status(500).json({ error: 'Internal Server Error' });
+              return { error: 'Internal Server Error' };
           }
     }
     async post(req){
