@@ -18,6 +18,8 @@ jobs:
           password: ${{ secrets.DEPLOY_SSH_PASSWORD }}
           script: |
             set -e
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
             cd ${{ secrets.DEPLOY_PATH }}
             git pull origin main
             npm ci
