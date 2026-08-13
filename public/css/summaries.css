@@ -8,11 +8,28 @@
 
 	--dark-font: black;
 	--ligth-font: #FFFFFF;
+
+  --persian-blue-50: #f0f5fe;
+  --persian-blue-100: #dde8fc;
+  --persian-blue-200: #c2d7fb;
+  --persian-blue-300: #98bff8;
+  --persian-blue-400: #689df2;
+  --persian-blue-500: #447aed;
+  --persian-blue-600: #2f5ce1;
+  --persian-blue-700: #284bd7;
+  --persian-blue-800: #253ca8;
+  --persian-blue-900: #233785;
+  --persian-blue-950: #1a2451;
+
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-invalid-bg: #fee2e2;
+  --color-hover: rgba(255, 255, 255, 0.25);
 }
 
 html {
 	background: rgb(42,35,163);
-background: linear-gradient(90deg, rgba(42,35,163,1) 0%, rgba(79,126,250,1) 67%, rgba(8,39,119,1) 100%);
+background: linear-gradient(90deg, var(--persian-blue-600) 0%, var(--persian-blue-950) 67%, var(--persian-blue-900));
   font-size: 82.5%;
 	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
@@ -42,7 +59,7 @@ background: linear-gradient(90deg, rgba(42,35,163,1) 0%, rgba(79,126,250,1) 67%,
 	width:  20px;
 }
 header{
-  background: linear-gradient(90deg, rgba(42,35,163,1) 0%, rgba(79,126,250,1) 67%, rgba(8,39,119,1) 100%);
+  background: linear-gradient(90deg, var(--persian-blue-600) 0%, var(--persian-blue-950) 67%, var(--persian-blue-900));
 	height: 35px;
 	padding: 5px 9px 0 6px;
 }
@@ -74,7 +91,7 @@ header ul{
 	position: fixed;
 	width: 100%;
     height: 80vh;
-    background: linear-gradient(90deg, rgba(42,35,163,1) 0%, rgba(79,126,250,1) 67%, rgba(8,39,119,1) 100%);
+    background: linear-gradient(90deg, var(--persian-blue-600) 0%, var(--persian-blue-950) 67%, var(--persian-blue-900));
     left: -100%;
     top: 38px;
 	transition: .5s;
@@ -92,7 +109,7 @@ header ul li a{
 	
 }
 .pestaña a.active, .pestaña a:hover{
-	background-color:brown;
+	background-color: var(--color-hover);
 	transition: .5s;
 }
 
@@ -181,9 +198,9 @@ p{
   }
 
   .botton_save{
-    background: #52ff00;
-    color: black;
-    border: solid #52ff00;
+    background: var(--color-success);
+    color: white;
+    border: solid var(--color-success);
     border-radius: 20px;
     width: 80px;
     margin-top: 10px;
