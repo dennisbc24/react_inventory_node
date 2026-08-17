@@ -35,7 +35,7 @@ const routerApi = require("./routers/index_Router");
 
 routerApi(app);
 
-app.get(/^\/(?!api|resumen|uploads).*/, (req, res) => {
+app.get(/^\/(?!api|uploads).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 

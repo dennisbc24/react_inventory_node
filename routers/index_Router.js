@@ -1,9 +1,6 @@
 const express = require("express");
 const { authJwt } = require('../middlewares/auth.handler')
 
-//importamos los endpoints:
-const resumenRouter = require("./resumenRouter");
-
 
 //API
 const apiVentas = require("./api/ventasRouter");
@@ -17,21 +14,11 @@ const apiTransactions = require('./api/transactionsRouter')
 const apiEntries = require('./api/entriesRouter')
 const apiSuppliers = require('./api/suppliersRouter')
 const apiAuth = require('./api/authRouter')
+const apiShoppingList = require('./api/shoppingListRouter')
 
-
-//get url temmplates
-const publicPath = __dirname.replace("routers", "public");
 
 function routerApi(app) {
   const router = express.Router();
-  app.set("views", `${publicPath}/templates`);
-  app.engine("html", require("ejs").renderFile);
-  app.set("view engine", "html");
-  app.use(express.static(publicPath));
-  
- 
-  app.use("/resumen", resumenRouter);
-  
 
   app.use("/api/v1/auth", apiAuth);
   app.use("/api/v1", authJwt, router);
@@ -45,6 +32,7 @@ function routerApi(app) {
     router.use("/transactions", apiTransactions);
     router.use("/entries", apiEntries);
     router.use("/suppliers", apiSuppliers);
+    router.use("/shoppingList", apiShoppingList);
 }
 
 module.exports = routerApi;
