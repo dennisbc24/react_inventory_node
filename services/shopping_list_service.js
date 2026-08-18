@@ -56,62 +56,6 @@ class ShoppingListService {
     return result.rows[0] || null;
   }
 
-  async generate({ threshold = 0, days = 7, fk_user }) {
-    const query = `
-      WITH stock AS (
-        SELECT fk_product, COALESCE(SUM(amount), 0) AS total_stock
-        FROM existence
-        GROUP BY fk_product
-      ),
-      ventas AS (
-        SELECT fk_product, SUM(amount) AS vendido_12m
-        FROM sales
-        WHERE date >= NOW() - INTERVAL '12 months'
-        GROUP BY fk_product
-      )
-      SELECT p.id_product,
-             COALESCE(s.total_stock, 0) AS total_stock,
-             CASE
-               WHEN COALESCE(v.vendido_12m, 0) = 0 THEN NULL
-               ELSE ROUND(COALESCE(s.total_stock, 0) * (365.0 / v.vendido_12m), 1)
-             END AS dias_hasta_stock_cero
-      FROM products p
-      LEFT JOIN stock s ON s.fk_product = p.id_product
-      LEFT JOIN ventas v ON v.fk_product = p.id_product
-      WHERE COALESCE(s.total_stock, 0) <= $1
-         OR (COALESCE(v.vendido_12m, 0) > 0
-             AND COALESCE(s.total_stock, 0) * (365.0 / v.vendido_12m) <= $2)
-      ORDER BY COALESCE(s.total_stock, 0) ASC, dias_hasta_stock_cero ASC NULLS LAST
-      LIMIT 100
-    `;
-    const result = await pool.query(query, [threshold, days]);
-
-    const maxPos = await pool.query(
-      "SELECT COALESCE(MAX(position), 0) AS max_pos FROM shopping_list WHERE status = 'pending'"
-    );
-    let base = maxPos.rows[0].max_pos;
-    let added = 0;
-    for (const row of result.rows) {
-      const already = await pool.query(
-        "SELECT id_shopping FROM shopping_list WHERE fk_product = $1 AND status = 'pending'",
-        [row.id_product]
-      );
-      if (already.rows.length === 0) {
-        base += 1;
-        await pool.query(
-          "INSERT INTO shopping_list (fk_product, fk_user, source, position, created, updated) VALUES ($1, $2, 'auto', $3, NOW(), NOW())",
-          [row.id_product, fk_user, base]
-        );
-        added++;
-      }
-    }
-    return {
-      added,
-      total: result.rows.length,
-      message: `Se agregaron ${added} productos a la lista`,
-    };
-  }
-
   async reorder(orderedIds) {
     if (!Array.isArray(orderedIds)) {
       return { message: "Formato incorrecto" };

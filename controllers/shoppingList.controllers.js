@@ -18,13 +18,6 @@ const getShoppingListByProduct = async (req, res) => {
   res.json({ inList: !!item, id_shopping: item ? item.id_shopping : null });
 };
 
-const generateShoppingList = async (req, res) => {
-  const { threshold, days } = req.body;
-  const fk_user = req.user ? req.user.sub : undefined;
-  const response = await service.generate({ threshold, days, fk_user });
-  res.json(response);
-};
-
 const purchasedShoppingListItem = async (req, res) => {
   const response = await service.markPurchased(req.params.id);
   res.json(response);
@@ -44,7 +37,6 @@ module.exports = {
   getShoppingList,
   addShoppingListItem,
   getShoppingListByProduct,
-  generateShoppingList,
   purchasedShoppingListItem,
   removeShoppingListItem,
   reorderShoppingList,

@@ -6,7 +6,6 @@ const {
   getShoppingList,
   addShoppingListItem,
   getShoppingListByProduct,
-  generateShoppingList,
   purchasedShoppingListItem,
   removeShoppingListItem,
   reorderShoppingList
@@ -18,7 +17,6 @@ router.get("/", checkRole(allRoles), getShoppingList)
 router.get("/byProduct", checkRole(allRoles), getShoppingListByProduct)
 router.post("/", checkRole(['admin']), addShoppingListItem)
 router.put("/order", checkRole(['admin']), reorderShoppingList)
-router.post("/generate", checkRole(['admin']), generateShoppingList)
 router.patch("/:id/purchased", checkRole(['admin']), purchasedShoppingListItem)
 router.delete("/:id", checkRole(['admin']), removeShoppingListItem)
 
