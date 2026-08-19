@@ -7,6 +7,7 @@ class ShoppingListService {
     const query = await pool.query(`
       SELECT sl.id_shopping,
              p.id_product,
+             p.url_image,
              p.name AS product_name,
              p.cost,
              COALESCE(e.total_stock, 0) AS total_stock,
