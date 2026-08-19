@@ -28,7 +28,7 @@ const postEntries = async (req, res) => {
             fechaActual.toDate(),
           ]
         );
-        newExistenceId = createExistence.rows[0].id_existence;
+        const newExistenceId = createExistence.rows[0].id_existence;
 
         const createEntry = await pool.query(
           "INSERT INTO entries(fk_existence, fk_user, amount, date) VALUES ($1, $2, $3, $4)",
@@ -50,8 +50,10 @@ const postEntries = async (req, res) => {
         );
       }
       console.log('entry created successfully line');
+      res.send("entry created");
   } catch (e) {
     console.error(e);
+    res.status(500).json({ error: "Error al registrar el ingreso" });
   }
 };
 
