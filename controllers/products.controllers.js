@@ -12,9 +12,8 @@ const { response } = require("express");
 
 const getProducts = async (req, res) => {
   const response = await pool.query(
-    "SELECT * FROM products ORDER BY name ASC"
+    "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
   );
- 
   res.json(response.rows);
 };
 

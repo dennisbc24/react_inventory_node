@@ -9,13 +9,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
   "http://localhost:4000",
   "http://localhost:8080",
   "https://inventario.cocinamejor.store",
   "https://inventario.elwayardo.com",
+  "https://cocinamejor.store",
+  "https://www.cocinamejor.store",
 ];
 
-app.use(cors({ origin: allowedOrigins }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS: " + origin));
+  },
+  credentials: true,
+}));
 
 app.use(
   fileUpload({

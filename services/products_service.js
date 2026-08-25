@@ -6,14 +6,14 @@ class ProductsService {
     constructor(){
         }
     async create(req){
-        const { name, cost, fk_supplier, lowest_price, list_price} = req.body;
+        const { name, cost, fk_supplier, lowest_price, list_price, fk_category} = req.body;
         console.log(req.body);
         
         const fechaActual = moment(); // Crea un objeto moment con la hora actual en Lima
-      console.log(name, cost, fk_supplier, lowest_price, list_price);
+      console.log(name, cost, fk_supplier, lowest_price, list_price, fk_category);
       
         try {
-                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier) VALUES($1, $2, $3, $4, $5, $6 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price,fk_supplier]);
+                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category) VALUES($1, $2, $3, $4, $5, $6, $7 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price, list_price,fk_supplier, fk_category || null]);
                 const newProductId = response.rows[0].id_product;
                 //const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
                 return `Product ${newProductId} created successfully`
@@ -24,10 +24,10 @@ class ProductsService {
         }
         
     }
-    async get(){
+     async get(){
         try {
             const response = await pool.query(
-                "SELECT * FROM products ORDER BY name ASC"
+                "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
               );
              
               return response.rows
@@ -83,9 +83,9 @@ let nameFile = req.body.name.replaceAll(' ','' )
                
                       const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
                      
-                      const { name, cost, sugested_price, wholesale_price } = req.body;
+                      const { name, cost, sugested_price, wholesale_price, fk_category } = req.body;
                 const id = req.params.id        
-                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6  WHERE id_product = $7 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate(),urlImage ,id] )
+                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
               return `Product: ${id} updated successfully`
             } catch (error) {
                 console.log(error);
@@ -95,11 +95,11 @@ let nameFile = req.body.name.replaceAll(' ','' )
             
             }else{
              nameFile2 = '' 
-             const { name, cost, sugested_price, wholesale_price } = req.body;
+             const { name, cost, sugested_price, wholesale_price, fk_category } = req.body;
                 const id = req.params.id   
-                console.log(name, cost, sugested_price, wholesale_price);
+                console.log(name, cost, sugested_price, wholesale_price, fk_category);
                      
-                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5  WHERE id_product = $6 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate() ,id] )
+                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price, sugested_price,fechaActual.toDate() ,fk_category||null ,id] )
               return `Product: ${id} updated successfully`
         }        
     }
