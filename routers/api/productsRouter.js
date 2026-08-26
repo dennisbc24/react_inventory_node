@@ -6,9 +6,9 @@ const { checkRole } = require('../../middlewares/auth.handler')
 const { latestUpdates, updateProductsById, getProducts, getProductsById ,postProduct, deleteProductsById, saveImage} = require('../../controllers/products.controllers')
 
 router.get("/", getProducts)
-router.patch("/:id", checkRole(['admin']), updateProductsById)
-router.get("/", getProductsById)
 router.get("/latestProducts", latestUpdates)
+router.get("/:id", getProductsById)
+router.patch("/:id", checkRole(['admin']), updateProductsById)
 
 router.post("/", checkRole(['admin']), postProduct)
 router.delete("/:id", checkRole(['admin']), deleteProductsById)

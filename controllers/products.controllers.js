@@ -10,34 +10,45 @@ const moment = require('moment-timezone');
 const service = new ProductsService()
 const { response } = require("express");
 
-const getProducts = async (req, res) => {
-  const response = await pool.query(
-    "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
-  );
-  res.json(response.rows);
+const getProducts = async (req, res, next) => {
+  try {
+    const response = await pool.query(
+      "SELECT p.*, c.name AS category_name, c.slug AS category_slug FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
+    );
+    res.json(response.rows);
+  } catch(e){ next(e); }
 };
 
-const getProductsById = async (req, res) => {
-    const response = await service.getById(req)
+const getProductsById = async (req, res, next) => {
+    try {
+      const response = await service.getById(req)
+      res.json(response);
+    } catch(e){ next(e); }
+};
+
+const deleteProductsById = async (req, res, next) => {
+  try {
+    const response = await service.delete(req)
     res.json(response);
-};
-
-const deleteProductsById = async (req, res) => {
-  const response = await service.delete(req)
-  res.json(response);
+  } catch(e){ next(e); }
   };
   
-const postProduct = async (req, res) => {
-  const response = await service.create(req)
-  res.send(response);
+const postProduct = async (req, res, next) => {
+  try {
+    const response = await service.create(req)
+    // service.create ahora lanza error con status si fk_category inválida
+    if (response instanceof Error) throw response;
+    res.send(response);
+  } catch(e){ next(e); }
 };
 
-const updateProductsById = async (req, res) => {
-  const id = req.params.id
-  console.log(id);
-  
-  const response = await service.update(req)
-  res.json(response);  
+const updateProductsById = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const response = await service.update(req)
+    res.json(response);
+  } catch(e){ next(e); }
   };
   
   const latestUpdates = async(req,res) => {
