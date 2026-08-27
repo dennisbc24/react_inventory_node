@@ -21,6 +21,13 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             . "$NVM_DIR/nvm.sh"
             cd ${{ secrets.DEPLOY_PATH }}
-            git pull origin main
+            echo "==> Git fetch + reset --hard (sobrescribe cambios locales/untracked)"
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+            echo "==> Install & restart"
             npm ci
-            pm2 restart inventariojs
+            pm2 restart inventariojs || pm2 start server.js --name inventariojs
+            pm2 save
+            pm2 ls
+            echo "==> Deploy OK $(date) $(git rev-parse --short HEAD)"
