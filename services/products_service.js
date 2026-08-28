@@ -28,7 +28,20 @@ class ProductsService {
                 const isOnline = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1 ? true : is_online === 'false' || is_online === false || is_online === '0' ? false : false;
                 const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category, is_online) VALUES($1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price || null, list_price || null,fk_supplier || null, fk_category || null, isOnline]);
                 const newProductId = response.rows[0].id_product;
-                //const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
+                // si viene foto, súbela igual que en actualizar (S3 products/image-{id}.ext)
+                if (req.files && req.files.photo) {
+                    let nameFile2 = '';
+                    switch (true) {
+                        case req.files.photo.name.endsWith('.png'): nameFile2 = `${newProductId}.png`; break;
+                        case req.files.photo.name.endsWith('.jpg'): nameFile2 = `${newProductId}.jpg`; break;
+                        case req.files.photo.name.endsWith('.jpeg'): nameFile2 = `${newProductId}.jpeg`; break;
+                        default: nameFile2 = `${newProductId}.jpg`; break;
+                    }
+                    const nameFile3 = `products/image-${nameFile2}`;
+                    const urlImage = `https://caja-for-many-products-dennis.s3.sa-east-1.amazonaws.com/${nameFile3}`;
+                    await uploadFile(req.files.photo, nameFile2);
+                    await pool.query('UPDATE products SET url_image=$1 WHERE id_product=$2', [urlImage, newProductId]);
+                }
                 return `Product ${newProductId} created successfully`
               
         } catch (error) {
