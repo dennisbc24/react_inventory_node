@@ -11,13 +11,20 @@ function slugify(txt){
 
 router.get("/products", async (req, res, next) => {
   try {
-    const { category, limit, offset, q } = req.query;
+    const { category, limit, offset, q, online } = req.query;
     const lim = Math.min(Math.max(parseInt(limit||'50',10)||50,1),100);
     const off = Math.max(parseInt(offset||'0',10)||0,0);
 
     let where = [];
     let params = [];
     let idx = 1;
+
+    // filtro online para ecommerce: ?online=true solo productos habilitados
+    if (online === 'true' || online === '1') {
+      where.push(`COALESCE(p.is_online,false)=true`);
+    } else if (online === 'false' || online === '0') {
+      where.push(`COALESCE(p.is_online,false)=false`);
+    }
 
     if (category) {
       // compat: category puede ser id numérico o slug
@@ -53,10 +60,12 @@ router.get("/products", async (req, res, next) => {
 
 router.get("/categories", async (req, res, next) => {
   try {
-    const { withCounts } = req.query;
+    const { withCounts, online } = req.query;
+    // conteo online para shop si ?online=true
+    const countWhere = online === 'true' ? ' AND COALESCE(p.is_online,false)=true' : '';
     if (withCounts === 'true') {
       const r = await pool.query(`
-        SELECT c.*, (SELECT COUNT(*)::int FROM products p WHERE p.fk_category=c.id_category) AS product_count
+        SELECT c.*, (SELECT COUNT(*)::int FROM products p WHERE p.fk_category=c.id_category${countWhere}) AS product_count
         FROM categories c WHERE COALESCE(c.active,true)=true
         ORDER BY COALESCE(c.position,9999) ASC, c.name ASC`);
       return res.json(r.rows);

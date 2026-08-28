@@ -7,7 +7,7 @@ class ProductsService {
         }
     async create(req){
         // compat: frontend puede enviar unit/total en lugar de list_price/lowest_price
-        let { name, cost, fk_supplier, lowest_price, list_price, fk_category} = req.body;
+        let { name, cost, fk_supplier, lowest_price, list_price, fk_category, is_online} = req.body;
         if (req.body.unit !== undefined && (list_price === undefined || list_price === '')) list_price = req.body.unit;
         if (req.body.total !== undefined && (lowest_price === undefined || lowest_price === '')) lowest_price = req.body.total;
         // normaliza fk_category: '' -> null, valida número
@@ -25,7 +25,8 @@ class ProductsService {
       console.log(name, cost, fk_supplier, lowest_price, list_price, fk_category);
       
         try {
-                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category) VALUES($1, $2, $3, $4, $5, $6, $7 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price || null, list_price || null,fk_supplier || null, fk_category || null]);
+                const isOnline = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1 ? true : is_online === 'false' || is_online === false || is_online === '0' ? false : false;
+                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category, is_online) VALUES($1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price || null, list_price || null,fk_supplier || null, fk_category || null, isOnline]);
                 const newProductId = response.rows[0].id_product;
                 //const response2 = await pool.query('INSERT INTO existence (amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1, $2, $3, $4, $5, $6)', [amount, fk_branch, newProductId, fk_user,fechaActual.toDate(),fechaActual.toDate()]);
                 return `Product ${newProductId} created successfully`
@@ -95,7 +96,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                
                       const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
                      
-                      let { name, cost, sugested_price, wholesale_price, fk_category } = req.body;
+                      let { name, cost, sugested_price, wholesale_price, fk_category, is_online } = req.body;
                 // normaliza/ valida fk_category
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
@@ -105,8 +106,14 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   if (exists.rowCount === 0) throw Object.assign(new Error('Categoría no existe'), { status: 400 });
                   fk_category = fk;
                 }
-                const id = req.params.id        
-                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
+                let isOnline = undefined;
+                if (is_online !== undefined) isOnline = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1;
+                const id = req.params.id
+                if (isOnline !== undefined) {
+                  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7, is_online=$8  WHERE id_product = $9 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,isOnline ,id] )
+                } else {
+                  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
+                }
               return `Product: ${id} updated successfully`
             } catch (error) {
                 console.log(error);
@@ -116,7 +123,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
             
             }else{
              nameFile2 = '' 
-             let { name, cost, sugested_price, wholesale_price, fk_category } = req.body;
+             let { name, cost, sugested_price, wholesale_price, fk_category, is_online } = req.body;
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
                   const fk = Number(fk_category);
@@ -125,10 +132,15 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   if (exists.rowCount === 0) throw Object.assign(new Error('Categoría no existe'), { status: 400 });
                   fk_category = fk;
                 }
+                let isOnline2 = undefined;
+                if (is_online !== undefined) isOnline2 = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1;
                 const id = req.params.id   
-                console.log(name, cost, sugested_price, wholesale_price, fk_category);
-                     
-                const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,id] )
+                console.log(name, cost, sugested_price, wholesale_price, fk_category, is_online);
+                if (isOnline2 !== undefined) {
+                  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6, is_online=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,isOnline2 ,id] )
+                } else {
+                  const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,id] )
+                }
               return `Product: ${id} updated successfully`
         }        
     }
