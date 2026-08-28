@@ -6,8 +6,9 @@ const pool = new Pool({
   host: config.dbHost,
   database: config.dbName,
   password: config.dbPassword,
-  port: 5432,
-  ssl: {
+  port: config.dbPort,
+  // SSM tunel local (127.0.0.1:5433) no necesita ssl; prod EC2 sí
+  ssl: config.dbHost === "127.0.0.1" || config.dbHost === "localhost" ? false : {
     rejectUnauthorized: false,
   },
 });
