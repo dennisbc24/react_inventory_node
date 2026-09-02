@@ -42,7 +42,7 @@ console.log(req.body);
           fechaActual.toDate(),
         ]
       );
-      newExistenceId = createExistence.rows[0].id_existence;
+      const newExistenceId = createExistence.rows[0].id_existence;
       const createTransaction = await pool.query(
         "INSERT INTO transactions(fk_existence_a, fk_existence_b, amount, fk_user, date, fk_product)VALUES ($1, $2, $3, $4, $5,$6) ",
         [ existenceA.id_existence, newExistenceId, amount, fk_user, date, fk_product]
@@ -51,6 +51,7 @@ console.log(req.body);
         "UPDATE existence SET amount = amount - $1, fk_user = $2, updated = $3 WHERE fk_branch = $4 AND fk_product = $5 ;",
         [amount, fk_user, fechaActual.toDate(), pointA, fk_product]
       );
+      return res.send("traslado creado");
     } else {
       console.log(existenceA.id_existence, existenceB.id_existence);
       console.log("si existen los 2");
@@ -73,9 +74,11 @@ console.log(req.body);
           fk_product,
         ]
       );
+      return res.send("traslado creado");
     }
   } catch (e) {
     console.error(e);
+    return res.status(500).json({ message: "Error al registrar traslado", detail: e.message });
   }
 };
 
