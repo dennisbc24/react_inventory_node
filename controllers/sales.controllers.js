@@ -26,6 +26,11 @@ const getSalesByMonth = async (req, res) => {
   res.json(response)
 };
 
+const getSalesByUserRange = async (req, res) => {
+  const response = await service.getByUserRange(req)
+  res.json(response)
+};
+
 const getSalesMonthy = async (req, res) => {
   const response = await service.salesSumMonthly(req)
   res.json(response)
@@ -91,6 +96,7 @@ module.exports = {
   getTopSellingProducts,
   getSales,
   getSalesByDate,
+  getSalesByUserRange,
   postSales,
   getSalesByMonth,
   postVendings,

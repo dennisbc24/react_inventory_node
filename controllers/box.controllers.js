@@ -40,6 +40,10 @@ const getTransactionByUser = async (req, res) =>{
 const getTransByUser = await service2.getTransactionByUser(req)
 res.json(getTransByUser)
 }
+const getGastosByUserRange = async (req, res) => {
+  const response = await service2.getGastosByUserRange(req)
+  res.json(response)
+}
 const getLastSpends = async (req,res) =>{
   const response = await service2.getLastSpends(req)
   res.json(response)
@@ -49,8 +53,12 @@ const postMoneyTransaction = async (req, res) => {
   const sendBody = await service2.postMoneyTransaction(req)
   res.json(sendBody)
 }
+const adjustCash = async (req, res) => {
+  const response = await service2.adjustCash(req)
+  res.json(response)
+}
 const savePayment = async (req, res)  => {
   const savePay = await service2.payDebt(req)
   res.json(savePay)
 }
-module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getLastSpends, postMoneyTransaction, savePayment}
+module.exports = {getBox, postBox, deleteBoxById, getByMonth, getByUSer, getDebts, postDebt, getTransactionByUser, getGastosByUserRange, getLastSpends, postMoneyTransaction, adjustCash, savePayment}

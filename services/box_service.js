@@ -97,6 +97,33 @@ class Box {
      }
   }
   
+  async getGastosByUserRange(req) {
+    try {
+      const { user, from, to } = req.query;
+      const response = await pool.query(
+        "SELECT TO_CHAR(date, 'DD/MM/YYYY') AS fecha, concept AS descripcion, amount AS gasto FROM box WHERE fk_user = $1 AND date >= $2::date AND date < ($3::date + 1) AND concept NOT ILIKE 'TRD%' AND concept NOT ILIKE 'ENTREGA%' ORDER BY date ASC",
+        [user, from, to]
+      );
+      return response.rows;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async adjustCash(req) {
+    try {
+      const { user, newCash } = req.body;
+      const current = await pool.query("SELECT cash FROM users WHERE id_user = $1", [user]);
+      const oldCash = parseFloat(current.rows[0]?.cash || 0);
+      const diff = parseFloat(newCash) - oldCash;
+      await pool.query("INSERT INTO public.box(concept, amount, fk_user) VALUES ($1, $2, $3);", ["AJUSTE DE CAJA", diff, user]);
+      await pool.query("UPDATE public.users SET cash = $1 WHERE id_user = $2;", [newCash, user]);
+      return "cash ajustado correctamente";
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async postMoneyTransaction (req){
     const {concept, amount, userA, userB} = req.body
     console.log(concept, amount, userA, userB);

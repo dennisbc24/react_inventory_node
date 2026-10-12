@@ -4,10 +4,11 @@ const { checkRole } = require('../../middlewares/auth.handler')
 
 const router = express.Router();
 
-const { getBestProducts,getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
+const { getBestProducts,getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, getSalesByUserRange, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
 
 router.get("/", getSales);
 router.get("/salesByDate", getSalesByDate);
+router.get("/byUserRange", checkRole(['admin']), getSalesByUserRange);
 router.get("/salesByMonth", getSalesByMonth);
 router.get("/salesMonthly", getSalesMonthy)
 router.get("/saleByProduct", getByProduct)

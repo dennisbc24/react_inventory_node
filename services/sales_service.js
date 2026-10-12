@@ -31,6 +31,14 @@ class SalesService{
             return { error: "Internal Server Error" };
           }
     }
+    async getByUserRange(req){
+      const { user, from, to } = req.query;
+      const response = await pool.query(
+        "SELECT TO_CHAR(date, 'DD/MM/YYYY') AS fecha, SUM(p_total) AS venta FROM sales WHERE fk_id_user = $1 AND date >= $2::date AND date < ($3::date + 1) GROUP BY date ORDER BY date ASC",
+        [user, from, to]
+      );
+      return response.rows;
+    }
     async register(req){
 
     const {date,amount,p_total,p_unit,revenue,customer,fk_id_product,fk_id_user,fk_id_branch,product,branch} = req.body;
