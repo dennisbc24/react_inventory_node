@@ -10,6 +10,8 @@ class ShoppingListService {
              p.url_image,
              p.name AS product_name,
              p.cost,
+             p.fk_supplier,
+             s.name AS supplier_name,
              COALESCE(e.total_stock, 0) AS total_stock,
              u.name AS added_by,
              sl.source,
@@ -18,6 +20,7 @@ class ShoppingListService {
              sl.updated
       FROM shopping_list sl
       INNER JOIN products p ON p.id_product = sl.fk_product
+      LEFT JOIN suppliers s ON s.id_supplier = p.fk_supplier
       LEFT JOIN users u ON u.id_user = sl.fk_user
       LEFT JOIN (
         SELECT fk_product, SUM(amount) AS total_stock

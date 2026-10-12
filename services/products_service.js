@@ -62,7 +62,7 @@ class ProductsService {
      async get(){
         try {
             const response = await pool.query(
-                "SELECT p.*, c.name AS category_name, c.slug AS category_slug FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
+                "SELECT p.*, c.name AS category_name, c.slug AS category_slug, COALESCE(s.total, 0) AS stock_total FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category LEFT JOIN (SELECT fk_product, SUM(amount) AS total FROM existence GROUP BY fk_product) s ON s.fk_product = p.id_product ORDER BY p.name ASC"
               );
               
               return response.rows
@@ -118,7 +118,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                
                       const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
                      
-                       let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes } = req.body;
+                       let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes, fk_supplier, supplier } = req.body;
                 // normaliza/ valida fk_category
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
@@ -138,6 +138,18 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
                 }
                 if (attrs !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs), id]);
+                if (fk_supplier !== undefined) {
+                  let fkSup = fk_supplier;
+                  if (fkSup === '' || fkSup === 'null') fkSup = null;
+                  if (fkSup != null) {
+                    const fk = Number(fkSup);
+                    if (Number.isNaN(fk)) throw Object.assign(new Error('fk_supplier inválido'), { status: 400 });
+                    const existsSup = await pool.query('SELECT 1 FROM suppliers WHERE id_supplier=$1', [fk]);
+                    if (existsSup.rowCount === 0) throw Object.assign(new Error('Proveedor no existe'), { status: 400 });
+                    fkSup = fk;
+                  }
+                  await pool.query('UPDATE products SET fk_supplier=$1, supplier=$2 WHERE id_product=$3', [fkSup, supplier || null, id]);
+                }
               return `Product: ${id} updated successfully`
             } catch (error) {
                 console.log(error);
@@ -147,7 +159,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
             
             }else{
              nameFile2 = '' 
-             let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes } = req.body;
+             let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes, fk_supplier, supplier } = req.body;
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
                   const fk = Number(fk_category);
@@ -167,6 +179,18 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,id] )
                 }
                 if (attrs2 !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs2), id]);
+                if (fk_supplier !== undefined) {
+                  let fkSup = fk_supplier;
+                  if (fkSup === '' || fkSup === 'null') fkSup = null;
+                  if (fkSup != null) {
+                    const fk = Number(fkSup);
+                    if (Number.isNaN(fk)) throw Object.assign(new Error('fk_supplier inválido'), { status: 400 });
+                    const existsSup = await pool.query('SELECT 1 FROM suppliers WHERE id_supplier=$1', [fk]);
+                    if (existsSup.rowCount === 0) throw Object.assign(new Error('Proveedor no existe'), { status: 400 });
+                    fkSup = fk;
+                  }
+                  await pool.query('UPDATE products SET fk_supplier=$1, supplier=$2 WHERE id_product=$3', [fkSup, supplier || null, id]);
+                }
               return `Product: ${id} updated successfully`
         }        
     }

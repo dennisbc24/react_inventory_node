@@ -40,6 +40,12 @@ const getByProduct = async (req, res) => {
   res.json(response)
 };
 
+const getSaleById = async (req, res) => {
+  const response = await service.getById(req)
+  if (!response) return res.status(404).json({ message: "Venta no existe" });
+  res.json(response)
+};
+
 const postSales = async (req, res, next) => {
   // const { branch, date, amount, product, p_total, p_unit, revenue } = req.body;
 
@@ -96,11 +102,11 @@ module.exports = {
   getTopSellingProducts,
   getSales,
   getSalesByDate,
-  getSalesByUserRange,
-  postSales,
+  getSalesByUserRange,  postSales,
   getSalesByMonth,
   postVendings,
   deleteSalesById,getSalesMonthy,getByProduct,
+  getSaleById,
   getLastSales,
   getSumSalesToday,
   getSumRevenueToday

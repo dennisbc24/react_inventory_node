@@ -13,7 +13,7 @@ class SalesService{
     }
     async getByDate(req){
         const date = req.query.date;
-        const response = await pool.query("SELECT users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
+        const response = await pool.query("SELECT users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente, id_sale, fk_product, fk_id_user, fk_id_branch FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
         return response.rows
     }
     async getByMonth(req){
@@ -86,11 +86,16 @@ class SalesService{
         const responseUpdateExistence = await pool.query("UPDATE existence SET amount = amount + $1 WHERE fk_branch = $2 AND fk_product = $3 ;",[amount, branch, product]);
       
        const deleteSale = await pool.query("DELETE FROM sales WHERE id_sale=$1", [id] )
-        
+         
        const changeCash = await pool.query("UPDATE public.users 	SET cash = cash - $1 WHERE id_user = $2;", [p_total, user])
 
+       const tipo = req.query.tipo || 'ELIMINACION';
+       const motivo = req.query.motivo || '';
+       const concept = motivo !== '' ? `${tipo} venta #${id} - ${motivo}` : `${tipo} venta #${id}`;
+       await pool.query("INSERT INTO public.box(concept, amount, fk_user) VALUES ($1, $2, $3)", [concept, -parseFloat(p_total), user]);
+
        return `Product: ${id} deleted successfully`
-       
+        
       } else {
         return `Product: ${id} no existe`
       }  
@@ -101,9 +106,15 @@ class SalesService{
       return response.rows
   }
 async getSaleByProduct(req) {
+
       const fk_id_product = req.query.fk_id_product;
       const response = await pool.query("SELECT id_sale AS Codigo,public.branches.name AS Sucursal, public.users.name AS Vendedor, date AS Fecha,hour AS Hora, amount AS Cantidad,product AS Articulo, p_total, p_unit, revenue AS Ganancia,  customer AS Cliente	FROM public.sales INNER JOIN public.branches on public.sales.fk_id_branch = public.branches.id_branch	INNER join public.users on public.sales.fk_id_user = public.users.id_user	WHERE sales.fk_product = $1	ORDER BY sales.date DESC	LIMIT 50;", [fk_id_product] );
       return response.rows
+}
+async getById(req){
+  const id = req.params.id;
+  const response = await pool.query("SELECT id_sale, branch, date, hour, amount, product, p_total, p_unit, revenue, customer, fk_product, fk_id_user, fk_id_branch FROM sales WHERE id_sale = $1", [id]);
+  return response.rows[0] || null;
 }
 async getLastSales(req){
   const user = req.query.user
