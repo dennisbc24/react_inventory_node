@@ -116,6 +116,107 @@ async getById(req){
   const response = await pool.query("SELECT id_sale, branch, date, hour, amount, product, p_total, p_unit, revenue, customer, fk_product, fk_id_user, fk_id_branch FROM sales WHERE id_sale = $1", [id]);
   return response.rows[0] || null;
 }
+async devolucion(req){
+  const { id_sale, motivo } = req.body;
+  if (!id_sale) throw Object.assign(new Error('Venta requerida'), { status: 400 });
+  if (!motivo || !motivo.trim()) throw Object.assign(new Error('Motivo requerido'), { status: 400 });
+  const found = await pool.query("SELECT * FROM sales WHERE id_sale = $1", [id_sale]);
+  if (found.rowCount === 0) throw Object.assign(new Error('Venta no existe'), { status: 404 });
+  const sale = found.rows[0];
+  const qty = parseInt(sale.amount);
+  if (!(qty > 0)) throw Object.assign(new Error('Esa venta ya está devuelta'), { status: 400 });
+  const refund = parseFloat(sale.p_total);
+  const revBack = parseFloat(sale.revenue);
+  const fechaActual = moment();
+  moment.tz.setDefault("America/Lima");
+  const horaActual = fechaActual.format("HH:mm:ss");
+  const hoy = fechaActual.format("YYYY-MM-DD");
+  const customerNote = `${sale.customer || ''} (DEV: ${motivo.trim()})`.trim();
+  const updExist = await pool.query(
+    "UPDATE existence SET amount = amount + $1 WHERE fk_branch = $2 AND fk_product = $3",
+    [qty, sale.fk_id_branch, sale.fk_product]
+  );
+  if (updExist.rowCount === 0) {
+    await pool.query(
+      "INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,NOW(),NOW())",
+      [qty, sale.fk_id_branch, sale.fk_product, sale.fk_id_user]
+    );
+  }
+  await pool.query("UPDATE users SET cash = cash - $1 WHERE id_user = $2", [refund, sale.fk_id_user]);
+  await pool.query(
+    "INSERT INTO sales (date, amount, p_unit, p_total, revenue, hour, customer, fk_product, fk_id_user, fk_id_branch, product, branch) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
+    [hoy, -qty, sale.p_unit, -refund, -revBack, horaActual, customerNote, sale.fk_product, sale.fk_id_user, sale.fk_id_branch, sale.product, sale.branch]
+  );
+  await pool.query("INSERT INTO public.box(concept, amount, fk_user) VALUES ($1, $2, $3)", [`DEVOLUCION venta #${id_sale} - ${motivo.trim()}`, -refund, sale.fk_id_user]);
+  return { message: `Devolución registrada: ${qty} uds. de "${sale.product}"`, refund };
+}
+async cambio(req){
+  const { id_sale, motivo, lines } = req.body;
+  if (!id_sale) throw Object.assign(new Error('Venta requerida'), { status: 400 });
+  if (!motivo || !motivo.trim()) throw Object.assign(new Error('Motivo requerido'), { status: 400 });
+  if (!Array.isArray(lines) || lines.length === 0) throw Object.assign(new Error('Agrega productos para el cambio'), { status: 400 });
+  const found = await pool.query("SELECT * FROM sales WHERE id_sale = $1", [id_sale]);
+  if (found.rowCount === 0) throw Object.assign(new Error('Venta no existe'), { status: 404 });
+  const sale = found.rows[0];
+  const qty = parseInt(sale.amount);
+  if (!(qty > 0)) throw Object.assign(new Error('Esa venta ya está devuelta'), { status: 400 });
+  const refund = parseFloat(sale.p_total);
+  const revBack = parseFloat(sale.revenue);
+  const fechaActual = moment();
+  moment.tz.setDefault("America/Lima");
+  const horaActual = fechaActual.format("HH:mm:ss");
+  const hoy = fechaActual.format("YYYY-MM-DD");
+  let newTotal = 0;
+  const prepared = [];
+  for (const l of lines) {
+    const count = parseInt(l.count);
+    const pUnit = parseFloat(l.p_unit);
+    if (!(count > 0) || !(pUnit > 0)) throw Object.assign(new Error('Cantidad o precio inválido en el cambio'), { status: 400 });
+    const prod = await pool.query("SELECT name, cost FROM products WHERE id_product = $1", [l.fk_product]);
+    if (prod.rowCount === 0) throw Object.assign(new Error(`Producto ${l.fk_product} no existe`), { status: 404 });
+    const revenue = parseFloat(((pUnit - parseFloat(prod.rows[0].cost)) * count).toFixed(2));
+    if (revenue < 0) throw Object.assign(new Error(`El cambio de "${prod.rows[0].name}" es a perdida`), { status: 400 });
+    const total = parseFloat((pUnit * count).toFixed(2));
+    newTotal = parseFloat((newTotal + total).toFixed(2));
+    prepared.push({ fk_product: l.fk_product, name: prod.rows[0].name, count, pUnit, total, revenue });
+  }
+  const updExist = await pool.query(
+    "UPDATE existence SET amount = amount + $1 WHERE fk_branch = $2 AND fk_product = $3",
+    [qty, sale.fk_id_branch, sale.fk_product]
+  );
+  if (updExist.rowCount === 0) {
+    await pool.query(
+      "INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,NOW(),NOW())",
+      [qty, sale.fk_id_branch, sale.fk_product, sale.fk_id_user]
+    );
+  }
+  await pool.query("UPDATE users SET cash = cash - $1 WHERE id_user = $2", [refund, sale.fk_id_user]);
+  await pool.query(
+    "INSERT INTO sales (date, amount, p_unit, p_total, revenue, hour, customer, fk_product, fk_id_user, fk_id_branch, product, branch) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
+    [hoy, -qty, sale.p_unit, -refund, -revBack, horaActual, `${sale.customer || ''} (CAMBIO: ${motivo.trim()})`.trim(), sale.fk_product, sale.fk_id_user, sale.fk_id_branch, sale.product, sale.branch]
+  );
+  await pool.query("INSERT INTO public.box(concept, amount, fk_user) VALUES ($1, $2, $3)", [`CAMBIO venta #${id_sale} - ${motivo.trim()}`, -refund, sale.fk_id_user]);
+  for (const p of prepared) {
+    await pool.query(
+      "INSERT INTO sales (date, amount, p_unit, p_total, revenue, hour, customer, fk_product, fk_id_user, fk_id_branch, product, branch) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
+      [hoy, p.count, p.pUnit, p.total, p.revenue, horaActual, sale.customer, p.fk_product, sale.fk_id_user, sale.fk_id_branch, p.name, sale.branch]
+    );
+    const upd = await pool.query(
+      "UPDATE existence SET amount = amount - $1 WHERE fk_branch = $2 AND fk_product = $3",
+      [p.count, sale.fk_id_branch, p.fk_product]
+    );
+    if (upd.rowCount === 0) {
+      const created = await pool.query(
+        "INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,NOW(),NOW()) RETURNING id_existence",
+        [p.count, sale.fk_id_branch, p.fk_product, sale.fk_id_user]
+      );
+      await pool.query("UPDATE public.existence SET amount = 0 WHERE id_existence = $1", [created.rows[0].id_existence]);
+    }
+    await pool.query("UPDATE users SET cash = cash + $1 WHERE id_user = $2", [p.total, sale.fk_id_user]);
+  }
+  const diff = parseFloat((newTotal - refund).toFixed(2));
+  return { message: "Cambio registrado", diff, refund, newTotal };
+}
 async getLastSales(req){
   const user = req.query.user
   const response = await pool.query("SELECT product AS Producto,date, p_total FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user   WHERE users.id_user = $1 ORDER BY date DESC, hour desc limit 15;", [user])

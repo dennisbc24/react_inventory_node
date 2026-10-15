@@ -51,6 +51,23 @@ class ProductsService {
                     await uploadFile(req.files.photo, nameFile2);
                     await pool.query('UPDATE products SET url_image=$1 WHERE id_product=$2', [urlImage, newProductId]);
                 }
+                // stock inicial opcional: [{fk_branch, amount}]
+                let stockInicial = [];
+                if (req.body.stock) {
+                  try { stockInicial = JSON.parse(req.body.stock); } catch { stockInicial = []; }
+                }
+                if (Array.isArray(stockInicial)) {
+                  const fkUser = req.body.fk_user ? Number(req.body.fk_user) : null;
+                  for (const s of stockInicial) {
+                    const amount = parseInt(s.amount);
+                    const fkBranch = parseInt(s.fk_branch);
+                    if (!(amount > 0) || !(fkBranch > 0)) continue;
+                    await pool.query(
+                      'INSERT INTO existence(amount, fk_branch, fk_product, fk_user, created, updated) VALUES ($1,$2,$3,$4,NOW(),NOW())',
+                      [amount, fkBranch, newProductId, fkUser]
+                    );
+                  }
+                }
                 return `Product ${newProductId} created successfully`
               
         } catch (error) {

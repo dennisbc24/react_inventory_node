@@ -101,7 +101,7 @@ class Box {
     try {
       const { user, from, to } = req.query;
       const response = await pool.query(
-        "SELECT TO_CHAR(date, 'DD/MM/YYYY') AS fecha, concept AS descripcion, amount AS gasto FROM box WHERE fk_user = $1 AND date >= $2::date AND date < ($3::date + 1) AND concept NOT ILIKE 'TRD%' AND concept NOT ILIKE 'ENTREGA%' ORDER BY date ASC",
+        "SELECT TO_CHAR(date, 'DD/MM/YYYY') AS fecha, concept AS descripcion, amount AS gasto FROM box WHERE fk_user = $1 AND date >= $2::date AND date < ($3::date + 1) AND concept NOT ILIKE 'TRD%' AND concept NOT ILIKE 'ENTREGA%' AND concept NOT ILIKE 'DEVOLUCION%' AND concept NOT ILIKE 'CAMBIO%' AND concept NOT ILIKE 'AJUSTE%' AND concept NOT ILIKE 'ELIMINACION%' ORDER BY date ASC",
         [user, from, to]
       );
       return response.rows;
