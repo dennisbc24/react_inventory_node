@@ -3,6 +3,14 @@ const fileUpload = require('express-fileupload');
 const cors = require('cors');
 const path = require('path');
 
+// no tumbar el proceso por errores no capturados
+process.on("uncaughtException", (err) => {
+  console.error("uncaughtException:", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("unhandledRejection:", err);
+});
+
 const app = express();
 
 app.use(express.json());
@@ -47,6 +55,20 @@ routerApi(app);
 
 app.get(/^\/(?!api|uploads).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+// health check simple sin auth
+app.get("/api/health", async (req, res) => {
+  const { checkDb } = require("./config/db");
+  const ok = await checkDb(2500);
+  res.status(ok ? 200 : 503).json({ db: ok ? "up" : "down" });
+});
+
+// handler final: responde JSON en vez de HTML/crash
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message || "Error interno del servidor" });
 });
 
 app.listen(port, () => {

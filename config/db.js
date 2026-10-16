@@ -13,4 +13,22 @@ const pool = new Pool({
   },
 });
 
-module.exports = { pool };
+// un cliente idle que pierde la conexión no debe tumbar el proceso
+pool.on("error", (err) => {
+  console.error("DB pool error (cliente inactivo):", err.message);
+});
+
+// chequea conexión real con timeout; nunca lanza
+async function checkDb(timeoutMs = 2500) {
+  try {
+    await Promise.race([
+      pool.query("SELECT 1"),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("db timeout")), timeoutMs)),
+    ]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+module.exports = { pool, checkDb };

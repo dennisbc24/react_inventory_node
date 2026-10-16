@@ -1,5 +1,6 @@
 const express = require("express");
 const { authJwt } = require('../middlewares/auth.handler')
+const { dbHealth } = require('../middlewares/dbHealth')
 
 
 //API
@@ -22,6 +23,8 @@ const apiPublic = require('./api/publicRouter')
 function routerApi(app) {
   const router = express.Router();
 
+  // corta con 503 si la BD no responde (antes de auth y rutas)
+  app.use("/api/v1", dbHealth);
   app.use("/api/v1/auth", apiAuth);
   // Rutas públicas de solo lectura para cocinamejor.store (sin duplicar BD)
   app.use("/api/v1/public", apiPublic);
