@@ -16,6 +16,7 @@ const apiEntries = require('./api/entriesRouter')
 const apiSuppliers = require('./api/suppliersRouter')
 const apiAuth = require('./api/authRouter')
 const apiShoppingList = require('./api/shoppingListRouter')
+const apiShoppingOrders = require('./api/shoppingOrdersRouter')
 const apiCategories = require('./api/categoriesRouter')
 const apiPublic = require('./api/publicRouter')
 
@@ -41,6 +42,7 @@ function routerApi(app) {
     router.use("/suppliers", apiSuppliers);
     router.use("/categories", apiCategories);
     router.use("/shoppingList", apiShoppingList);
+    router.use("/shoppingOrders", apiShoppingOrders);
 }
 
 module.exports = routerApi;
