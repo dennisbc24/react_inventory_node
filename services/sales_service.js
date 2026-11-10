@@ -13,7 +13,7 @@ class SalesService{
     }
     async getByDate(req){
         const date = req.query.date;
-        const response = await pool.query("SELECT users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente, id_sale, fk_product, fk_id_user, fk_id_branch FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
+        const response = await pool.query("SELECT users.name AS Vendedor, amount AS Cant, product AS Producto, p_total, p_unit, revenue AS Ganancia, hour AS Hora, customer AS Cliente, TO_CHAR(date, 'YYYY-MM-DD') AS Fecha, id_sale, fk_product, fk_id_user, fk_id_branch FROM public.sales     INNER JOIN users ON sales.fk_id_user = users.id_user    WHERE date = $1     ORDER BY hour DESC",    [date]  );
         return response.rows
     }
     async getByMonth(req){
@@ -115,6 +115,18 @@ async getById(req){
   const id = req.params.id;
   const response = await pool.query("SELECT id_sale, branch, date, hour, amount, product, p_total, p_unit, revenue, customer, fk_product, fk_id_user, fk_id_branch FROM sales WHERE id_sale = $1", [id]);
   return response.rows[0] || null;
+}
+async updateDate(req){
+  const id = req.params.id;
+  const { date } = req.body;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) throw Object.assign(new Error('Fecha inválida'), { status: 400 });
+  const found = await pool.query("SELECT id_sale FROM sales WHERE id_sale = $1", [id]);
+  if (found.rowCount === 0) throw Object.assign(new Error('Venta no existe'), { status: 404 });
+  const response = await pool.query(
+    "UPDATE sales SET date = $1 WHERE id_sale = $2 RETURNING id_sale, TO_CHAR(date, 'YYYY-MM-DD') AS fecha",
+    [date, id]
+  );
+  return response.rows[0];
 }
 async devolucion(req){
   const { id_sale, motivo } = req.body;

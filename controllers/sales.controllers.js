@@ -46,6 +46,16 @@ const getSaleById = async (req, res) => {
   res.json(response)
 };
 
+const putSalesDate = async (req, res) => {
+  try {
+    const response = await service.updateDate(req)
+    res.json(response)
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ message: e.message || "Error al actualizar la fecha" });
+  }
+};
+
 const postDevolucion = async (req, res) => {
   try {
     const response = await service.devolucion(req)
@@ -127,6 +137,7 @@ module.exports = {
   postVendings,
   deleteSalesById,getSalesMonthy,getByProduct,
   getSaleById,
+  putSalesDate,
   postDevolucion,
   postCambio,
   getLastSales,

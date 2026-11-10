@@ -4,7 +4,7 @@ const { checkRole } = require('../../middlewares/auth.handler')
 
 const router = express.Router();
 
-const { getBestProducts,getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, getSalesByUserRange, getSaleById, postDevolucion, postCambio, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
+const { getBestProducts,getSumRevenueToday,getTopSellingProducts,getSumSalesToday,getSales, postSales , getSalesByDate, getSalesByMonth, getSalesByUserRange, getSaleById, putSalesDate, postDevolucion, postCambio, postVendings, deleteSalesById, getSalesMonthy, getByProduct, getLastSales} = require("../../controllers/sales.controllers");
 
 router.get("/", getSales);
 router.get("/salesByDate", getSalesByDate);
@@ -19,6 +19,7 @@ router.get("/topSellingProducts", getTopSellingProducts)
 router.post("/", postSales);
 router.post("/vendings", postVendings)
 router.delete("/", checkRole(['admin']), deleteSalesById)
+router.put("/:id/date", checkRole(['admin']), putSalesDate)
 router.post("/devolucion", checkRole(['admin']), postDevolucion)
 router.post("/cambio", checkRole(['admin']), postCambio)
 router.get("/bestProducts", getBestProducts)
