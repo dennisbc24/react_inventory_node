@@ -1,4 +1,3 @@
-const { pool } = require("../config/db");
 const moment = require('moment-timezone');
 
   // Configura moment.js para utilizar la zona horaria de Lima (America/Lima)
@@ -12,10 +11,8 @@ const { response } = require("express");
 
 const getProducts = async (req, res, next) => {
   try {
-    const response = await pool.query(
-      "SELECT p.*, c.name AS category_name, c.slug AS category_slug FROM products p LEFT JOIN categories c ON p.fk_category=c.id_category ORDER BY p.name ASC"
-    );
-    res.json(response.rows);
+    const response = await service.get();
+    res.json(response);
   } catch(e){ next(e); }
 };
 
