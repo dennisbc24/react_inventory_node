@@ -63,14 +63,17 @@ function buildBins(X, maxBins) {
 }
 
 function binMatrix(X, bins) {
-  return X.map((row) => {
-    const binned = new Uint16Array(bins.length);
-    for (let feature = 0; feature < bins.length; feature += 1) {
+  const featureCount = bins.length;
+  const rowCount = X.length;
+  const columns = bins.map(() => new Uint16Array(rowCount));
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+    const row = X[rowIndex];
+    for (let feature = 0; feature < featureCount; feature += 1) {
       const value = Number(row[feature]);
-      binned[feature] = Number.isFinite(value) ? upperBound(bins[feature], value) : 0;
+      columns[feature][rowIndex] = Number.isFinite(value) ? upperBound(bins[feature], value) : 0;
     }
-    return binned;
-  });
+  }
+  return columns;
 }
 
 class GradientBoostedRegressor {
@@ -112,14 +115,14 @@ class GradientBoostedRegressor {
       this.baseRaw = mean(target);
     }
 
-    const raw = new Array(target.length).fill(this.baseRaw);
+    const raw = new Float64Array(target.length).fill(this.baseRaw);
     const sampleCount = Math.max(1, Math.floor(target.length * Math.max(0.1, Math.min(1, this.subsample))));
     const indices = target.map((_, index) => index);
 
     for (let iteration = 0; iteration < this.nEstimators; iteration += 1) {
       const prediction = raw.map((value) => this._link(value));
-      const gradient = new Array(target.length);
-      const hessian = new Array(target.length);
+      const gradient = new Float64Array(target.length);
+      const hessian = new Float64Array(target.length);
       for (let index = 0; index < target.length; index += 1) {
         const values = this._gradient(prediction[index], target[index]);
         gradient[index] = values.gradient;
@@ -200,7 +203,7 @@ class GradientBoostedRegressor {
     node.value = leafValue;
     if (depth >= this.maxDepth || indices.length < this.minSamplesLeaf * 2) return node;
 
-    const featureCount = Xb[0].length;
+    const featureCount = Xb.length;
     let bestGain = 0;
     let bestFeature = -1;
     let bestBin = -1;
@@ -208,16 +211,19 @@ class GradientBoostedRegressor {
     const totalH = sumHessian + this.lambda;
 
     for (let feature = 0; feature < featureCount; feature += 1) {
+      const featureBinCount = this.bins[feature].length;
+      if (featureBinCount === 0) continue;
+      const column = Xb[feature];
       const gradHist = new Float64Array(binCount);
       const hessHist = new Float64Array(binCount);
       const countHist = new Int32Array(binCount);
-      for (const index of indices) {
-        const bin = Xb[index][feature];
+      for (let position = 0; position < indices.length; position += 1) {
+        const index = indices[position];
+        const bin = column[index];
         gradHist[bin] += gradient[index];
         hessHist[bin] += hessian[index];
         countHist[bin] += 1;
       }
-      const featureBinCount = this.bins[feature].length;
       let leftGradient = 0;
       let leftHessian = 0;
       let leftCount = 0;
@@ -243,10 +249,11 @@ class GradientBoostedRegressor {
 
     if (bestFeature < 0 || bestGain <= 1e-12) return node;
 
+    const bestColumn = Xb[bestFeature];
     const leftIndices = [];
     const rightIndices = [];
     for (const index of indices) {
-      if (Xb[index][bestFeature] <= bestBin) leftIndices.push(index);
+      if (bestColumn[index] <= bestBin) leftIndices.push(index);
       else rightIndices.push(index);
     }
     if (leftIndices.length < this.minSamplesLeaf || rightIndices.length < this.minSamplesLeaf) return node;

@@ -61,6 +61,32 @@ function keyOf(skuId, branchId) {
   return `${skuId}:${branchId}`;
 }
 
+const helperCache = new WeakMap();
+
+function seriesHelpers(series) {
+  let helper = helperCache.get(series);
+  if (!helper) {
+    helper = {
+      length: 0,
+      lastSale: -1,
+      lastPrice: null,
+      lastSaleBefore: [],
+      lastPriceAt: [],
+    };
+    helperCache.set(series, helper);
+  }
+  const target = series.y.length;
+  for (let index = helper.length; index < target; index += 1) {
+    helper.lastSaleBefore[index] = helper.lastSale;
+    if (number(series.y[index]) > 0) helper.lastSale = index;
+    const value = series.price ? series.price[index] : null;
+    if (value !== null && value !== undefined && value > 0) helper.lastPrice = value;
+    helper.lastPriceAt[index] = helper.lastPrice;
+  }
+  helper.length = target;
+  return helper;
+}
+
 function buildSeriesCollection(dataset, options = {}) {
   const from = options.from;
   const to = options.to;
@@ -231,11 +257,13 @@ function buildSeriesCollection(dataset, options = {}) {
 }
 
 function lastKnownPrice(series, index) {
-  for (let position = Math.min(index, series.price.length - 1); position >= 0; position -= 1) {
-    const value = series.price[position];
-    if (value !== null && value !== undefined && value > 0) return value;
-  }
-  return series.last_price || series.list_price || series.cost || 0;
+  const fallback = series.last_price || series.list_price || series.cost || 0;
+  if (!series.price || series.price.length === 0 || index < 0) return fallback;
+  const helper = seriesHelpers(series);
+  const position = Math.min(index, helper.length - 1);
+  if (position < 0) return fallback;
+  const value = helper.lastPriceAt[position];
+  return value === null || value === undefined ? fallback : value;
 }
 
 function priorValues(series, index, windowSize) {
@@ -255,13 +283,7 @@ function featureRow(series, index, options = {}) {
     .slice(Math.max(0, index - 7), index)
     .filter((value) => value !== null && value !== undefined && value > 0);
   const priceBaseline = priorPrices.length ? mean(priorPrices) : priceUnit;
-  let lastSaleIndex = -1;
-  for (let position = index - 1; position >= 0; position -= 1) {
-    if (number(y[position]) > 0) {
-      lastSaleIndex = position;
-      break;
-    }
-  }
+  const lastSaleIndex = seriesHelpers(series).lastSaleBefore[index] ?? -1;
   const daysSinceLastSale = lastSaleIndex >= 0 ? index - lastSaleIndex : Math.min(index + 1, 365);
   const nonzeroRatio = prior28.length ? prior28.filter((value) => value > 0).length / prior28.length : 0;
   const stockStart = series.has_stock ? Math.max(0, number(series.stock_start[index])) : 0;

@@ -50,27 +50,39 @@ function baselineResidualStats(series, cutoffIndex, warmupDays) {
 }
 
 function buildTrainingRows(seriesList, cutoffIndexes, warmupDays, options) {
-  const rows = [];
-  seriesList.forEach((series, seriesIndex) => {
+  const maxRows = Number(options.maxTrainingRows) || 0;
+  let total = 0;
+  for (let seriesIndex = 0; seriesIndex < seriesList.length; seriesIndex += 1) {
+    const series = seriesList[seriesIndex];
     const cutoffIndex = cutoffIndexes[seriesIndex];
     for (let index = Math.min(warmupDays, cutoffIndex); index <= cutoffIndex; index += 1) {
       if (series.stockout[index] && series.y[index] === 0) continue;
-      rows.push({
-        x: featureRow(series, index, options),
-        y: series.y[index],
-        seriesIndex,
-        index,
-        date: series.dates[index],
-      });
+      total += 1;
     }
-  });
-  if (rows.length > options.maxTrainingRows) {
-    const step = rows.length / options.maxTrainingRows;
-    const sampled = [];
-    for (let position = 0; position < options.maxTrainingRows; position += 1) {
-      sampled.push(rows[Math.floor(position * step)]);
+  }
+  const sample = maxRows > 0 && total > maxRows;
+  const step = sample ? total / maxRows : 0;
+  const targets = sample
+    ? new Set(Array.from({ length: maxRows }, (_, position) => Math.floor(position * step)))
+    : null;
+  const rows = [];
+  let globalIndex = 0;
+  for (let seriesIndex = 0; seriesIndex < seriesList.length; seriesIndex += 1) {
+    const series = seriesList[seriesIndex];
+    const cutoffIndex = cutoffIndexes[seriesIndex];
+    for (let index = Math.min(warmupDays, cutoffIndex); index <= cutoffIndex; index += 1) {
+      if (series.stockout[index] && series.y[index] === 0) continue;
+      if (!sample || targets.has(globalIndex)) {
+        rows.push({
+          x: featureRow(series, index, options),
+          y: series.y[index],
+          seriesIndex,
+          index,
+          date: series.dates[index],
+        });
+      }
+      globalIndex += 1;
     }
-    return sampled;
   }
   return rows;
 }
