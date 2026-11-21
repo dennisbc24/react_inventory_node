@@ -183,3 +183,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/node,windows,linux
+# Modelo GBM preentrenado de forecasting (se genera con npm run train-forecasting / en deploy)
+services/forecasting/artifacts/
+

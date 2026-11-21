@@ -273,29 +273,15 @@ function buildFutureSeries(series, horizon, options, p50Model, p80Model, isInter
   };
 }
 
-function trainAndForecast(seriesList, options = {}) {
-  const config = {
+function resolveConfig(options = {}) {
+  return {
     ...DEFAULT_OPTIONS,
     ...options,
     model: { ...DEFAULT_OPTIONS.model, ...(options.model || {}) },
   };
-  const horizon = Math.max(1, Math.min(120, Number(config.horizon) || DEFAULT_OPTIONS.horizon));
-  if (!seriesList.length) {
-    return {
-      forecasts: [],
-      metrics: {},
-      meta: {
-        horizon,
-        train_rows: 0,
-        test_rows: 0,
-        cutoff_date: null,
-        model_config: config.model,
-        feature_names: FEATURE_NAMES,
-        assumptions: [],
-      },
-    };
-  }
+}
 
+function prepareContext(seriesList, config) {
   const historyDays = seriesList[0].dates.length;
   const asOfDate = seriesList[0].dates[historyDays - 1];
   const testDays = Math.max(1, Math.min(config.testDays, Math.max(1, Math.floor(historyDays * 0.25))));
@@ -308,7 +294,84 @@ function trainAndForecast(seriesList, options = {}) {
     return cutoff;
   });
   const warmupDays = Math.max(7, Math.min(config.warmupDays, Math.max(7, Math.floor(historyDays * 0.5))));
-  const trainRows = buildTrainingRows(seriesList, cutoffIndexes, warmupDays, config);
+  return { historyDays, asOfDate, testDays, cutoffDate, cutoffIndexes, warmupDays };
+}
+
+function fitModels(seriesList, config, context) {
+  const trainRows = buildTrainingRows(seriesList, context.cutoffIndexes, context.warmupDays, config);
+  let p50 = null;
+  let p80 = null;
+  if (trainRows.length >= 20 && trainRows.some((row) => row.y > 0)) {
+    const X = trainRows.map((row) => row.x);
+    const y = trainRows.map((row) => row.y);
+    p50 = makeModel(config, 0.5, 42).fit(X, y);
+    p80 = makeModel(config, 0.8, 43).fit(X, y);
+  }
+  return { p50, p80, trainRows };
+}
+
+// Entrena sólo los modelos (sin proyectar ni evaluar). Lo usa el script
+// offline `scripts/train_forecasting_model.js` para persistir el artefacto.
+function trainModels(seriesList, options = {}) {
+  const config = resolveConfig(options);
+  if (!Array.isArray(seriesList) || !seriesList.length) {
+    throw new Error("No hay series para entrenar el modelo");
+  }
+  const context = prepareContext(seriesList, config);
+  const { p50, p80, trainRows } = fitModels(seriesList, config, context);
+  if (!p50 || !p80) throw new Error("Datos insuficientes para entrenar el modelo");
+  return {
+    p50,
+    p80,
+    meta: {
+      as_of_date: context.asOfDate,
+      cutoff_date: context.cutoffDate,
+      history_days: context.historyDays,
+      test_days: context.testDays,
+      warmup_days: context.warmupDays,
+      train_rows: trainRows.length,
+      model_config: config.model,
+      feature_names: FEATURE_NAMES,
+    },
+  };
+}
+
+function trainAndForecast(seriesList, options = {}) {
+  const config = resolveConfig(options);
+  const horizon = Math.max(1, Math.min(120, Number(config.horizon) || DEFAULT_OPTIONS.horizon));
+  if (!seriesList.length) {
+    return {
+      forecasts: [],
+      metrics: {},
+      meta: {
+        horizon,
+        train_rows: 0,
+        test_rows: 0,
+        cutoff_date: null,
+        model_source: "baseline",
+        model_config: config.model,
+        feature_names: FEATURE_NAMES,
+        assumptions: [],
+      },
+    };
+  }
+
+  const context = prepareContext(seriesList, config);
+  const { historyDays, asOfDate, testDays, cutoffDate, cutoffIndexes, warmupDays } = context;
+  const pretrained =
+    options.pretrained && options.pretrained.p50 && options.pretrained.p80 ? options.pretrained : null;
+
+  let trainRows = [];
+  let p50Model = pretrained ? pretrained.p50 : null;
+  let p80Model = pretrained ? pretrained.p80 : null;
+  if (!pretrained) {
+    const fitted = fitModels(seriesList, config, context);
+    trainRows = fitted.trainRows;
+    p50Model = fitted.p50;
+    p80Model = fitted.p80;
+  }
+  const modelSource = pretrained ? "pretrained" : p50Model ? "trained" : "baseline";
+
   const testRows = buildTestRows(seriesList, cutoffIndexes, config);
   const intermittentTrain = seriesList.map((series, index) => {
     const cutoff = cutoffIndexes[index];
@@ -317,15 +380,6 @@ function trainAndForecast(seriesList, options = {}) {
   });
   const intermittentFull = seriesList.map((series) => classifyIntermittent(series.y).isIntermittent);
   const baselineStats = seriesList.map((series, index) => baselineResidualStats(series, cutoffIndexes[index], warmupDays));
-
-  let p50Model = null;
-  let p80Model = null;
-  if (trainRows.length >= 20 && trainRows.some((row) => row.y > 0)) {
-    const X = trainRows.map((row) => row.x);
-    const y = trainRows.map((row) => row.y);
-    p50Model = makeModel(config, 0.5, 42).fit(X, y);
-    p80Model = makeModel(config, 0.8, 43).fit(X, y);
-  }
 
   const predictions = new Map();
   if (p50Model) {
@@ -404,6 +458,7 @@ function trainAndForecast(seriesList, options = {}) {
       test_days: testDays,
       train_rows: trainRows.length,
       test_rows: testRows.length,
+      model_source: modelSource,
       model_config: config.model,
       feature_names: FEATURE_NAMES,
       feature_importance: featureImportance,
@@ -415,7 +470,8 @@ function trainAndForecast(seriesList, options = {}) {
         "Peru national holidays and pay-cycle effects (15th, month-end) are modeled by default; extra holidays can be passed in options.calendar.extraHolidays.",
       ],
     },
+    models: { p50: p50Model, p80: p80Model },
   };
 }
 
-module.exports = { DEFAULT_OPTIONS, trainAndForecast };
+module.exports = { DEFAULT_OPTIONS, trainAndForecast, trainModels };

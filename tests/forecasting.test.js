@@ -1,12 +1,16 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 
 const { addDays, calendarFeatures, easterSunday } = require("../services/forecasting/calendar");
 const { mape, pinball, wape } = require("../services/forecasting/metrics");
 const { GradientBoostedRegressor } = require("../services/forecasting/gbm");
 const { classifyIntermittent, tsbForecast } = require("../services/forecasting/intermittent");
 const { buildSeriesCollection } = require("../services/forecasting/features");
-const { trainAndForecast } = require("../services/forecasting/demand_forecaster");
+const { trainAndForecast, trainModels } = require("../services/forecasting/demand_forecaster");
+const { saveArtifact } = require("../services/forecasting/model_store");
 const {
   buildRestockPlan,
   buildRiskBreakdown,
@@ -17,6 +21,12 @@ const {
   zScore,
 } = require("../services/forecasting/restock_optimizer");
 const { ForecastingService } = require("../services/forecasting/forecasting_service");
+
+// Aísla los tests de cualquier artefacto local: siempre entrenan en caliente.
+process.env.FORECASTING_MODEL_PATH = path.join(
+  os.tmpdir(),
+  `forecasting-test-missing-${process.pid}-${Date.now()}.json`
+);
 
 function makeDataset({ days = 420, endDate = "2024-02-04" } = {}) {
   const dates = Array.from({ length: days }, (_, index) => addDays(endDate, -(days - 1 - index)));
@@ -136,6 +146,92 @@ test("gradient boosted trees learn a non-linear series", () => {
   }).fit(X, y);
   const predictions = model.predict(X);
   assert.ok(wape(y, predictions) < 0.15);
+});
+
+test("gradient boosted model round-trips through JSON with identical predictions", () => {
+  const X = [];
+  const y = [];
+  for (let index = 0; index < 200; index += 1) {
+    const x1 = index / 7;
+    const x2 = Math.cos(index / 5);
+    X.push([x1, x2]);
+    y.push(Math.max(0, 3 + 1.5 * x1 + 2 * x2));
+  }
+  const model = new GradientBoostedRegressor({
+    nEstimators: 12,
+    maxDepth: 3,
+    maxBins: 16,
+    learningRate: 0.1,
+    objective: "quantile",
+    quantile: 0.8,
+    seed: 3,
+  }).fit(X, y);
+  const restored = GradientBoostedRegressor.fromJSON(JSON.parse(JSON.stringify(model)));
+  assert.deepEqual(restored.predict(X), model.predict(X));
+});
+
+test("forecaster reuses a pretrained model instead of retraining", () => {
+  const dataset = makeDataset();
+  const series = buildSeriesCollection(dataset, {
+    from: dataset.sales[0].date,
+    to: dataset.sales[dataset.sales.length - 1].date,
+  });
+  const trained = trainModels(series, { testDays: 28, warmupDays: 28 });
+  const pretrained = trainAndForecast(series, {
+    horizon: 14,
+    testDays: 28,
+    warmupDays: 28,
+    pretrained: { p50: trained.p50, p80: trained.p80 },
+  });
+  const reference = trainAndForecast(series, { horizon: 14, testDays: 28, warmupDays: 28 });
+  assert.equal(pretrained.meta.model_source, "pretrained");
+  assert.equal(pretrained.meta.train_rows, 0);
+  assert.equal(reference.meta.model_source, "trained");
+  assert.equal(pretrained.forecasts.length, reference.forecasts.length);
+  pretrained.forecasts.forEach((forecast, index) => {
+    forecast.future.forEach((row, step) => {
+      assert.equal(row.p50, reference.forecasts[index].future[step].p50);
+      assert.equal(row.p80, reference.forecasts[index].future[step].p80);
+    });
+  });
+});
+
+test("forecasting service loads a persisted model artifact", async () => {
+  const dataset = makeDataset({ days: 140 });
+  const series = buildSeriesCollection(dataset, {
+    from: dataset.sales[0].date,
+    to: dataset.sales[dataset.sales.length - 1].date,
+  });
+  const trained = trainModels(series, { testDays: 28, warmupDays: 28 });
+  const previousPath = process.env.FORECASTING_MODEL_PATH;
+  const artifactFile = path.join(os.tmpdir(), `forecasting-artifact-${process.pid}-${Date.now()}.json`);
+  process.env.FORECASTING_MODEL_PATH = artifactFile;
+  try {
+    saveArtifact({
+      p50: trained.p50,
+      p80: trained.p80,
+      asOfDate: "2024-02-04",
+      modelConfig: trained.meta.model_config,
+    });
+    const repository = {
+      async loadDataset() {
+        return dataset;
+      },
+    };
+    const service = new ForecastingService({ repository, cacheTtlMs: 1000 });
+    const demand = await service.getDemandForecasts({
+      as_of_date: "2024-02-04",
+      history_days: 140,
+      horizon: 7,
+    });
+    assert.equal(demand.meta.model_source, "pretrained");
+    assert.equal(demand.meta.train_rows, 0);
+    assert.equal(demand.forecasts.length, 2);
+  } finally {
+    if (previousPath === undefined) delete process.env.FORECASTING_MODEL_PATH;
+    else process.env.FORECASTING_MODEL_PATH = previousPath;
+    fs.rmSync(artifactFile, { force: true });
+  }
 });
 
 test("intermittent demand is detected and TSB avoids over-forecasting", () => {
@@ -634,7 +730,7 @@ test("forecasting service integrates with an in-memory repository", async () => 
   });
   assert.equal(demand.forecasts.length, 2);
   assert.equal(demand.filters.horizon, 7);
-  assert.ok(demand.meta.train_rows > 0);
+  assert.ok(demand.meta.train_rows > 0 || demand.meta.model_source === "pretrained");
   assert.ok(demand.forecasts.every((forecast) => forecast.recent_stats.days > 0));
 
   dataset.stock.push({ sku_id: 1, branch_id: 2, stock: 5 });

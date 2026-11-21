@@ -168,6 +168,48 @@ class GradientBoostedRegressor {
       .slice(0, limit);
   }
 
+  // Serializa el modelo entrenado para guardarlo como artefacto (patrón
+  // "entrenar offline, inferir en el request"). Sólo incluye estado
+  // necesario para predecir, no las filas de entrenamiento.
+  toJSON() {
+    return {
+      schema_version: 1,
+      config: {
+        nEstimators: this.nEstimators,
+        learningRate: this.learningRate,
+        maxDepth: this.maxDepth,
+        minSamplesLeaf: this.minSamplesLeaf,
+        maxBins: this.maxBins,
+        lambda: this.lambda,
+        subsample: this.subsample,
+        objective: this.objective,
+        quantile: this.quantile,
+        tweediePower: this.tweediePower,
+        seed: this.seed,
+      },
+      link: this.link,
+      baseRaw: this.baseRaw,
+      bins: this.bins,
+      trees: this.trees,
+      featureImportance: this.featureImportance,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data || typeof data !== "object" || !Array.isArray(data.trees) || !Array.isArray(data.bins)) {
+      throw new Error("Modelo GBM inválido: faltan trees/bins");
+    }
+    const model = new GradientBoostedRegressor(data.config || {});
+    model.link = data.link || model.link;
+    model.baseRaw = Number(data.baseRaw) || 0;
+    model.bins = data.bins;
+    model.trees = data.trees;
+    model.featureImportance = Array.isArray(data.featureImportance)
+      ? data.featureImportance
+      : new Array(data.bins.length).fill(0);
+    return model;
+  }
+
   _link(raw) {
     if (this.link === "log") return Math.exp(Math.max(-20, Math.min(20, raw)));
     return raw;

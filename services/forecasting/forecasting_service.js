@@ -3,6 +3,7 @@ const { addDays, calendarFeatures } = require("./calendar");
 const { trainAndForecast } = require("./demand_forecaster");
 const { buildSeriesCollection } = require("./features");
 const { ForecastingRepository } = require("./forecasting_repository");
+const { loadModels } = require("./model_store");
 const {
   buildRestockPlan,
   buildRiskBreakdown,
@@ -121,6 +122,8 @@ class ForecastingService {
     this.repository = options.repository || new ForecastingRepository();
     this.cacheTtlMs = Number(options.cacheTtlMs) || 30 * 60 * 1000;
     this.cache = new Map();
+    // `loadPretrained: null` desactiva el artefacto (tests / entrenamiento forzado).
+    this.loadPretrained = options.loadPretrained === undefined ? loadModels : options.loadPretrained;
   }
 
   async getDemandForecasts(params = {}) {
@@ -304,6 +307,13 @@ class ForecastingService {
   }
 
   async _buildBundle(common, dataset, horizon) {
+    // Modelo preentrenado (patrón sofa): si existe el artefacto, sólo inferimos.
+    // Si el request trae `model` explícito, respetamos el entrenamiento custom.
+    const pretrained =
+      this.loadPretrained && Object.keys(common.model || {}).length === 0 ? this.loadPretrained() : null;
+    const modelSource = pretrained
+      ? `pretrained:${pretrained.file || ""}:${pretrained.mtimeMs || ""}`
+      : "trained";
     const cacheKey = JSON.stringify({
       branchId: common.branchId,
       skuId: common.skuId,
@@ -316,6 +326,7 @@ class ForecastingService {
       warmupDays: common.warmupDays,
       model: common.model,
       calendar: common.calendar,
+      modelSource,
     });
     const cached = this.cache.get(cacheKey);
     if (cached && cached.expires > Date.now() && !common.refresh) return cached.bundle;
@@ -335,6 +346,7 @@ class ForecastingService {
       warmupDays: common.warmupDays,
       model: common.model,
       calendar: common.calendar,
+      pretrained,
     });
     result.forecasts = result.forecasts.filter((forecast) => {
       if (common.branchId !== null && forecast.branch_id !== common.branchId) return false;

@@ -30,6 +30,8 @@ jobs:
             NODE_ENV=production node migrations/run.js 005_invoices.sql
             NODE_ENV=production node migrations/run.js 006_forecasting.sql
             NODE_ENV=production node migrations/run.js 007_products_discontinued.sql
+            echo "==> Entrenar modelo de forecasting (best effort)"
+            NODE_ENV=production node scripts/train_forecasting_model.js || echo "WARN: no se pudo preentrenar; se usara entrenamiento en caliente"
             echo "==> Restart"
             pm2 restart inventariojs || pm2 start server.js --name inventariojs
             pm2 save
