@@ -20,6 +20,7 @@ const apiShoppingOrders = require('./api/shoppingOrdersRouter')
 const apiInvoices = require('./api/invoicesRouter')
 const apiCategories = require('./api/categoriesRouter')
 const apiPublic = require('./api/publicRouter')
+const apiForecasting = require('./api/forecastingRouter')
 
 
 function routerApi(app) {
@@ -45,6 +46,7 @@ function routerApi(app) {
     router.use("/shoppingList", apiShoppingList);
     router.use("/shoppingOrders", apiShoppingOrders);
     router.use("/invoices", apiInvoices);
+    router.use("/forecasting", apiForecasting);
 }
 
 module.exports = routerApi;

@@ -15,7 +15,7 @@ class ProductsService {
     }
     async create(req){
         // compat: frontend puede enviar unit/total en lugar de list_price/lowest_price
-        let { name, cost, fk_supplier, lowest_price, list_price, fk_category, is_online, attributes} = req.body;
+        let { name, cost, fk_supplier, lowest_price, list_price, fk_category, is_online, is_discontinued, attributes} = req.body;
         if (req.body.unit !== undefined && (list_price === undefined || list_price === '')) list_price = req.body.unit;
         if (req.body.total !== undefined && (lowest_price === undefined || lowest_price === '')) lowest_price = req.body.total;
         // normaliza fk_category: '' -> null, valida número
@@ -34,8 +34,9 @@ class ProductsService {
       
         try {
                 const isOnline = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1 ? true : is_online === 'false' || is_online === false || is_online === '0' ? false : false;
+                const isDiscontinued = is_discontinued === 'true' || is_discontinued === true || is_discontinued === '1' || is_discontinued === 1;
                 const attrs = this.parseAttributes(attributes);
-                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category, is_online, attributes) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price || null, list_price || null,fk_supplier || null, fk_category || null, isOnline, attrs ? JSON.stringify(attrs) : '{}']);
+                const response = await pool.query('INSERT INTO products (name, cost, created, lowest_price, list_price,fk_supplier,fk_category, is_online, attributes, is_discontinued) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10 ) RETURNING id_product', [name, cost, fechaActual.toDate(), lowest_price || null, list_price || null,fk_supplier || null, fk_category || null, isOnline, attrs ? JSON.stringify(attrs) : '{}', isDiscontinued]);
                 const newProductId = response.rows[0].id_product;
                 // si viene foto, súbela igual que en actualizar (S3 products/image-{id}.ext)
                 if (req.files && req.files.photo) {
@@ -135,7 +136,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                
                       const uploadFileRequest = await uploadFile(req.files.photo, nameFile2)
                      
-                       let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes, fk_supplier, supplier } = req.body;
+                       let { name, cost, sugested_price, wholesale_price, fk_category, is_online, is_discontinued, attributes, fk_supplier, supplier } = req.body;
                 // normaliza/ valida fk_category
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
@@ -147,6 +148,8 @@ let nameFile = req.body.name.replaceAll(' ','' )
                 }
                 let isOnline = undefined;
                 if (is_online !== undefined) isOnline = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1;
+                let isDiscontinued = undefined;
+                if (is_discontinued !== undefined) isDiscontinued = is_discontinued === 'true' || is_discontinued === true || is_discontinued === '1' || is_discontinued === 1;
                 const attrs = this.parseAttributes(attributes);
                 const id = req.params.id
                 if (isOnline !== undefined) {
@@ -155,6 +158,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
                 }
                 if (attrs !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs), id]);
+                if (isDiscontinued !== undefined) await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued, id]);
                 if (fk_supplier !== undefined) {
                   let fkSup = fk_supplier;
                   if (fkSup === '' || fkSup === 'null') fkSup = null;
@@ -176,7 +180,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
             
             }else{
              nameFile2 = '' 
-             let { name, cost, sugested_price, wholesale_price, fk_category, is_online, attributes, fk_supplier, supplier } = req.body;
+             let { name, cost, sugested_price, wholesale_price, fk_category, is_online, is_discontinued, attributes, fk_supplier, supplier } = req.body;
                 if (fk_category === '' || fk_category === 'null') fk_category = null;
                 if (fk_category != null) {
                   const fk = Number(fk_category);
@@ -187,6 +191,8 @@ let nameFile = req.body.name.replaceAll(' ','' )
                 }
                 let isOnline2 = undefined;
                 if (is_online !== undefined) isOnline2 = is_online === 'true' || is_online === true || is_online === '1' || is_online === 1;
+                let isDiscontinued2 = undefined;
+                if (is_discontinued !== undefined) isDiscontinued2 = is_discontinued === 'true' || is_discontinued === true || is_discontinued === '1' || is_discontinued === 1;
                 const attrs2 = this.parseAttributes(attributes);
                 const id = req.params.id   
                 console.log(name, cost, sugested_price, wholesale_price, fk_category, is_online);
@@ -196,6 +202,7 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,id] )
                 }
                 if (attrs2 !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs2), id]);
+                if (isDiscontinued2 !== undefined) await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued2, id]);
                 if (fk_supplier !== undefined) {
                   let fkSup = fk_supplier;
                   if (fkSup === '' || fkSup === 'null') fkSup = null;

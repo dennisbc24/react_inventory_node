@@ -28,6 +28,8 @@ jobs:
             echo "==> Install & migrate"
             npm ci
             NODE_ENV=production node migrations/run.js 005_invoices.sql
+            NODE_ENV=production node migrations/run.js 006_forecasting.sql
+            NODE_ENV=production node migrations/run.js 007_products_discontinued.sql
             echo "==> Restart"
             pm2 restart inventariojs || pm2 start server.js --name inventariojs
             pm2 save
