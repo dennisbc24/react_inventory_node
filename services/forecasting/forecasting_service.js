@@ -4,6 +4,7 @@ const { trainAndForecast } = require("./demand_forecaster");
 const { buildSeriesCollection } = require("./features");
 const { ForecastingRepository } = require("./forecasting_repository");
 const { loadModels } = require("./model_store");
+const { RestockSnapshotStore } = require("./restock_snapshot");
 const {
   buildRestockPlan,
   buildRiskBreakdown,
@@ -14,6 +15,13 @@ const {
 } = require("./restock_optimizer");
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// Lead time fijo: evita combinaciones dinámicas y mantiene estable el snapshot.
+const FIXED_LEAD_TIME_MIN = 4;
+const FIXED_LEAD_TIME_MAX = 20;
+const DEFAULT_HISTORY_DAYS = 365;
+// Nunca se consultan más de 365 días de ventas: la ventana de un año es
+// suficiente para estacionalidad y mantiene acotado el costo del escaneo.
+const MAX_HISTORY_DAYS = 365;
 
 function httpError(status, message) {
   return Object.assign(new Error(message), { status });
@@ -30,8 +38,14 @@ function clamp(value, minimum, maximum) {
 function normalizeCommonParams(params = {}) {
   const asOfDate = params.asOfDate || params.as_of_date || todayInLima();
   if (!DATE_PATTERN.test(asOfDate)) throw httpError(400, "as_of_date debe tener formato YYYY-MM-DD");
-  const historyDays = clamp(Number(params.historyDays ?? params.history_days ?? 730) || 730, 60, 1095);
-  const from = params.from || addDays(asOfDate, -(historyDays - 1));
+  const historyDays = clamp(
+    Number(params.historyDays ?? params.history_days ?? DEFAULT_HISTORY_DAYS) || DEFAULT_HISTORY_DAYS,
+    60,
+    MAX_HISTORY_DAYS
+  );
+  const earliestFrom = addDays(asOfDate, -(MAX_HISTORY_DAYS - 1));
+  const requestedFrom = params.from || addDays(asOfDate, -(historyDays - 1));
+  const from = requestedFrom < earliestFrom ? earliestFrom : requestedFrom;
   if (!DATE_PATTERN.test(from)) throw httpError(400, "from debe tener formato YYYY-MM-DD");
   const parseId = (value, name) => {
     if (value === null || value === undefined || value === "") return null;
@@ -43,26 +57,18 @@ function normalizeCommonParams(params = {}) {
   const skuId = parseId(params.skuId ?? params.sku_id, "sku_id");
   const horizon = clamp(Number(params.horizon) || 28, 1, 120);
   const granularity = params.granularity === "week" ? "week" : "day";
-  const parseOptionalDays = (value, name) => {
-    if (value === null || value === undefined || value === "") return null;
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      throw httpError(400, `${name} debe ser un número mayor o igual a 0`);
-    }
-    return parsed;
-  };
-  const leadTimeMin = parseOptionalDays(params.leadTimeMin ?? params.lead_time_min, "lead_time_min");
-  const leadTimeMax = parseOptionalDays(params.leadTimeMax ?? params.lead_time_max, "lead_time_max");
-  if (leadTimeMin !== null && leadTimeMax !== null && leadTimeMax < leadTimeMin) {
-    throw httpError(400, "lead_time_max debe ser mayor o igual a lead_time_min");
-  }
+  // Lead time fijo para todo el cálculo: menos parámetros y snapshot estable.
+  const leadTimeMin = FIXED_LEAD_TIME_MIN;
+  const leadTimeMax = FIXED_LEAD_TIME_MAX;
   const forecastFrom = params.forecastFrom || params.forecast_from || params.date_from || null;
   const forecastTo = params.forecastTo || params.forecast_to || params.date_to || null;
   if (forecastFrom && !DATE_PATTERN.test(forecastFrom)) throw httpError(400, "forecast_from debe tener formato YYYY-MM-DD");
   if (forecastTo && !DATE_PATTERN.test(forecastTo)) throw httpError(400, "forecast_to debe tener formato YYYY-MM-DD");
   return {
     asOfDate,
+    asOfExplicit: Boolean(params.asOfDate || params.as_of_date),
     from,
+    fromExplicit: Boolean(params.from),
     to: asOfDate,
     forecastFrom,
     forecastTo,
@@ -122,21 +128,102 @@ class ForecastingService {
     this.repository = options.repository || new ForecastingRepository();
     this.cacheTtlMs = Number(options.cacheTtlMs) || 30 * 60 * 1000;
     this.cache = new Map();
+    // Deduplica cargas concurrentes del mismo dataset (single-flight).
+    this.inflightDatasets = new Map();
     // `loadPretrained: null` desactiva el artefacto (tests / entrenamiento forzado).
     this.loadPretrained = options.loadPretrained === undefined ? loadModels : options.loadPretrained;
+    this.snapshotCoverageMaxDays = Number(
+      options.snapshotCoverageMaxDays || process.env.FORECASTING_SNAPSHOT_COVERAGE_DAYS || 180
+    );
+    // Un `refresh=true` repetido no debe volver a golpear Postgres.
+    this.refreshCooldownMs = Number(
+      options.refreshCooldownMs ||
+        process.env.FORECASTING_REFRESH_COOLDOWN_MS ||
+        15 * 60 * 1000
+    );
+    this.lastForcedRefreshAt = 0;
+    // Un snapshot viejo se sigue sirviendo (stale-while-revalidate) mientras el
+    // job diario corre; pasada esta ventana se prefiere recalcular.
+    this.snapshotMaxAgeMs = Number(
+      options.snapshotMaxAgeMs ||
+        process.env.FORECASTING_SNAPSHOT_MAX_AGE_MS ||
+        72 * 60 * 60 * 1000
+    );
+    this.snapshotStore = options.snapshotStore === null
+      ? null
+      : options.snapshotStore || new RestockSnapshotStore({
+          refreshHour: options.refreshHour,
+          refreshMinute: options.refreshMinute,
+          jitterMinutes: options.jitterMinutes,
+          persistPath: options.snapshotPath,
+          persist: options.persistSnapshot,
+        });
   }
 
   async getDemandForecasts(params = {}) {
     const common = normalizeCommonParams(params);
+    const snapshot = this.snapshotStore ? this.snapshotStore.get() : null;
+    const refreshRequested = common.refresh && this._canForceRefresh();
+    if (common.refresh) common.refresh = refreshRequested;
+    if (refreshRequested) this.lastForcedRefreshAt = Date.now();
+
+    const snapshotReady =
+      snapshot &&
+      this._snapshotMatches(snapshot, common) &&
+      common.horizon <= snapshot.horizon;
+
+    if (refreshRequested && !snapshot && this.snapshotStore) {
+      await this.snapshotStore.refresh().catch(() => {});
+      const built = this.snapshotStore.get();
+      if (built && this._snapshotMatches(built, common) && common.horizon <= built.horizon) {
+        return this._demandResponseFromSnapshot(built, common, true);
+      }
+    }
+
+    if (snapshotReady) {
+      if (refreshRequested && this.snapshotStore) {
+        this.snapshotStore.refresh().catch(() => {});
+      }
+      return this._demandResponseFromSnapshot(snapshot, common, refreshRequested);
+    }
+
     const loadCommon = { ...common, branchId: null };
     const bundle = await this._getBundle(loadCommon);
-    const selected = consolidateForecastsBySku(bundle.result.forecasts, {
+    return this._demandResponse({
+      common,
+      source: bundle.result.forecasts,
+      metrics: bundle.result.metrics,
+      meta: bundle.result.meta,
+      snapshotMeta: { served_from: "live" },
+    });
+  }
+
+  _demandResponseFromSnapshot(snapshot, common, refreshRequested = false) {
+    return this._demandResponse({
+      common,
+      source: snapshot.forecasts,
+      metrics: snapshot.metrics,
+      meta: snapshot.meta,
+      snapshotMeta: {
+        ...this._snapshotMeta(snapshot, "snapshot"),
+        refresh_requested: Boolean(refreshRequested),
+      },
+    });
+  }
+
+  _demandResponse({ common, source, metrics, meta, snapshotMeta }) {
+    const pool = common.skuId === null
+      ? source
+      : source.filter((forecast) => Number(forecast.sku_id) === common.skuId);
+    const selected = consolidateForecastsBySku(pool, {
       branchId: common.branchId,
     }).filter(
       (forecast) => common.skuId === null || forecast.sku_id === common.skuId
     );
     const forecasts = selected.map((forecast) => {
+      const horizonEnd = addDays(common.asOfDate, common.horizon);
       const filteredFuture = forecast.future.filter((row) => {
+        if (row.date > horizonEnd) return false;
         if (common.forecastFrom && row.date < common.forecastFrom) return false;
         if (common.forecastTo && row.date > common.forecastTo) return false;
         return true;
@@ -188,33 +275,185 @@ class ForecastingService {
         lead_time_min: common.leadTimeMin,
         lead_time_max: common.leadTimeMax,
       },
-      metrics: bundle.result.metrics,
-      meta: bundle.result.meta,
+      metrics,
+      meta,
       forecasts,
+      snapshot: snapshotMeta,
     };
+  }
+
+  _snapshotMeta(snapshot, servedFrom) {
+    return {
+      served_from: servedFrom,
+      as_of_date: snapshot.asOfDate,
+      built_at: new Date(snapshot.builtAt).toISOString(),
+      age_seconds: Math.round((Date.now() - snapshot.builtAt) / 1000),
+      coverage_max_days: snapshot.coverageMaxDays,
+      refresh_in_progress: Boolean(this.snapshotStore && this.snapshotStore.isRefreshing()),
+    };
+  }
+
+  // Sobrepone el flag `is_discontinued` vigente sobre los productos del
+  // snapshot. Es una consulta mínima (id + flag, cache corto) y hace que
+  // descontinuar/reactivar se refleje sin esperar al job diario.
+  async _withFreshDiscontinuedFlags(products) {
+    if (!Array.isArray(products) || products.length === 0) return products;
+    if (typeof this.repository.loadDiscontinuedFlags !== "function") return products;
+    try {
+      const flags = await this.repository.loadDiscontinuedFlags();
+      if (!Array.isArray(flags) || flags.length === 0) return products;
+      const byId = new Map(
+        flags.map((row) => [String(row.id_product), row.is_discontinued])
+      );
+      return products.map((product) => {
+        const key = String(product.id_product);
+        if (!byId.has(key)) return product;
+        const value = byId.get(key);
+        return {
+          ...product,
+          is_discontinued: value === true || value === "true" || value === 1,
+        };
+      });
+    } catch (error) {
+      // Si la consulta falla, se usan los flags del snapshot.
+      return products;
+    }
   }
 
   async getRestockPlan(params = {}) {
     const common = normalizeCommonParams(params);
-    const options = normalizeOptions({
+    const options = this._restockOptions(params, common);
+    const snapshot = this.snapshotStore ? this.snapshotStore.get() : null;
+    const compatible = snapshot && this._isSnapshotCompatible(snapshot, common, options);
+
+    // Cooldown del refresco manual: un botón pulsado varias veces (o varios
+    // usuarios) no debe encadenar cálculos pesados.
+    const refreshRequested = common.refresh && this._canForceRefresh();
+    if (common.refresh) common.refresh = refreshRequested;
+    if (refreshRequested) this.lastForcedRefreshAt = Date.now();
+
+    // Cold start: no hay snapshot que servir, así que este request sí espera.
+    if (refreshRequested && !snapshot && this.snapshotStore) {
+      await this.snapshotStore.refresh().catch(() => {});
+      const built = this.snapshotStore.get();
+      if (built && this._isSnapshotCompatible(built, common, options)) {
+        return this._restockResponseFromSnapshot(built, common, options, params, true);
+      }
+    }
+
+    // Camino rápido: derivar el plan del snapshot precalculado. La derivación
+    // es barata, así que cualquier presupuesto/cobertura/sucursal responde al
+    // instante sin volver a consultar Postgres.
+    if (compatible) {
+      // Refresco manual: se dispara en segundo plano y se responde con el
+      // snapshot vigente (stale-while-revalidate). Nunca calcula en el request.
+      if (refreshRequested && this.snapshotStore) {
+        this.snapshotStore.refresh().catch(() => {});
+      }
+      return this._restockResponseFromSnapshot(snapshot, common, options, params, refreshRequested);
+    }
+
+    const restockCommon = { ...common, branchId: null };
+    const horizon = this._restockHorizon(common, options);
+    const bundle = await this._getBundleFor(restockCommon, horizon);
+    const dataset = bundle.dataset;
+    const consolidated = consolidateForecastsBySku(bundle.result.forecasts, {
+      branchId: common.branchId,
+    });
+    return this._assembleRestockResponse({
+      common,
+      options,
+      params,
+      consolidated,
+      products: dataset.products,
+      sales: dataset.sales,
+      metrics: bundle.result.metrics,
+      meta: bundle.result.meta,
+      snapshotMeta: { served_from: "live" },
+    });
+  }
+
+  _canForceRefresh(now = Date.now()) {
+    return now - this.lastForcedRefreshAt >= this.refreshCooldownMs;
+  }
+
+  _restockOptions(params, common) {
+    return normalizeOptions({
       budget: params.budget,
-      leadTimeMin: common.leadTimeMin ?? undefined,
-      leadTimeMax: common.leadTimeMax ?? common.leadTimeMin ?? undefined,
+      leadTimeMin: common.leadTimeMin,
+      leadTimeMax: common.leadTimeMax,
       coverageDays: params.coverageDays ?? params.coverage_days,
       serviceLevel: params.serviceLevel ?? params.service_level,
       riskAversion: params.riskAversion ?? params.risk_aversion,
       soonDays: params.soonDays ?? params.soon_days,
     });
-    const restockCommon = { ...common, branchId: null };
-    const dataset = await this._loadDataset(restockCommon);
-    const maxLead = this._maxLeadTime(dataset, options);
-    const horizon = Math.max(common.horizon, maxLead + options.coverageDays + 2);
-    const bundle = await this._buildBundle(restockCommon, dataset, horizon);
-    const consolidated = consolidateForecastsBySku(bundle.result.forecasts, {
+  }
+
+  _restockHorizon(common, options) {
+    return Math.max(common.horizon, FIXED_LEAD_TIME_MAX + options.coverageDays + 2);
+  }
+
+  _isSnapshotCompatible(snapshot, common, options) {
+    return (
+      this._snapshotMatches(snapshot, common) &&
+      options.coverageDays <= snapshot.coverageMaxDays &&
+      options.leadTimeMin === snapshot.leadTimeMin &&
+      options.leadTimeMax === snapshot.leadTimeMax
+    );
+  }
+
+  _snapshotMatches(snapshot, common) {
+    if (!snapshot) return false;
+    if (snapshot.historyDays !== common.historyDays) return false;
+    if (snapshot.leadTimeMin !== common.leadTimeMin) return false;
+    if (snapshot.leadTimeMax !== common.leadTimeMax) return false;
+    // Si el cliente pidió una fecha explícita, el snapshot debe ser de esa fecha.
+    if (common.asOfExplicit) return snapshot.asOfDate === common.asOfDate;
+    if (common.fromExplicit && snapshot.from !== common.from) return false;
+    // Stale-while-revalidate: mientras el job diario no corra, se sirve el
+    // snapshot anterior dentro de la ventana permitida.
+    return Date.now() - snapshot.builtAt <= this.snapshotMaxAgeMs;
+  }
+
+  _restockResponseFromSnapshot(snapshot, common, options, params, refreshRequested = false) {
+    const forecasts = common.skuId === null
+      ? snapshot.forecasts
+      : snapshot.forecasts.filter((forecast) => Number(forecast.sku_id) === common.skuId);
+    const consolidated = consolidateForecastsBySku(forecasts, {
       branchId: common.branchId,
     });
-    const discontinued = filterDiscontinuedSkus(consolidated, dataset.products);
-    const filtered = filterStaleSkus(discontinued.forecasts, dataset.sales, {
+    return this._assembleRestockResponse({
+      common,
+      options,
+      params,
+      consolidated,
+      products: snapshot.products,
+      sales: snapshot.sales,
+      metrics: snapshot.metrics,
+      meta: snapshot.meta,
+      snapshotMeta: {
+        ...this._snapshotMeta(snapshot, "snapshot"),
+        refresh_requested: Boolean(refreshRequested),
+      },
+    });
+  }
+
+  async _assembleRestockResponse({
+    common,
+    options,
+    params,
+    consolidated,
+    products,
+    sales,
+    metrics,
+    meta,
+    snapshotMeta,
+  }) {
+    // El snapshot puede tener hasta un día de antigüedad; los flags de
+    // descontinuado se refrescan aparte para que "no reponer" sea inmediato.
+    const freshProducts = await this._withFreshDiscontinuedFlags(products);
+    const discontinued = filterDiscontinuedSkus(consolidated, freshProducts);
+    const filtered = filterStaleSkus(discontinued.forecasts, sales, {
       asOfDate: common.asOfDate,
       staleDays: params.staleDays ?? params.stale_days,
       profitWindowDays: params.profitWindowDays ?? params.profit_window_days,
@@ -245,8 +484,71 @@ class ForecastingService {
       summary: plan.summary,
       items: plan.items,
       soon_to_run_out: plan.soon_to_run_out,
-      forecast_metrics: bundle.result.metrics,
+      forecast_metrics: metrics,
+      meta,
+      snapshot: snapshotMeta,
+    };
+  }
+
+  async buildRestockSnapshot(params = {}) {
+    const started = Date.now();
+    const common = normalizeCommonParams({
+      asOfDate: params.asOfDate ?? params.as_of_date,
+      historyDays: params.historyDays ?? params.history_days,
+      refresh: true,
+    });
+    const restockCommon = { ...common, branchId: null, skuId: null };
+    const dataset = await this.repository.loadDataset({
+      branchId: null,
+      skuId: null,
+      from: common.from,
+      to: common.to,
+      sequential: true,
+    });
+    const horizon = Math.max(
+      common.horizon,
+      FIXED_LEAD_TIME_MAX + this.snapshotCoverageMaxDays + 2
+    );
+    const bundle = await this._buildBundle(restockCommon, dataset, horizon);
+    return {
+      asOfDate: common.asOfDate,
+      from: common.from,
+      historyDays: common.historyDays,
+      leadTimeMin: FIXED_LEAD_TIME_MIN,
+      leadTimeMax: FIXED_LEAD_TIME_MAX,
+      coverageMaxDays: this.snapshotCoverageMaxDays,
+      horizon,
+      forecasts: bundle.result.forecasts,
+      sales: dataset.sales,
+      products: dataset.products,
+      suppliers: dataset.suppliers,
+      metrics: bundle.result.metrics,
       meta: bundle.result.meta,
+      builtAt: Date.now(),
+      durationMs: Date.now() - started,
+    };
+  }
+
+  startRestockSnapshot() {
+    if (!this.snapshotStore) return;
+    this.snapshotStore.start(() => this.buildRestockSnapshot());
+  }
+
+  stopRestockSnapshot() {
+    if (this.snapshotStore) this.snapshotStore.stop();
+  }
+
+  getRestockSnapshotStatus() {
+    const status = this.snapshotStore
+      ? this.snapshotStore.status()
+      : { ready: false, refreshing: false, last_error: null };
+    return {
+      ...status,
+      refresh_cooldown_seconds: Math.round(this.refreshCooldownMs / 1000),
+      manual_refresh_allowed: this._canForceRefresh(),
+      manual_refresh_available_at: this.lastForcedRefreshAt
+        ? new Date(this.lastForcedRefreshAt + this.refreshCooldownMs).toISOString()
+        : null,
     };
   }
 
@@ -261,11 +563,44 @@ class ForecastingService {
       riskAversion: params.riskAversion ?? params.risk_aversion,
       soonDays: params.soonDays ?? params.soon_days,
     });
-    const dataset = await this._loadDataset(common);
-    const maxLead = this._maxLeadTime(dataset, options);
-    const horizon = Math.max(common.horizon, maxLead + options.coverageDays + 2);
-    const bundle = await this._buildBundle(common, dataset, horizon);
-    const discontinued = filterDiscontinuedSkus(bundle.result.forecasts, dataset.products);
+    const snapshot = this.snapshotStore ? this.snapshotStore.get() : null;
+    if (
+      snapshot &&
+      !common.refresh &&
+      this._snapshotMatches(snapshot, common) &&
+      common.horizon <= snapshot.horizon
+    ) {
+      return this._riskResponseFromSnapshot(snapshot, common, options);
+    }
+    const horizon = Math.max(common.horizon, FIXED_LEAD_TIME_MAX + options.coverageDays + 2);
+    const bundle = await this._getBundleFor(common, horizon);
+    return this._riskResponse({
+      common,
+      options,
+      forecasts: bundle.result.forecasts,
+      products: bundle.dataset.products,
+      meta: bundle.result.meta,
+    });
+  }
+
+  _riskResponseFromSnapshot(snapshot, common, options) {
+    const forecasts = common.branchId === null
+      ? snapshot.forecasts
+      : snapshot.forecasts.filter(
+          (forecast) => String(forecast.branch_id) === String(common.branchId)
+        );
+    return this._riskResponse({
+      common,
+      options,
+      forecasts,
+      products: snapshot.products,
+      meta: snapshot.meta,
+    });
+  }
+
+  async _riskResponse({ common, options, forecasts, products, meta }) {
+    const freshProducts = await this._withFreshDiscontinuedFlags(products);
+    const discontinued = filterDiscontinuedSkus(forecasts, freshProducts);
     const breakdown = buildRiskBreakdown(discontinued.forecasts, options);
     return {
       generated_at: new Date().toISOString(),
@@ -277,44 +612,64 @@ class ForecastingService {
       lost_profit_if_stocked_out: breakdown.lost_profit_if_stocked_out,
       capital_tied_if_over_ordered: breakdown.capital_tied_if_over_ordered,
       over_order_candidates: breakdown.over_order_candidates,
-      meta: bundle.result.meta,
+      meta,
     };
   }
 
-  async _loadDataset(common) {
-    return this.repository.loadDataset({
-      branchId: common.branchId,
-      skuId: common.skuId,
-      from: common.from,
-      to: common.to,
-    });
-  }
+  async _loadDataset(common, options = {}) {
+    // Single-flight: si dos requests piden el mismo dataset a la vez, sólo uno
+    // consulta Postgres y el otro espera el mismo resultado.
+    const key = [
+      common.branchId,
+      common.skuId,
+      common.from,
+      common.to,
+      Boolean(options.sequential),
+    ].join("|");
+    const pending = this.inflightDatasets.get(key);
+    if (pending) return pending;
 
-  _maxLeadTime(dataset, options) {
-    let maxLead = Math.max(options.leadTimeMax, 7);
-    for (const product of dataset.products || []) {
-      maxLead = Math.max(maxLead, Number(product.lead_time_max_days) || 0);
-    }
-    for (const supplier of dataset.suppliers || []) {
-      maxLead = Math.max(maxLead, Number(supplier.lead_time_max_days) || 0);
-    }
-    return maxLead;
+    const promise = this.repository
+      .loadDataset({
+        branchId: common.branchId,
+        skuId: common.skuId,
+        from: common.from,
+        to: common.to,
+        sequential: options.sequential,
+      })
+      .finally(() => this.inflightDatasets.delete(key));
+    this.inflightDatasets.set(key, promise);
+    return promise;
   }
 
   async _getBundle(common) {
-    const dataset = await this._loadDataset(common);
-    return this._buildBundle(common, dataset, common.horizon);
+    return this._getBundleFor(common, common.horizon);
   }
 
-  async _buildBundle(common, dataset, horizon) {
+  // Revisa el cache ANTES de tocar Postgres: un cache hit no debe costar una
+  // carga de dataset.
+  async _getBundleFor(common, horizon) {
+    const pretrained = this._pretrainedFor(common);
+    const cacheKey = this._bundleCacheKey(common, horizon, pretrained);
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expires > Date.now() && !common.refresh) return cached.bundle;
+    const dataset = await this._loadDataset(common);
+    return this._computeBundle(common, dataset, horizon, cacheKey, pretrained);
+  }
+
+  _pretrainedFor(common) {
     // Modelo preentrenado (patrón sofa): si existe el artefacto, sólo inferimos.
     // Si el request trae `model` explícito, respetamos el entrenamiento custom.
-    const pretrained =
-      this.loadPretrained && Object.keys(common.model || {}).length === 0 ? this.loadPretrained() : null;
+    return this.loadPretrained && Object.keys(common.model || {}).length === 0
+      ? this.loadPretrained()
+      : null;
+  }
+
+  _bundleCacheKey(common, horizon, pretrained) {
     const modelSource = pretrained
       ? `pretrained:${pretrained.file || ""}:${pretrained.mtimeMs || ""}`
       : "trained";
-    const cacheKey = JSON.stringify({
+    return JSON.stringify({
       branchId: common.branchId,
       skuId: common.skuId,
       from: common.from,
@@ -328,9 +683,17 @@ class ForecastingService {
       calendar: common.calendar,
       modelSource,
     });
+  }
+
+  async _buildBundle(common, dataset, horizon) {
+    const pretrained = this._pretrainedFor(common);
+    const cacheKey = this._bundleCacheKey(common, horizon, pretrained);
     const cached = this.cache.get(cacheKey);
     if (cached && cached.expires > Date.now() && !common.refresh) return cached.bundle;
+    return this._computeBundle(common, dataset, horizon, cacheKey, pretrained);
+  }
 
+  _computeBundle(common, dataset, horizon, cacheKey, pretrained) {
     const seriesList = buildSeriesCollection(dataset, {
       from: common.from,
       to: common.to,

@@ -466,7 +466,7 @@ function trainAndForecast(seriesList, options = {}) {
       assumptions: [
         "Historical demand is reconstructed backwards from current existence using sales and entries; stockout days are flagged when reconstructed stock reaches zero.",
         "Zero-sales stockout rows are excluded from GBM training to reduce censored-demand bias; future forecasts receive a capped uplift based on the historical stockout rate.",
-        "Lead times default to 4-7 days, can be overridden per product or supplier via lead_time_min_days and lead_time_max_days, and can be overridden for the whole calculation with the lead_time_min and lead_time_max request parameters.",
+        "Lead time is fixed at 4-20 days for every SKU so the precomputed snapshot stays stable and the database load is predictable.",
         "Peru national holidays and pay-cycle effects (15th, month-end) are modeled by default; extra holidays can be passed in options.calendar.extraHolidays.",
       ],
     },

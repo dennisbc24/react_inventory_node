@@ -1,6 +1,7 @@
 const { pool } = require("../config/db");
 const moment = require("moment-timezone");
 const {uploadFile} = require("../helpers/aws")
+const { invalidateForecastingCaches } = require("./forecasting/forecasting_repository");
 
 class ProductsService {
     constructor(){
@@ -158,7 +159,11 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, url_image = $6, fk_category=$7  WHERE id_product = $8 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate(),urlImage ,fk_category||null ,id] )
                 }
                 if (attrs !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs), id]);
-                if (isDiscontinued !== undefined) await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued, id]);
+                if (isDiscontinued !== undefined) {
+                  await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued, id]);
+                  // Que reposición/proyecciones vean el cambio sin esperar al snapshot diario.
+                  invalidateForecastingCaches();
+                }
                 if (fk_supplier !== undefined) {
                   let fkSup = fk_supplier;
                   if (fkSup === '' || fkSup === 'null') fkSup = null;
@@ -202,7 +207,11 @@ let nameFile = req.body.name.replaceAll(' ','' )
                   const response = await pool.query("UPDATE products SET name = $1, cost = $2, lowest_price = $3, list_price = $4, updated = $5, fk_category=$6  WHERE id_product = $7 ", [name, cost, wholesale_price || null, sugested_price || null,fechaActual.toDate() ,fk_category||null ,id] )
                 }
                 if (attrs2 !== null) await pool.query("UPDATE products SET attributes=$1 WHERE id_product=$2", [JSON.stringify(attrs2), id]);
-                if (isDiscontinued2 !== undefined) await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued2, id]);
+                if (isDiscontinued2 !== undefined) {
+                  await pool.query("UPDATE products SET is_discontinued=$1 WHERE id_product=$2", [isDiscontinued2, id]);
+                  // Que reposición/proyecciones vean el cambio sin esperar al snapshot diario.
+                  invalidateForecastingCaches();
+                }
                 if (fk_supplier !== undefined) {
                   let fkSup = fk_supplier;
                   if (fkSup === '' || fkSup === 'null') fkSup = null;
