@@ -43,9 +43,15 @@ const getRiskBreakdown = async (req, res) => {
   }
 };
 
+const getRestockSnapshotStatus = (req, res) => {
+  res.json(service.getRestockSnapshotStatus());
+};
+
 module.exports = {
+  service,
   getDemandForecasts,
   getRestockPlan,
   getRiskBreakdown,
   postRestockPlan,
+  getRestockSnapshotStatus,
 };

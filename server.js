@@ -73,4 +73,14 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log("empezando el server puerto " + port);
+  // La DB es la misma en producción y desarrollo: en dev el job pesado queda
+  // apagado por defecto para que un laptop no lo dispare contra la primaria.
+  const snapshotEnabled =
+    process.env.FORECASTING_SNAPSHOT_ENABLED === "true" ||
+    (process.env.NODE_ENV === "production" &&
+      process.env.FORECASTING_SNAPSHOT_ENABLED !== "false");
+  if (snapshotEnabled) {
+    const { service } = require("./controllers/forecasting.controllers");
+    service.startRestockSnapshot();
+  }
 });
