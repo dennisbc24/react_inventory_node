@@ -13,8 +13,7 @@ services/forecasting/
   features.js                 series reconstruction, stockout flags, lag/rolling features
   demand_forecaster.js        time split, training, evaluation, recursive future forecasts
   restock_optimizer.js        safety stock, margins, risk scoring, greedy budget allocation
-  restock_snapshot.js         daily snapshot store, scheduler, jitter and disk persistence
-  forecasting_repository.js   PostgreSQL queries, catalog cache and schema adapters
+  forecasting_repository.js   PostgreSQL queries and schema adapters
   forecasting_service.js      public service functions and short-lived model cache
 controllers/forecasting.controllers.js
 routers/api/forecastingRouter.js
@@ -33,7 +32,7 @@ The GBM engine is a histogram-based gradient-boosted tree implementation with L2
 | `cost_unit` | `products.cost` |
 | `price_unit` | daily weighted `SUM(p_total) / SUM(amount)`, fallback `products.list_price` |
 | `margin` | `price_unit - products.cost` |
-| `lead_time_days` | fixed at 4-20 days for every SKU; supplier/product lead-time columns are kept for reference but are not used by the calculation |
+| `lead_time_days` | new `suppliers.lead_time_min_days` / `lead_time_max_days` (default 4/7) and optional `products.lead_time_min_days` / `lead_time_max_days` override |
 | `stockout_flag` | derived: reconstructed daily stock reaches zero (no new column required) |
 | current stock | `SUM(existence.amount)` per SKU across all branches for consolidated views |
 | inbound stock | `entries.amount` joined through `existence` |
@@ -106,7 +105,7 @@ The allocator is greedy and ranks SKUs with a weighted score:
 
 The response includes two views of the same calculation: `items` is the general restock search, and `soon_to_run_out` is the specific search for products that still have stock but will run out within `soon_days`, sorted by days until stockout and then recent turnover. Summary counts expose `items_out_of_stock`, `items_running_out_soon` and `items_healthy`.
 
-Projections are therefore the main ranking factor; recent performance, profitability and urgency support the decision. The allocator funds affordable units until the budget is exhausted, supports partial funding, and reports why an item was not funded. The default budget is S/ 2,000, the lead time is fixed at 4-20 days, default coverage is 60 days (at least two months), and default `soon_days` equals the lead-time max (20 days).
+Projections are therefore the main ranking factor; recent performance, profitability and urgency support the decision. The allocator funds affordable units until the budget is exhausted, supports partial funding, and reports why an item was not funded. The default budget is S/ 2,000, default lead time is 4-7 days, default coverage is 60 days (at least two months), and default `soon_days` equals the lead-time max.
 
 ## Service Functions
 
@@ -114,14 +113,14 @@ Projections are therefore the main ranking factor; recent performance, profitabi
 const { ForecastingService } = require("../services/forecasting/forecasting_service");
 const service = new ForecastingService();
 
-await service.getDemandForecasts({ branch_id: 1, horizon: 28, granularity: "day" });
-await service.getRestockPlan({ budget: 2000, coverage_days: 60 });
-await service.getRiskBreakdown({ branch_id: 1, coverage_days: 60 });
+await service.getDemandForecasts({ branch_id: 1, horizon: 28, granularity: "day", lead_time_min: 4, lead_time_max: 7 });
+await service.getRestockPlan({ budget: 2000, lead_time_min: 4, lead_time_max: 7, coverage_days: 60 });
+await service.getRiskBreakdown({ branch_id: 1, lead_time_min: 4, lead_time_max: 7, coverage_days: 60 });
 ```
 
 For demand and restock, `branch_id` filters projected demand only. Stock is always consolidated across all branches. Omit `branch_id` to consolidate demand across all branches as well.
 
-The lead time is fixed at 4-20 days for every SKU. `lead_time_min` / `lead_time_max` request parameters are accepted for backwards compatibility but ignored.
+`lead_time_min` and `lead_time_max` are optional overrides applied to every SKU in the calculation. When omitted, each SKU resolves its lead time as product → supplier → 4/7 days.
 
 ## API Examples
 
@@ -224,55 +223,6 @@ Example restock response (abridged):
 }
 ```
 
-## Daily Snapshot and Database Load
-
-The forecasting endpoints are designed to keep the heavy work off the request path:
-
-- **One daily job.** `RestockSnapshotStore` rebuilds a single global snapshot once per day at **09:00 America/Lima** (configurable) with up to **15 minutes of jitter** so it does not collide with backups or other jobs. If the process restarts with a snapshot already built today, it is not recomputed. The scheduler starts automatically in production; in development it stays off unless `FORECASTING_SNAPSHOT_ENABLED=true`, because dev and prod share the same database.
-- **Stale-while-revalidate.** Requests are derived from the in-memory snapshot, which is cheap. A snapshot from the previous day is still served (up to `FORECASTING_SNAPSHOT_MAX_AGE_MS`, default 72 h) until the next daily run finishes.
-- **Single-flight.** Only one snapshot build can run at a time, and concurrent dataset loads with the same parameters share one Postgres query set.
-- **Sequential background queries.** The daily job runs `sales`, `entries`, `stock`, and catalog queries one after another. Requests never run six parallel queries per cache miss.
-- **One year of sales.** The history window defaults to **365 days** and is capped at 365, even if `history_days=730` is requested.
-- **Long-lived catalog cache.** `products`, `suppliers`, and `branches` are cached for 12 h (`FORECASTING_CATALOG_TTL_MS`).
-- **Persisted snapshot.** The snapshot is written to `services/forecasting/artifacts/restock_snapshot.json.gz` (gitignored, outside the tracked tree) so a restart or deploy does not trigger a cold start. Override with `FORECASTING_SNAPSHOT_PATH`, or disable with `FORECASTING_SNAPSHOT_PERSIST=false`.
-- **Manual refresh with cooldown.** `refresh=true` triggers a background snapshot rebuild and responds with the current snapshot. Repeated calls within `FORECASTING_REFRESH_COOLDOWN_MS` (default 15 min) are ignored, and a manual refresh never computes inside the request unless there is no snapshot at all (cold start).
-- **Discontinued products are immediate.** The snapshot keeps the heavy forecast data, but `is_discontinued` is refreshed separately with a short cache (`FORECASTING_DISCONTINUED_TTL_MS`, default 60 s) and invalidated by the product PATCH endpoint. Marking a product as "no reponer" (or re-enabling it) changes the restock and risk responses on the next request, without waiting for the daily rebuild or a restart.
-- **Dedicated read-only pool.** `forecastingPool` uses `application_name=inventario-forecasting`, `max=2`, `connectionTimeoutMillis=10000`, `statement_timeout=120000`, and `default_transaction_read_only=on`. It is visible in `pg_stat_activity` and cannot write.
-
-Operational status is exposed at `GET /api/v1/forecasting/restock/status`:
-
-```json
-{
-  "ready": true,
-  "refreshing": false,
-  "as_of_date": "2026-11-22",
-  "built_at": "2026-11-22T14:03:12.000Z",
-  "age_seconds": 3600,
-  "refresh_hour_lima": 9,
-  "jitter_minutes": 15,
-  "persisted": true,
-  "refresh_cooldown_seconds": 900,
-  "manual_refresh_allowed": true,
-  "manual_refresh_available_at": null,
-  "last_error": null
-}
-```
-
-Relevant environment variables:
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `FORECASTING_SNAPSHOT_ENABLED` | production: `true`, development: `false` | Start the daily snapshot scheduler with the server; set to `true` in dev to test it |
-| `FORECASTING_SNAPSHOT_HOUR` / `_MINUTE` | `9` / `0` | Daily run time in America/Lima |
-| `FORECASTING_SNAPSHOT_JITTER_MINUTES` | `15` | Random delay added to the daily run |
-| `FORECASTING_SNAPSHOT_COVERAGE_DAYS` | `180` | Days of coverage precomputed in the snapshot |
-| `FORECASTING_SNAPSHOT_MAX_AGE_MS` | `259200000` | Max age of a snapshot served while stale |
-| `FORECASTING_SNAPSHOT_PATH` | `artifacts/restock_snapshot.json.gz` | Persisted snapshot file |
-| `FORECASTING_REFRESH_COOLDOWN_MS` | `900000` | Minimum interval between manual refreshes |
-| `FORECASTING_CATALOG_TTL_MS` | `43200000` | Catalog cache TTL |
-| `FORECASTING_DB_POOL_MAX` | `2` | Max connections in the forecasting pool |
-| `FORECASTING_DB_STATEMENT_TIMEOUT_MS` | `120000` | Server-side statement timeout |
-
 ## Tests
 
 ```bash
@@ -287,5 +237,5 @@ The tests use synthetic time series covering seasonality, holidays/pay cycles, i
 - Forecast quality depends on having enough history. With fewer than ~60 days, the module falls back to simple moving-average/TSB behavior.
 - Current stock is a point-in-time snapshot; open purchase orders are not included because the current schema has no open-order quantity.
 - Stockout reconstruction assumes `entries` and `sales` are complete for the selected history window.
-- Models are cached in memory for 30 minutes per branch/SKU/date-range/horizon combination, and a cache hit does not re-query the dataset. `refresh=true` is subject to the manual-refresh cooldown.
+- Models are cached in memory for 30 minutes per branch/SKU/date-range/horizon combination. Pass `refresh=true` to recompute.
 - The GBM is dependency-free rather than the Python LightGBM package. The algorithm and feature/evaluation interfaces are compatible with a future LightGBM/XGBoost worker.

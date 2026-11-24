@@ -20,8 +20,7 @@ const {
   resolveProfitReference,
   zScore,
 } = require("../services/forecasting/restock_optimizer");
-const { ForecastingService, normalizeCommonParams } = require("../services/forecasting/forecasting_service");
-const { RestockSnapshotStore, msUntilNextRun } = require("../services/forecasting/restock_snapshot");
+const { ForecastingService } = require("../services/forecasting/forecasting_service");
 
 // Aísla los tests de cualquier artefacto local: siempre entrenan en caliente.
 process.env.FORECASTING_MODEL_PATH = path.join(
@@ -672,7 +671,7 @@ test("forecasting service omits discontinued products from restock and risk", as
   assert.ok(!risk.lost_profit_if_stocked_out.some((item) => item.sku_id === 2));
 });
 
-test("forecasting uses a fixed 4-20 day lead time", async () => {
+test("forecasting service applies lead time overrides to demand and restock", async () => {
   const dataset = makeDataset({ days: 140 });
   dataset.products[0].lead_time_min_days = 2;
   dataset.products[0].lead_time_max_days = 3;
@@ -685,15 +684,15 @@ test("forecasting uses a fixed 4-20 day lead time", async () => {
   const demand = await service.getDemandForecasts({
     as_of_date: "2024-02-04",
     history_days: 140,
-    horizon: 30,
+    horizon: 7,
     lead_time_min: 10,
     lead_time_max: 15,
   });
   assert.ok(
     demand.forecasts.every(
       (forecast) =>
-        forecast.lead_time_min_days === 4 &&
-        forecast.lead_time_max_days === 20
+        forecast.lead_time_min_days === 10 &&
+        forecast.lead_time_max_days === 15
     )
   );
 
@@ -705,66 +704,15 @@ test("forecasting uses a fixed 4-20 day lead time", async () => {
     lead_time_max: 15,
     coverage_days: 7,
   });
-  assert.equal(restock.parameters.lead_time_min, 4);
-  assert.equal(restock.parameters.lead_time_max, 20);
-  assert.equal(restock.parameters.soon_days, 20);
+  assert.equal(restock.parameters.lead_time_min, 10);
+  assert.equal(restock.parameters.lead_time_max, 15);
+  assert.equal(restock.parameters.soon_days, 15);
   assert.ok(
     restock.items.every(
       (item) =>
-        item.lead_time_min_days === 4 && item.lead_time_max_days === 20
+        item.lead_time_min_days === 10 && item.lead_time_max_days === 15
     )
   );
-});
-
-test("restock serves a precomputed snapshot and falls back to live when incompatible", async () => {
-  const dataset = makeDataset({ days: 140 });
-  let loads = 0;
-  const repository = {
-    async loadDataset() {
-      loads += 1;
-      return dataset;
-    },
-  };
-  const service = new ForecastingService({
-    repository,
-    cacheTtlMs: 1000,
-    snapshotStore: new RestockSnapshotStore({ refreshHour: 9, refreshMinute: 0 }),
-  });
-
-  const snapshot = await service.buildRestockSnapshot({
-    as_of_date: "2024-02-04",
-    history_days: 140,
-  });
-  service.snapshotStore.set(snapshot);
-  const loadsAfterSnapshot = loads;
-
-  const restock = await service.getRestockPlan({
-    as_of_date: "2024-02-04",
-    history_days: 140,
-    budget: 2000,
-    coverage_days: 7,
-  });
-  assert.equal(restock.snapshot.served_from, "snapshot");
-  assert.equal(loads, loadsAfterSnapshot);
-  assert.equal(restock.parameters.lead_time_min, 4);
-  assert.equal(restock.parameters.lead_time_max, 20);
-
-  const live = await service.getRestockPlan({
-    as_of_date: "2024-02-03",
-    history_days: 140,
-    budget: 2000,
-    coverage_days: 7,
-  });
-  assert.equal(live.snapshot.served_from, "live");
-  assert.ok(loads > loadsAfterSnapshot);
-});
-
-test("snapshot scheduler computes the next 9am Lima run", () => {
-  const moment = require("moment-timezone");
-  const morning = moment.tz("2024-02-04T08:00:00", "America/Lima");
-  assert.equal(msUntilNextRun(9, 0, morning), 60 * 60 * 1000);
-  const afternoon = moment.tz("2024-02-04T10:00:00", "America/Lima");
-  assert.equal(msUntilNextRun(9, 0, afternoon), 23 * 60 * 60 * 1000);
 });
 
 test("forecasting service integrates with an in-memory repository", async () => {
@@ -822,166 +770,4 @@ test("forecasting service integrates with an in-memory repository", async () => 
     coverage_days: 7,
   });
   assert.ok(Array.isArray(risk.lost_profit_if_stocked_out));
-});
-
-test("sales history window never exceeds one year", () => {
-  const capped = normalizeCommonParams({ as_of_date: "2024-02-04", history_days: 730 });
-  assert.equal(capped.historyDays, 365);
-  assert.equal(capped.from, addDays("2024-02-04", -364));
-
-  const olderFrom = normalizeCommonParams({ as_of_date: "2024-02-04", from: "2020-01-01" });
-  assert.equal(olderFrom.from, addDays("2024-02-04", -364));
-});
-
-test("manual refresh respects the cooldown and avoids repeat heavy loads", async () => {
-  const dataset = makeDataset({ days: 140 });
-  let loads = 0;
-  const repository = {
-    async loadDataset() {
-      loads += 1;
-      return dataset;
-    },
-  };
-  const service = new ForecastingService({
-    repository,
-    cacheTtlMs: 60_000,
-    snapshotStore: null,
-    refreshCooldownMs: 60_000,
-  });
-  const params = {
-    as_of_date: "2024-02-04",
-    history_days: 140,
-    budget: 2000,
-    coverage_days: 7,
-    refresh: true,
-  };
-  await service.getRestockPlan(params);
-  assert.equal(loads, 1);
-  // Segundo refresh dentro del cooldown: no vuelve a golpear Postgres.
-  await service.getRestockPlan(params);
-  assert.equal(loads, 1);
-  assert.equal(service.getRestockSnapshotStatus().manual_refresh_allowed, false);
-});
-
-test("snapshot persists to disk and survives a restart", async () => {
-  const persistPath = path.join(
-    os.tmpdir(),
-    `restock-snapshot-${process.pid}-${Date.now()}.json.gz`
-  );
-  const silentLogger = { log() {}, error() {} };
-  const fakeSnapshot = {
-    asOfDate: "2024-02-04",
-    from: "2023-02-05",
-    historyDays: 365,
-    leadTimeMin: 4,
-    leadTimeMax: 20,
-    coverageMaxDays: 180,
-    horizon: 202,
-    forecasts: [],
-    sales: [],
-    products: [],
-    metrics: {},
-    meta: {},
-    builtAt: Date.now(),
-  };
-  try {
-    const store = new RestockSnapshotStore({ persistPath, logger: silentLogger });
-    await store.refresh(async () => fakeSnapshot);
-    assert.ok(fs.existsSync(persistPath));
-
-    const restored = new RestockSnapshotStore({ persistPath, logger: silentLogger });
-    const loaded = restored.loadFromDisk();
-    assert.equal(loaded.asOfDate, "2024-02-04");
-    assert.equal(restored.get().historyDays, 365);
-  } finally {
-    fs.rmSync(persistPath, { force: true });
-  }
-});
-
-test("an existing snapshot is served while the daily job has not run", async () => {
-  const moment = require("moment-timezone");
-  const dataset = makeDataset({ days: 140 });
-  const repository = {
-    async loadDataset() {
-      return dataset;
-    },
-  };
-  const service = new ForecastingService({
-    repository,
-    cacheTtlMs: 1000,
-    snapshotStore: new RestockSnapshotStore({
-      refreshHour: 9,
-      refreshMinute: 0,
-      persistPath: null,
-    }),
-  });
-  const yesterday = addDays(moment().tz("America/Lima").format("YYYY-MM-DD"), -1);
-  const snapshot = await service.buildRestockSnapshot({
-    as_of_date: yesterday,
-    history_days: 140,
-  });
-  service.snapshotStore.set(snapshot);
-
-  const restock = await service.getRestockPlan({
-    history_days: 140,
-    budget: 2000,
-    coverage_days: 7,
-  });
-  assert.equal(restock.snapshot.served_from, "snapshot");
-  assert.equal(restock.snapshot.as_of_date, yesterday);
-});
-
-test("discontinuing a product takes effect on an existing snapshot", async () => {
-  const dataset = makeDataset({ days: 140 });
-  let discontinued = false;
-  const repository = {
-    async loadDataset() {
-      return dataset;
-    },
-    async loadDiscontinuedFlags() {
-      return dataset.products.map((product) => ({
-        id_product: product.id_product,
-        is_discontinued: product.id_product === 1 ? discontinued : false,
-      }));
-    },
-  };
-  const service = new ForecastingService({
-    repository,
-    cacheTtlMs: 1000,
-    snapshotStore: new RestockSnapshotStore({ persistPath: null }),
-  });
-  const snapshot = await service.buildRestockSnapshot({
-    as_of_date: "2024-02-04",
-    history_days: 140,
-  });
-  service.snapshotStore.set(snapshot);
-
-  const params = {
-    as_of_date: "2024-02-04",
-    history_days: 140,
-    budget: 2000,
-    coverage_days: 7,
-  };
-  const before = await service.getRestockPlan(params);
-  assert.ok(before.items.some((item) => item.sku_id === 1));
-
-  discontinued = true;
-  const after = await service.getRestockPlan(params);
-  assert.ok(!after.items.some((item) => item.sku_id === 1));
-  assert.deepEqual(after.filter.discontinued_skus, [1]);
-});
-
-test("forecasting pool is bounded and read-only", () => {
-  const { forecastingPool } = require("../config/db");
-  assert.equal(forecastingPool.options.application_name, "inventario-forecasting");
-  assert.match(
-    String(forecastingPool.options.options || ""),
-    /default_transaction_read_only=on/
-  );
-  assert.ok(Number(forecastingPool.options.statement_timeout) > 0);
-  assert.ok(Number(forecastingPool.options.connectionTimeoutMillis) > 0);
-  assert.equal(
-    Number(forecastingPool.options.max),
-    Number(process.env.FORECASTING_DB_POOL_MAX || 2)
-  );
 });
