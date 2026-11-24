@@ -3,7 +3,7 @@ const { addDays, calendarFeatures } = require("./calendar");
 const { trainAndForecast } = require("./demand_forecaster");
 const { buildSeriesCollection } = require("./features");
 const { ForecastingRepository } = require("./forecasting_repository");
-const { loadModels } = require("./model_store");
+const { loadModels, artifactStatus } = require("./model_store");
 const { RestockSnapshotStore } = require("./restock_snapshot");
 const {
   buildRestockPlan,
@@ -12,6 +12,7 @@ const {
   filterDiscontinuedSkus,
   filterStaleSkus,
   normalizeOptions,
+  profitBySku,
 } = require("./restock_optimizer");
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -22,6 +23,8 @@ const DEFAULT_HISTORY_DAYS = 365;
 // Nunca se consultan más de 365 días de ventas: la ventana de un año es
 // suficiente para estacionalidad y mantiene acotado el costo del escaneo.
 const MAX_HISTORY_DAYS = 365;
+// Ventana con la que se rankea la rentabilidad para recortar el snapshot.
+const SNAPSHOT_PROFIT_WINDOW_DAYS = 365;
 
 function httpError(status, message) {
   return Object.assign(new Error(message), { status });
@@ -135,6 +138,14 @@ class ForecastingService {
     this.snapshotCoverageMaxDays = Number(
       options.snapshotCoverageMaxDays || process.env.FORECASTING_SNAPSHOT_COVERAGE_DAYS || 180
     );
+    // El costo del GBM es casi lineal en cantidad de series: el snapshot sólo
+    // precalcula los SKUs que más aportan. `FORECASTING_SNAPSHOT_TOP_SKUS=0`
+    // desactiva el recorte y vuelve a calcular todo el catálogo.
+    const topSkus = Number(
+      options.snapshotTopSkus ?? process.env.FORECASTING_SNAPSHOT_TOP_SKUS ?? 500
+    );
+    this.snapshotTopSkus = Number.isFinite(topSkus) && topSkus > 0 ? Math.floor(topSkus) : 0;
+
     // Un `refresh=true` repetido no debe volver a golpear Postgres.
     this.refreshCooldownMs = Number(
       options.refreshCooldownMs ||
@@ -289,6 +300,7 @@ class ForecastingService {
       built_at: new Date(snapshot.builtAt).toISOString(),
       age_seconds: Math.round((Date.now() - snapshot.builtAt) / 1000),
       coverage_max_days: snapshot.coverageMaxDays,
+      included_skus: snapshot.skuSelection ? snapshot.skuSelection.included_skus : null,
       refresh_in_progress: Boolean(this.snapshotStore && this.snapshotStore.isRefreshing()),
     };
   }
@@ -407,6 +419,15 @@ class ForecastingService {
     if (snapshot.historyDays !== common.historyDays) return false;
     if (snapshot.leadTimeMin !== common.leadTimeMin) return false;
     if (snapshot.leadTimeMax !== common.leadTimeMax) return false;
+    // El snapshot sólo cubre los SKUs más rentables: si piden uno de afuera,
+    // conviene calcularlo en vivo (una sola serie es barata) antes que devolver
+    // una lista vacía.
+    if (
+      common.skuId !== null &&
+      !snapshot.forecasts.some((forecast) => Number(forecast.sku_id) === common.skuId)
+    ) {
+      return false;
+    }
     // Si el cliente pidió una fecha explícita, el snapshot debe ser de esa fecha.
     if (common.asOfExplicit) return snapshot.asOfDate === common.asOfDate;
     if (common.fromExplicit && snapshot.from !== common.from) return false;
@@ -498,13 +519,14 @@ class ForecastingService {
       refresh: true,
     });
     const restockCommon = { ...common, branchId: null, skuId: null };
-    const dataset = await this.repository.loadDataset({
+    const rawDataset = await this.repository.loadDataset({
       branchId: null,
       skuId: null,
       from: common.from,
       to: common.to,
       sequential: true,
     });
+    const { dataset, selection } = this._selectSnapshotSkus(rawDataset, common);
     const horizon = Math.max(
       common.horizon,
       FIXED_LEAD_TIME_MAX + this.snapshotCoverageMaxDays + 2
@@ -517,6 +539,7 @@ class ForecastingService {
       leadTimeMin: FIXED_LEAD_TIME_MIN,
       leadTimeMax: FIXED_LEAD_TIME_MAX,
       coverageMaxDays: this.snapshotCoverageMaxDays,
+      skuSelection: selection,
       horizon,
       forecasts: bundle.result.forecasts,
       sales: dataset.sales,
@@ -526,6 +549,48 @@ class ForecastingService {
       meta: bundle.result.meta,
       builtAt: Date.now(),
       durationMs: Date.now() - started,
+    };
+  }
+
+  // Recorta el dataset del snapshot a los SKUs más rentables del último año.
+  // El plan de reposición se arma sólo con ellos; el resto del catálogo queda
+  // fuera porque el costo del cálculo es casi lineal en cantidad de series.
+  _selectSnapshotSkus(dataset, common) {
+    const limit = this.snapshotTopSkus;
+    const profits = profitBySku(dataset.sales, {
+      asOfDate: common.asOfDate,
+      windowDays: SNAPSHOT_PROFIT_WINDOW_DAYS,
+    });
+    const total = profits.size;
+    const selection = {
+      limit: limit > 0 ? limit : null,
+      profit_window_days: SNAPSHOT_PROFIT_WINDOW_DAYS,
+      total_skus: total,
+      included_skus: total,
+      applied: false,
+    };
+    if (!limit || total <= limit) return { dataset, selection };
+
+    const allowed = new Set(
+      [...profits.entries()]
+        .sort((left, right) => right[1] - left[1])
+        .slice(0, limit)
+        .map(([sku]) => sku)
+    );
+    const keepRows = (rows) => (rows || []).filter((row) => allowed.has(Number(row.sku_id)));
+    selection.included_skus = allowed.size;
+    selection.applied = true;
+    return {
+      dataset: {
+        ...dataset,
+        sales: keepRows(dataset.sales),
+        entries: keepRows(dataset.entries),
+        stock: keepRows(dataset.stock),
+        products: (dataset.products || []).filter((product) =>
+          allowed.has(Number(product.id_product))
+        ),
+      },
+      selection,
     };
   }
 
@@ -542,8 +607,12 @@ class ForecastingService {
     const status = this.snapshotStore
       ? this.snapshotStore.status()
       : { ready: false, refreshing: false, last_error: null };
+    const snapshot = this.snapshotStore ? this.snapshotStore.get() : null;
     return {
       ...status,
+      sku_selection: snapshot && snapshot.skuSelection ? snapshot.skuSelection : null,
+      model_source: snapshot && snapshot.meta ? snapshot.meta.model_source || null : null,
+      model: artifactStatus(),
       refresh_cooldown_seconds: Math.round(this.refreshCooldownMs / 1000),
       manual_refresh_allowed: this._canForceRefresh(),
       manual_refresh_available_at: this.lastForcedRefreshAt

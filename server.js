@@ -81,6 +81,17 @@ app.listen(port, () => {
       process.env.FORECASTING_SNAPSHOT_ENABLED !== "false");
   if (snapshotEnabled) {
     const { service } = require("./controllers/forecasting.controllers");
+    const model = service.getRestockSnapshotStatus().model;
+    if (model && model.available) {
+      console.log(
+        `[forecasting] modelo preentrenado en uso: ${model.file} (${model.age_seconds}s)`
+      );
+    } else {
+      console.warn(
+        `[forecasting] SIN modelo preentrenado (${(model && model.error) || "desconocido"}): ` +
+          "el cálculo entrenará en caliente y será mucho más lento"
+      );
+    }
     service.startRestockSnapshot();
   }
 });

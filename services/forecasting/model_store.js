@@ -68,6 +68,32 @@ function loadModels() {
   }
 }
 
+// Estado del artefacto para diagnóstico: si no está disponible, el cálculo
+// entrena el GBM en caliente y se vuelve mucho más lento.
+function artifactStatus() {
+  const file = modelPath();
+  try {
+    const stat = fs.statSync(file);
+    const artifact = loadArtifact();
+    return {
+      available: Boolean(artifact),
+      file,
+      size_bytes: stat.size,
+      modified_at: new Date(stat.mtimeMs).toISOString(),
+      age_seconds: Math.round((Date.now() - stat.mtimeMs) / 1000),
+      trained_at: artifact ? artifact.trained_at : null,
+      as_of_date: artifact ? artifact.as_of_date : null,
+      error: artifact ? null : "artefacto inválido",
+    };
+  } catch (error) {
+    return {
+      available: false,
+      file,
+      error: error.code === "ENOENT" ? "no existe" : error.message,
+    };
+  }
+}
+
 function saveArtifact({ p50, p80, asOfDate = null, modelConfig = null }) {
   if (!p50 || !p80) throw new Error("Se requieren los modelos p50 y p80 para guardar el artefacto");
   const payload = {
@@ -88,4 +114,4 @@ function saveArtifact({ p50, p80, asOfDate = null, modelConfig = null }) {
   return file;
 }
 
-module.exports = { SCHEMA_VERSION, modelPath, loadArtifact, loadModels, saveArtifact };
+module.exports = { SCHEMA_VERSION, artifactStatus, modelPath, loadArtifact, loadModels, saveArtifact };

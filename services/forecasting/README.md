@@ -233,6 +233,7 @@ The forecasting endpoints are designed to keep the heavy work off the request pa
 - **Single-flight.** Only one snapshot build can run at a time, and concurrent dataset loads with the same parameters share one Postgres query set.
 - **Sequential background queries.** The daily job runs `sales`, `entries`, `stock`, and catalog queries one after another. Requests never run six parallel queries per cache miss.
 - **One year of sales.** The history window defaults to **365 days** and is capped at 365, even if `history_days=730` is requested.
+- **Top profitable SKUs only.** The snapshot precomputes just the **500 SKUs with the most absolute profit over the last 365 days** (`FORECASTING_SNAPSHOT_TOP_SKUS`, `0` disables the cut). The GBM cost is almost linear in the number of series, so this is the main lever on build time. SKUs outside the cut stay out of the restock plan, but a request for one specific SKU is computed live (a single series is cheap) instead of returning an empty list.
 - **Long-lived catalog cache.** `products`, `suppliers`, and `branches` are cached for 12 h (`FORECASTING_CATALOG_TTL_MS`).
 - **Persisted snapshot.** The snapshot is written to `services/forecasting/artifacts/restock_snapshot.json.gz` (gitignored, outside the tracked tree) so a restart or deploy does not trigger a cold start. Override with `FORECASTING_SNAPSHOT_PATH`, or disable with `FORECASTING_SNAPSHOT_PERSIST=false`.
 - **Manual refresh with cooldown.** `refresh=true` triggers a background snapshot rebuild and responds with the current snapshot. Repeated calls within `FORECASTING_REFRESH_COOLDOWN_MS` (default 15 min) are ignored, and a manual refresh never computes inside the request unless there is no snapshot at all (cold start).
@@ -254,9 +255,27 @@ Operational status is exposed at `GET /api/v1/forecasting/restock/status`:
   "refresh_cooldown_seconds": 900,
   "manual_refresh_allowed": true,
   "manual_refresh_available_at": null,
+  "sku_selection": {
+    "limit": 500,
+    "profit_window_days": 365,
+    "total_skus": 1834,
+    "included_skus": 500,
+    "applied": true
+  },
+  "model_source": "pretrained",
+  "model": {
+    "available": true,
+    "file": ".../artifacts/gbm_quantiles.json",
+    "age_seconds": 5400,
+    "trained_at": "2026-11-22T10:00:00.000Z",
+    "as_of_date": "2026-11-22",
+    "error": null
+  },
   "last_error": null
 }
 ```
+
+`model.available: false` means the GBM artifact is missing or invalid, so every calculation would train in hot mode and be far slower; the server logs a warning at startup and the deploy workflow aborts if the artifact is not generated.
 
 Relevant environment variables:
 
@@ -266,6 +285,7 @@ Relevant environment variables:
 | `FORECASTING_SNAPSHOT_HOUR` / `_MINUTE` | `9` / `0` | Daily run time in America/Lima |
 | `FORECASTING_SNAPSHOT_JITTER_MINUTES` | `15` | Random delay added to the daily run |
 | `FORECASTING_SNAPSHOT_COVERAGE_DAYS` | `180` | Days of coverage precomputed in the snapshot |
+| `FORECASTING_SNAPSHOT_TOP_SKUS` | `500` | Only the N most profitable SKUs (last 365 days) are precomputed; `0` precomputes the whole catalog |
 | `FORECASTING_SNAPSHOT_MAX_AGE_MS` | `259200000` | Max age of a snapshot served while stale |
 | `FORECASTING_SNAPSHOT_PATH` | `artifacts/restock_snapshot.json.gz` | Persisted snapshot file |
 | `FORECASTING_REFRESH_COOLDOWN_MS` | `900000` | Minimum interval between manual refreshes |

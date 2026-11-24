@@ -644,6 +644,7 @@ module.exports = {
   filterDiscontinuedSkus,
   filterStaleSkus,
   normalizeOptions,
+  profitBySku,
   resolveProfitReference,
   zScore,
 };

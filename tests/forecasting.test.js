@@ -10,7 +10,7 @@ const { GradientBoostedRegressor } = require("../services/forecasting/gbm");
 const { classifyIntermittent, tsbForecast } = require("../services/forecasting/intermittent");
 const { buildSeriesCollection } = require("../services/forecasting/features");
 const { trainAndForecast, trainModels } = require("../services/forecasting/demand_forecaster");
-const { saveArtifact } = require("../services/forecasting/model_store");
+const { artifactStatus, saveArtifact } = require("../services/forecasting/model_store");
 const {
   buildRestockPlan,
   buildRiskBreakdown,
@@ -228,6 +228,9 @@ test("forecasting service loads a persisted model artifact", async () => {
     assert.equal(demand.meta.model_source, "pretrained");
     assert.equal(demand.meta.train_rows, 0);
     assert.equal(demand.forecasts.length, 2);
+    const status = artifactStatus();
+    assert.equal(status.available, true);
+    assert.equal(status.as_of_date, "2024-02-04");
   } finally {
     if (previousPath === undefined) delete process.env.FORECASTING_MODEL_PATH;
     else process.env.FORECASTING_MODEL_PATH = previousPath;
@@ -757,6 +760,76 @@ test("restock serves a precomputed snapshot and falls back to live when incompat
   });
   assert.equal(live.snapshot.served_from, "live");
   assert.ok(loads > loadsAfterSnapshot);
+});
+
+test("restock snapshot only precomputes the top profitable SKUs", async () => {
+  const dataset = makeDataset({ days: 140 });
+  // SKU 3 no tiene ventas: queda fuera del top por rentabilidad.
+  dataset.products.push({ id_product: 3, name: "Producto sin ventas", cost: 1, list_price: 2 });
+  dataset.stock.push({ sku_id: 3, branch_id: 1, stock: 200 });
+  const repository = {
+    async loadDataset() {
+      return dataset;
+    },
+  };
+  const service = new ForecastingService({
+    repository,
+    snapshotTopSkus: 1,
+    snapshotStore: new RestockSnapshotStore({ persistPath: null }),
+  });
+
+  const snapshot = await service.buildRestockSnapshot({
+    as_of_date: "2024-02-04",
+    history_days: 140,
+  });
+
+  assert.equal(snapshot.skuSelection.applied, true);
+  assert.equal(snapshot.skuSelection.limit, 1);
+  assert.equal(snapshot.skuSelection.included_skus, 1);
+  assert.equal(snapshot.skuSelection.total_skus, 2);
+  const skus = new Set(snapshot.forecasts.map((forecast) => Number(forecast.sku_id)));
+  assert.deepEqual([...skus], [1]);
+  assert.deepEqual(
+    snapshot.products.map((product) => Number(product.id_product)),
+    [1]
+  );
+
+  // Un SKU fuera del snapshot se calcula en vivo en lugar de devolver vacío.
+  service.snapshotStore.set(snapshot);
+  const outside = await service.getDemandForecasts({
+    as_of_date: "2024-02-04",
+    history_days: 140,
+    sku_id: 2,
+    horizon: 7,
+  });
+  assert.equal(outside.snapshot.served_from, "live");
+  assert.equal(outside.forecasts.length, 1);
+});
+
+test("snapshot status reports the SKU selection and the model artifact", async () => {
+  const dataset = makeDataset({ days: 140 });
+  const repository = {
+    async loadDataset() {
+      return dataset;
+    },
+  };
+  const service = new ForecastingService({
+    repository,
+    snapshotTopSkus: 1,
+    snapshotStore: new RestockSnapshotStore({ persistPath: null }),
+  });
+  const snapshot = await service.buildRestockSnapshot({
+    as_of_date: "2024-02-04",
+    history_days: 140,
+  });
+  service.snapshotStore.set(snapshot);
+
+  const status = service.getRestockSnapshotStatus();
+  assert.equal(status.sku_selection.limit, 1);
+  assert.equal(status.sku_selection.included_skus, 1);
+  // El test apunta FORECASTING_MODEL_PATH a un archivo inexistente.
+  assert.equal(status.model.available, false);
+  assert.ok(status.model.error);
 });
 
 test("snapshot scheduler computes the next 9am Lima run", () => {
