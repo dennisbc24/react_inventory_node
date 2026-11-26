@@ -5,6 +5,7 @@ const { buildSeriesCollection } = require("./features");
 const { ForecastingRepository } = require("./forecasting_repository");
 const { loadModels, artifactStatus } = require("./model_store");
 const { RestockSnapshotStore } = require("./restock_snapshot");
+const { buildSlowMovingReport } = require("./slow_moving");
 const {
   buildRestockPlan,
   buildRiskBreakdown,
@@ -650,6 +651,60 @@ class ForecastingService {
       products: bundle.dataset.products,
       meta: bundle.result.meta,
     });
+  }
+
+  async getSlowMovingCapital(params = {}) {
+    const common = normalizeCommonParams(params);
+    // Este reporte no necesita el modelo de forecasting: sólo ventas, stock y
+    // catálogo. Así incluye todo el catálogo (el snapshot se recorta a los SKUs
+    // más rentables y dejaría afuera justamente a los de baja rotación).
+    const historyFrom = addDays(common.asOfDate, -(MAX_HISTORY_DAYS - 1));
+    const dataset = await this.repository.loadDataset({
+      branchId: common.branchId,
+      skuId: common.skuId,
+      // Siempre un año de historia: permite ubicar la última venta y comparar
+      // la rotación de 90 días incluso si el request pide menos historial.
+      from: historyFrom,
+      to: common.asOfDate,
+    });
+    const freshProducts = await this._withFreshDiscontinuedFlags(dataset.products);
+    const report = buildSlowMovingReport(
+      { ...dataset, products: freshProducts },
+      {
+        asOfDate: common.asOfDate,
+        windowDays: params.windowDays ?? params.window_days,
+        slowDays: params.slowDays ?? params.slow_days,
+        onlySlow: params.onlySlow ?? params.only_slow,
+        skuId: common.skuId,
+      }
+    );
+
+    return {
+      generated_at: new Date().toISOString(),
+      consolidation: {
+        by: "sku",
+        stock_scope: "all_branches",
+        demand_scope: common.branchId ? "selected_branch" : "all_branches",
+        requested_branch_id: common.branchId,
+      },
+      filters: {
+        branch_id: common.branchId,
+        sku_id: common.skuId,
+        from: historyFrom,
+        to: common.asOfDate,
+        horizon: common.horizon,
+        granularity: common.granularity,
+        lead_time_min: common.leadTimeMin,
+        lead_time_max: common.leadTimeMax,
+        recent_window_days: report.parameters.window_days,
+        slow_days: report.parameters.slow_days,
+        only_slow: report.parameters.only_slow,
+      },
+      parameters: report.parameters,
+      summary: report.summary,
+      items: report.items,
+      snapshot: { served_from: "live" },
+    };
   }
 
   _riskResponseFromSnapshot(snapshot, common, options) {

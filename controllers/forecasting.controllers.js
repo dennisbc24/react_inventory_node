@@ -47,6 +47,15 @@ const getRestockSnapshotStatus = (req, res) => {
   res.json(service.getRestockSnapshotStatus());
 };
 
+const getSlowMovingCapital = async (req, res) => {
+  try {
+    const response = await service.getSlowMovingCapital(req.query);
+    res.json(response);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   service,
   getDemandForecasts,
@@ -54,4 +63,5 @@ module.exports = {
   getRiskBreakdown,
   postRestockPlan,
   getRestockSnapshotStatus,
+  getSlowMovingCapital,
 };

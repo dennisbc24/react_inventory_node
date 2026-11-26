@@ -20,6 +20,7 @@ const {
   resolveProfitReference,
   zScore,
 } = require("../services/forecasting/restock_optimizer");
+const { buildSlowMovingReport } = require("../services/forecasting/slow_moving");
 const { ForecastingService, normalizeCommonParams } = require("../services/forecasting/forecasting_service");
 const { RestockSnapshotStore, msUntilNextRun } = require("../services/forecasting/restock_snapshot");
 
@@ -609,6 +610,102 @@ test("stale products are hidden unless they are top-100 profitable in the last y
   assert.ok(stale.days_since_last_sale > 180);
   assert.equal(result.parameters.stale_days, 180);
   assert.equal(result.parameters.top_profit_products, 1);
+});
+
+test("slow-moving report ranks sleeping capital first and keeps only low rotation", () => {
+  const asOfDate = "2024-02-04";
+  const dataset = {
+    sales: [
+      // B vende poco: 1 unidad en 90 días.
+      { sku_id: 2, branch_id: 1, date: "2024-01-20", units: 1, revenue: 10, profit: 5 },
+      // C rota rápido: 900 unidades en 90 días.
+      { sku_id: 3, branch_id: 1, date: "2024-01-20", units: 900, revenue: 9000, profit: 4500 },
+      // D tuvo su última venta hace más de 90 días.
+      { sku_id: 4, branch_id: 1, date: "2023-06-01", units: 5, revenue: 50, profit: 25 },
+    ],
+    stock: [
+      { sku_id: 1, branch_id: 1, stock: 1000 },
+      { sku_id: 2, branch_id: 1, stock: 100 },
+      { sku_id: 3, branch_id: 1, stock: 10 },
+      { sku_id: 4, branch_id: 1, stock: 50 },
+    ],
+    products: [
+      { id_product: 1, name: "Nunca vendido", cost: 10, fk_supplier: 1 },
+      { id_product: 2, name: "Venta lenta", cost: 10, fk_supplier: 1 },
+      { id_product: 3, name: "Rotación rápida", cost: 10, fk_supplier: 1 },
+      { id_product: 4, name: "Descontinuado", cost: 20, fk_supplier: 1, is_discontinued: true },
+    ],
+    suppliers: [{ id_supplier: 1, name: "Proveedor demo" }],
+    branches: [{ id_branch: 1, name: "Principal" }],
+  };
+
+  const report = buildSlowMovingReport(dataset, { asOfDate });
+  assert.deepEqual(
+    report.items.map((item) => item.sku_id),
+    [1, 4, 2]
+  );
+  assert.equal(report.items[0].capital_inmovilizado, 10000);
+  assert.equal(report.items[0].rank, 1);
+  assert.equal(report.items[0].days_of_supply, 999);
+  assert.equal(report.items[0].is_slow_moving, true);
+  assert.equal(report.items[0].has_sales_90d, false);
+  assert.equal(report.items[0].supplier_name, "Proveedor demo");
+  assert.equal(report.summary.total_capital_inmovilizado, 12000);
+  assert.equal(report.summary.total_items_with_stock, 4);
+  assert.equal(report.summary.items_with_zero_sales_90d, 2);
+  assert.equal(report.summary.slow_items, 3);
+
+  const descontinued = report.items.find((item) => item.sku_id === 4);
+  assert.equal(descontinued.is_discontinued, true);
+  assert.ok(descontinued.days_since_last_sale > 90);
+  assert.equal(descontinued.last_sale_date, "2023-06-01");
+
+  const all = buildSlowMovingReport(dataset, { asOfDate, onlySlow: false });
+  assert.deepEqual(
+    all.items.map((item) => item.sku_id),
+    [1, 4, 2, 3]
+  );
+  const fast = all.items.find((item) => item.sku_id === 3);
+  assert.equal(fast.is_slow_moving, false);
+  assert.ok(fast.rotation_score > 1);
+  assert.equal(all.summary.total_items, 4);
+  assert.equal(all.summary.total_capital_inmovilizado, 12100);
+});
+
+test("slow-moving endpoint works without the forecasting snapshot", async () => {
+  const dataset = makeDataset({ days: 140 });
+  // Producto 2: vende 1 unidad cada 5 días con 4 de stock => ~20 días de stock.
+  const repository = {
+    async loadDataset() {
+      return dataset;
+    },
+  };
+  const service = new ForecastingService({
+    repository,
+    cacheTtlMs: 1000,
+    snapshotStore: null,
+  });
+  const report = await service.getSlowMovingCapital({
+    as_of_date: "2024-02-04",
+    history_days: 140,
+    slow_days: 10,
+  });
+  assert.equal(report.filters.only_slow, true);
+  assert.equal(report.filters.slow_days, 10);
+  assert.deepEqual(
+    report.items.map((item) => item.sku_id),
+    [2]
+  );
+  assert.equal(report.items[0].current_stock, 4);
+  assert.ok(report.items[0].capital_inmovilizado > 0);
+  assert.equal(report.snapshot.served_from, "live");
+
+  const all = await service.getSlowMovingCapital({
+    as_of_date: "2024-02-04",
+    history_days: 140,
+    only_slow: false,
+  });
+  assert.equal(all.items.length, 2);
 });
 
 test("discontinued products are excluded from restock and can be re-enabled", () => {
