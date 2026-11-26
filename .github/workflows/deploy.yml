@@ -31,7 +31,10 @@ jobs:
             NODE_ENV=production node migrations/run.js 006_forecasting.sql
             NODE_ENV=production node migrations/run.js 007_products_discontinued.sql
             echo "==> Entrenar modelo de forecasting (obligatorio para el snapshot)"
-            NODE_ENV=production node scripts/train_forecasting_model.js || echo "WARN: el entrenamiento fallo"
+            # La instancia de EC2 limita el heap de Node a ~230 MB: con 730 días y
+            # 60k filas el entrenamiento moría por OOM. Estas cotas entran holgadas
+            # y el artefacto resultante sigue siendo válido para inferencia.
+            NODE_ENV=production node scripts/train_forecasting_model.js --history-days 365 --max-training-rows 20000 --estimators 20 || echo "WARN: el entrenamiento fallo"
             if [ ! -s services/forecasting/artifacts/gbm_quantiles.json ]; then
               echo "ERROR: falta services/forecasting/artifacts/gbm_quantiles.json"
               echo "ERROR: sin artefacto el calculo entrena en caliente y vuelve el 502. Deploy abortado."
